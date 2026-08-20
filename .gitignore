@@ -8,7 +8,7 @@
 .vscode/ipch/
 
 # 비밀값 (WiFi 등) — 커밋 금지
-src/secrets.h
+src/common/secrets.h
 
 # macOS
 .DS_Store
