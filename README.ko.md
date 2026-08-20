@@ -72,5 +72,7 @@ src/
 - 날씨 조건 문자열(`뇌우`·`눈`·`비`…) = 서버 응답 매칭용, 코드에 한국어 유지
 
 ## 서버 (MCP)
+날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**
+
 - 기기: 평문 HTTPS GET 엔드포인트만
 - 동일 서버 MCP 노출 → AI(ChatGPT 등) 조회·제어

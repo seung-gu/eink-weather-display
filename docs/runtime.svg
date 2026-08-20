@@ -12,8 +12,9 @@
   <text x="102.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">wake</text>
   <rect x="220" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
   <text x="296.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">Wi-Fi</text>
-  <rect x="414" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="490.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">server GET</text>
+  <rect x="414" y="30" width="152" height="52" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="490.0" y="52.0" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">GET</text>
+  <text x="490.0" y="72.0" text-anchor="middle" font-size="12.5" fill="#4b5563">MCP server</text>
   <rect x="608" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
   <text x="684.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">draw e-Paper</text>
   <rect x="802" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>

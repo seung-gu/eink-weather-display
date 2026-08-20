@@ -67,5 +67,7 @@ src/
 ```
 
 ## Server (MCP)
+The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
+
 - The device only hits a plain HTTPS GET endpoint
 - The same server is exposed over MCP, so an AI client (e.g. ChatGPT) can query and control it
