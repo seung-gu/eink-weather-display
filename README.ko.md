@@ -28,19 +28,21 @@
 | 프레임워크 | Arduino (PlatformIO) |
 | 전원 | LiPo — 딥슬립으로 수개월 |
 
-## 배선 (Super Mini · `src/config.h`)
-| e-Paper | ESP32-C3 |
-|---|---|
-| VCC | 3V3 |
-| GND | GND |
-| DIN (MOSI) | GPIO7 |
-| CLK (SCK) | GPIO6 |
-| CS | GPIO10 |
-| DC | GPIO5 |
-| RST | GPIO4 |
-| BUSY | GPIO3 |
+## 배선 (`src/config.h`)
+두 보드 **GPIO 번호 동일**(코드 같음) — 물리 핀 라벨만 다름.
 
-- XIAO: 핀 라벨(D0–D10) 위치만 상이, GPIO 번호는 `config.h`에서 조정
+| e-Paper | GPIO | Super Mini 핀 | XIAO 라벨 |
+|---|---|---|---|
+| VCC | — | 3V3 | 3V3 |
+| GND | — | GND | GND |
+| DIN (MOSI) | 7 | GPIO7 | D5 |
+| CLK (SCK) | 6 | GPIO6 | D4 |
+| CS | 10 | GPIO10 | D10 |
+| DC | 5 | GPIO5 | D3 |
+| RST | 4 | GPIO4 | D2 |
+| BUSY | 3 | GPIO3 | D1 |
+
+- Super Mini는 핀에 GPIO 번호 직접 표기, XIAO는 `D0–D10`(보드 위치 이름, GPIO와 매핑 다름)
 - ⚠️ C3 기본 SPI핀(SCK=4·MISO=5) ↔ RST(4)/DC(5) 충돌 → `display.cpp`에서 SPI 재지정 후 핀 재확정
 
 ## 설정 (secrets)

@@ -28,19 +28,21 @@ Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink
 | Framework | Arduino (PlatformIO) |
 | Power | LiPo battery — months on deep sleep |
 
-## Wiring (Super Mini · `src/config.h`)
-| e-Paper | ESP32-C3 |
-|---|---|
-| VCC | 3V3 |
-| GND | GND |
-| DIN (MOSI) | GPIO7 |
-| CLK (SCK) | GPIO6 |
-| CS | GPIO10 |
-| DC | GPIO5 |
-| RST | GPIO4 |
-| BUSY | GPIO3 |
+## Wiring (`src/config.h`)
+Both boards use the **same GPIO numbers** (identical code) — only the physical pin labels differ.
 
-- XIAO ESP32-C3: pin labels (D0–D10) differ in position only; adjust GPIO numbers in `config.h`
+| e-Paper | GPIO | Super Mini pin | XIAO label |
+|---|---|---|---|
+| VCC | — | 3V3 | 3V3 |
+| GND | — | GND | GND |
+| DIN (MOSI) | 7 | GPIO7 | D5 |
+| CLK (SCK) | 6 | GPIO6 | D4 |
+| CS | 10 | GPIO10 | D10 |
+| DC | 5 | GPIO5 | D3 |
+| RST | 4 | GPIO4 | D2 |
+| BUSY | 3 | GPIO3 | D1 |
+
+- Super Mini labels pins by GPIO number; XIAO uses `D0–D10` (board positions mapped to different GPIOs)
 - ⚠️ The C3's default SPI pins (SCK=4 / MISO=5) collide with RST(4)/DC(5) → `display.cpp` remaps SPI and re-asserts the pins
 
 ## Setup (secrets)
