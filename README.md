@@ -1,3 +1,5 @@
+[English](README.md) | [한국어](README.ko.md)
+
 # eink-weather-display
 
 A low-power weather display built with an **ESP32-C3 + 1.54" e-Paper**.
