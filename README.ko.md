@@ -8,36 +8,14 @@
 > Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
 
 ## 동작 흐름 (5조각)
-```mermaid
-flowchart LR
-    W[wake] --> C[Wi-Fi] --> G["GET<br/>MCP server"] --> D[draw e-Paper] --> S[deep sleep]
-    S -.->|reset on wake| W
-    classDef step fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
-    classDef mcp fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
-    class W,C,D,S step
-    class G mcp
-    linkStyle 4 stroke:#d97706
-```
+![동작 흐름](docs/runtime.png)
 
 - 모든 작업 `setup()`, `loop()` 비움 (웨이크 = 리셋)
 - e-ink 쌍안정 → 화면 유지 전류 0, 갱신 순간만 소비
 - 상태 유지 필요 시 `RTC_DATA_ATTR`
 
 ## 데이터 파이프라인
-```mermaid
-flowchart LR
-    API["Public weather API"] -->|raw| SRV["MCP server<br/>format, store"] -->|"HTTP GET · short string"| DEV["device<br/>fetch, render"]
-    SRV -.->|MCP| AI["ChatGPT (AI)<br/>analyze, control"]
-    classDef api fill:#f3f4f6,stroke:#9ca3af,color:#374151
-    classDef mcp fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
-    classDef dev fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
-    classDef ai fill:#fef3c7,stroke:#d97706,color:#92400e
-    class API api
-    class SRV mcp
-    class DEV dev
-    class AI ai
-    linkStyle 2 stroke:#d97706
-```
+![데이터 파이프라인](docs/pipeline.png)
 
 - 정제 = 서버 담당 → 기기 경량 (RAM·전력 절약)
 - 기기: HTTPS GET 하나. AI 분석·제어 = 선택 경로

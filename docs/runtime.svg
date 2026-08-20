@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 966 158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+  <rect x="1.5" y="1.5" width="963" height="155" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="26" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="102.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">wake</text>
+  <rect x="220" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="296.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">Wi-Fi</text>
+  <rect x="414" y="30" width="152" height="52" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="490.0" y="52.0" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">GET</text>
+  <text x="490.0" y="72.0" text-anchor="middle" font-size="12.5" fill="#4b5563">MCP server</text>
+  <rect x="608" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="684.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">draw e-Paper</text>
+  <rect x="802" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="878.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">deep sleep</text>
+  <line x1="180" y1="56.0" x2="216" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="374" y1="56.0" x2="410" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="568" y1="56.0" x2="604" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="762" y1="56.0" x2="798" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <path d="M 878.0 82 L 878.0 128 L 102.0 128 L 102.0 84" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
+  <text x="490.0" y="122" text-anchor="middle" font-size="12.5" fill="#b45309">reset on wake</text>
+</svg>

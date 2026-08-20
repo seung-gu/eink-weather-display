@@ -8,36 +8,14 @@ Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink
 > Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
 
 ## Runtime (5 steps)
-```mermaid
-flowchart LR
-    W[wake] --> C[Wi-Fi] --> G["GET<br/>MCP server"] --> D[draw e-Paper] --> S[deep sleep]
-    S -.->|reset on wake| W
-    classDef step fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
-    classDef mcp fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
-    class W,C,D,S step
-    class G mcp
-    linkStyle 4 stroke:#d97706
-```
+![Runtime: wake, Wi-Fi, server GET, draw e-Paper, deep sleep, then reset on wake](docs/runtime.png)
 
 - Everything in `setup()`, `loop()` empty (a wake is a full reset)
 - Bistable e-ink → 0 current to hold the image, draws only on refresh
 - Persist state across sleeps with `RTC_DATA_ATTR`
 
 ## Data pipeline
-```mermaid
-flowchart LR
-    API["Public weather API"] -->|raw| SRV["MCP server<br/>format, store"] -->|"HTTP GET · short string"| DEV["device<br/>fetch, render"]
-    SRV -.->|MCP| AI["ChatGPT (AI)<br/>analyze, control"]
-    classDef api fill:#f3f4f6,stroke:#9ca3af,color:#374151
-    classDef mcp fill:#ccfbf1,stroke:#14b8a6,color:#134e4a
-    classDef dev fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
-    classDef ai fill:#fef3c7,stroke:#d97706,color:#92400e
-    class API api
-    class SRV mcp
-    class DEV dev
-    class AI ai
-    linkStyle 2 stroke:#d97706
-```
+![Data pipeline: public weather API to MCP server to device; server also exposed over MCP to an AI](docs/pipeline.png)
 
 - Formatting is server-side → the device stays light (less RAM/power)
 - Device: one HTTPS GET; AI analyze/control is an optional path

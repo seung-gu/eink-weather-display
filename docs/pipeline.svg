@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 232" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+  <rect x="1.5" y="1.5" width="817" height="229" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="28" y="30" width="200" height="58" rx="10" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="128.0" y="64.0" text-anchor="middle" font-size="15" font-weight="600" fill="#374151">Public weather API</text>
+  <rect x="302" y="30" width="200" height="58" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="402.0" y="55.0" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">MCP server</text>
+  <text x="402.0" y="75.0" text-anchor="middle" font-size="12.5" fill="#4b5563">format, store</text>
+  <rect x="576" y="30" width="200" height="58" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="676.0" y="55.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">device</text>
+  <text x="676.0" y="75.0" text-anchor="middle" font-size="12.5" fill="#4b5563">fetch, render</text>
+  <line x1="230" y1="59.0" x2="298" y2="59.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="265.0" y="49.0" text-anchor="middle" font-size="12" fill="#6b7280">raw</text>
+  <line x1="504" y1="59.0" x2="572" y2="59.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="539.0" y="49.0" text-anchor="middle" font-size="12" fill="#6b7280">HTTP GET</text>
+  <text x="539.0" y="79.0" text-anchor="middle" font-size="12" fill="#6b7280">short string</text>
+  <rect x="302" y="150" width="200" height="58" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="402.0" y="175.0" text-anchor="middle" font-size="15" font-weight="600" fill="#92400e">ChatGPT (AI)</text>
+  <text x="402.0" y="195.0" text-anchor="middle" font-size="12.5" fill="#4b5563">analyze, control</text>
+  <line x1="402.0" y1="90" x2="402.0" y2="146" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
+  <text x="428.0" y="123.0" text-anchor="middle" font-size="12" fill="#b45309">MCP</text>
+</svg>
