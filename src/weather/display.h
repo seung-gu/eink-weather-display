@@ -5,4 +5,5 @@
 void displayBegin();
 
 // Render a weather response string (up to 7 lines). Call only when it changed.
-void displayWeather(const String& w);
+// wifiMs: Wi-Fi connect time to show in the corner.
+void displayWeather(const String& w, uint32_t wifiMs);

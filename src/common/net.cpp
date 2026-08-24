@@ -4,12 +4,15 @@
 #include <HTTPClient.h>
 #include "config.h"
 
-void connectWiFi() {
-  Serial.printf("Wi-Fi connecting: %s", WIFI_SSID);
+uint32_t connectWiFi() {
+  uint32_t t0 = millis();                                 // start
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) { delay(300); Serial.print("."); }
-  Serial.printf(" connected, IP=%s\n", WiFi.localIP().toString().c_str());
+  while (WiFi.status() != WL_CONNECTED) delay(10);        // poll finely
+  uint32_t ms = millis() - t0;                            // elapsed
+  Serial.printf("Wi-Fi connected in %u ms, IP=%s\n",
+                ms, WiFi.localIP().toString().c_str());
+  return ms;
 }
 
 bool wifiConnected() {
@@ -21,9 +24,9 @@ String httpGet(const char* url) {
   client.setInsecure();
   HTTPClient http;
   String out = "";
-  if (http.begin(client, url)) {
-    if (http.GET() == 200) out = http.getString();
-    http.end();
+  if (http.begin(client, url)) {  // ① 어느 가게(URL)에 연결
+    if (http.GET() == 200) out = http.getString();  // ② GET 주문 → 200(정상)이면 나온 음식(응답 본문) 받기
+    http.end();  // ③ 연결 닫기
   }
   return out;
 }

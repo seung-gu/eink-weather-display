@@ -76,7 +76,7 @@ static void drawStat(const unsigned char* icon, const String& val, int ix, int t
 }
 
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w) {
+void displayWeather(const String& w, uint32_t wifiMs) {
   String p[7];
   int idx = 0, start = 0;
   for (int i = 0; i <= (int)w.length() && idx < 7; i++) {
@@ -110,6 +110,10 @@ void displayWeather(const String& w) {
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
+    // Wi-Fi connect time (debug) — bottom line
+    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+    u8g2Fonts.setCursor(6, 196);
+    u8g2Fonts.printf("wifi %u ms", wifiMs);
   } while (display.nextPage());
   display.hibernate();
 }

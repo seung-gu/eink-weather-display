@@ -17,13 +17,13 @@ void setup() {
   // pinMode(LED_PIN, OUTPUT);
   // setLed(false);
 
-  connectWiFi();
+  uint32_t wifiMs = connectWiFi();
   displayBegin();
 
   // Fetch weather and refresh the screen (e-Paper holds the image with no power)
   String w = httpGet(WEATHER_URL);
   if (w.length()) {
-    displayWeather(w);
+    displayWeather(w, wifiMs);
     Serial.println("[weather updated]\n" + w);
   }
 
@@ -31,11 +31,15 @@ void setup() {
   // String led = httpGet(LED_URL);
   // if (led.length()) setLed(led[0] == '1');
 
+#ifndef DEBUG_NO_SLEEP
   // Enter deep sleep -> on timer expiry the chip resets and restarts from setup()
   Serial.printf("deep sleep for %d min...\n", SLEEP_MINUTES);
   Serial.flush();
   esp_sleep_enable_timer_wakeup((uint64_t)SLEEP_MINUTES * 60 * 1000000ULL);
   esp_deep_sleep_start();
+#else
+  Serial.println("[debug] staying awake (no deep sleep)");   // 디버그 빌드에선 안 잠
+#endif
 }
 
 void loop() {
