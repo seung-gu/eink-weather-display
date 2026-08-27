@@ -68,6 +68,10 @@ src/
 └─ main.cpp         flow only (setup/loop)
 ```
 
+## Design notes
+- [Persistence & refresh](docs/persistence-and-refresh.md) — why the last weather is kept in NVS
+  (not RTC memory), and why a partial refresh of just the status line doesn't work here
+
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
 

@@ -73,6 +73,10 @@ src/
 - SPI 충돌 회피: `SPI.begin(6, -1, 7, 10)` 후 핀 OUTPUT 재확정 + 수동 리셋
 - 날씨 조건 문자열(`뇌우`·`눈`·`비`…) = 서버 응답 매칭용, 코드에 한국어 유지
 
+## 설계 노트
+- [Persistence & refresh](docs/persistence-and-refresh.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
+  상태줄만 부분 갱신이 안 되는 이유
+
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**
 
