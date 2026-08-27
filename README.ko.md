@@ -76,6 +76,8 @@ src/
 ## 설계 노트
 - [Persistence & refresh](docs/persistence-and-refresh.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
   상태줄만 부분 갱신이 안 되는 이유
+- [JTAG debugging](docs/jtag-debug.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
+  다운로드 모드에서 디버깅이 안 되는 이유
 
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**

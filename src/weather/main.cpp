@@ -21,19 +21,19 @@ void setup() {
   // (retries on the next wake). No restart loop -> battery-safe.
   WifiResult wifi = connectWiFi();
 
-  String w;
-  if (wifi.ok) w = httpGet(WEATHER_URL);             // retries once inside
+  String fetched;
+  if (wifi.ok) fetched = httpGet(WEATHER_URL);       // retries once inside
 
+  // NVS is the single source of truth: store a fresh response, then always draw what's stored.
+  // A failed fetch then simply redraws the last good data, with no separate fallback path.
   prefs.begin("weather", false);
-  if (w.length()) {
-    prefs.putString("last", w);                      // keep for the next failed wake
-    Serial.println("[weather updated]\n" + w);
-  } else {
-    w = prefs.getString("last", "");                 // fall back to the last good data
-    Serial.println(wifi.ok ? "fetch failed — redraw last weather"
-                           : "Wi-Fi failed — redraw last weather");
-  }
+  if (fetched.length()) prefs.putString("last", fetched);
+  String w = prefs.getString("last", "");
   prefs.end();
+
+  Serial.println(fetched.length() ? "[weather updated]\n" + w
+                                  : (wifi.ok ? "fetch failed — redraw stored weather"
+                                             : "Wi-Fi failed — redraw stored weather"));
 
   // Always redraw (full refresh) so the status line reflects THIS wake, even with no
   // weather data at all (empty w just leaves the weather area blank). 0 = offline.

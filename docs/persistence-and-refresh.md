@@ -105,12 +105,13 @@ This only becomes a concern at second-level intervals.
 ```cpp
 WifiResult wifi = connectWiFi();          // 1 try + 1 retry, no restart loop
 
-String w;
-if (wifi.ok) w = httpGet(WEATHER_URL);    // 1 try + 1 retry (server cold start)
+String fetched;
+if (wifi.ok) fetched = httpGet(WEATHER_URL);   // 1 try + 1 retry (server cold start)
 
+// NVS is the single source of truth: store what's fresh, then draw what's stored.
 prefs.begin("weather", false);
-if (w.length()) prefs.putString("last", w);        // success -> persist
-else            w = prefs.getString("last", "");   // failure -> last good data
+if (fetched.length()) prefs.putString("last", fetched);
+String w = prefs.getString("last", "");
 prefs.end();
 
 displayBegin();                                     // always redraw, full refresh

@@ -71,6 +71,8 @@ src/
 ## Design notes
 - [Persistence & refresh](docs/persistence-and-refresh.md) — why the last weather is kept in NVS
   (not RTC memory), and why a partial refresh of just the status line doesn't work here
+- [JTAG debugging](docs/jtag-debug.md) — step debugging over the built-in USB-JTAG: the OpenOCD
+  overrides it needs, and why download mode silently breaks it
 
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
