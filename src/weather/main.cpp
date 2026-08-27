@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Preferences.h>
 #include "esp_sleep.h"
 #include "config.h"
 #include "net.h"
@@ -7,29 +8,37 @@
 // Sleep this long, then wake and refresh the weather (shorten while testing)
 #define SLEEP_MINUTES 10
 
-// --- LED control (currently unused, commented out) ---
-// static void setLed(bool on) { digitalWrite(LED_PIN, on ? LOW : HIGH); }
+// Last good weather response, kept in NVS (flash) so it survives deep sleep, resets and
+// power loss — lets us redraw the screen when a fetch fails instead of losing it.
+// NVS skips the write when the value is unchanged, so flash wear stays negligible.
+static Preferences prefs;
+
 
 void setup() {
   Serial.begin(115200);
 
-  // --- Onboard LED (currently commented out) ---
-  // pinMode(LED_PIN, OUTPUT);
-  // setLed(false);
+  // Wi-Fi -> weather -> screen. On any failure, skip the rest and just deep sleep
+  // (retries on the next wake). No restart loop -> battery-safe.
+  WifiResult wifi = connectWiFi();
 
-  uint32_t wifiMs = connectWiFi();
-  displayBegin();
+  String w;
+  if (wifi.ok) w = httpGet(WEATHER_URL);             // retries once inside
 
-  // Fetch weather and refresh the screen (e-Paper holds the image with no power)
-  String w = httpGet(WEATHER_URL);
+  prefs.begin("weather", false);
   if (w.length()) {
-    displayWeather(w, wifiMs);
+    prefs.putString("last", w);                      // keep for the next failed wake
     Serial.println("[weather updated]\n" + w);
+  } else {
+    w = prefs.getString("last", "");                 // fall back to the last good data
+    Serial.println(wifi.ok ? "fetch failed — redraw last weather"
+                           : "Wi-Fi failed — redraw last weather");
   }
+  prefs.end();
 
-  // --- Reflect server LED state (currently commented out) ---
-  // String led = httpGet(LED_URL);
-  // if (led.length()) setLed(led[0] == '1');
+  // Always redraw (full refresh) so the status line reflects THIS wake, even with no
+  // weather data at all (empty w just leaves the weather area blank). 0 = offline.
+  displayBegin();
+  displayWeather(w, wifi.ok ? wifi.ms : 0, wifi.ok ? wifi.rssi : 0);
 
 #ifndef DEBUG_NO_SLEEP
   // Enter deep sleep -> on timer expiry the chip resets and restarts from setup()

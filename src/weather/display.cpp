@@ -75,8 +75,40 @@ static void drawStat(const unsigned char* icon, const String& val, int ix, int t
   u8g2Fonts.print(val);
 }
 
+// RSSI (dBm) -> 0..4 signal level. Real RSSI is negative; >= 0 means "no signal".
+static int rssiLevel(int rssi) {
+  if (rssi >= 0)   return 0;
+  if (rssi >= -55) return 4;
+  if (rssi >= -65) return 3;
+  if (rssi >= -75) return 2;
+  if (rssi >= -85) return 1;
+  return 0;
+}
+
+// Signal gauge: 4 ascending bars, filled up to the level, outline beyond it.
+// baseline = bottom of the bars.
+static void drawSignalGauge(int rssi, int x, int baseline) {
+  int bars = rssiLevel(rssi);
+  for (int i = 0; i < 4; i++) {
+    int h  = 3 + i * 3;                 // ascending heights: 3,6,9,12
+    int bx = x + i * 5;
+    int by = baseline - h;
+    if (i < bars) display.fillRect(bx, by, 3, h, GxEPD_BLACK);   // filled
+    else          display.drawRect(bx, by, 3, h, GxEPD_BLACK);   // outline
+  }
+}
+
+// Bottom line: Wi-Fi connect time (left) + signal gauge (right)
+static void drawBottomLine(uint32_t wifiMs, int rssi) {
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  u8g2Fonts.setCursor(6, display.height() - 4);
+  if (wifiMs) u8g2Fonts.printf("wifi %u ms", wifiMs);
+  else        u8g2Fonts.print("offline");
+  drawSignalGauge(rssi, 172, display.height() - 4);
+}
+
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w, uint32_t wifiMs) {
+void displayWeather(const String& w, uint32_t wifiMs, int rssi) {
   String p[7];
   int idx = 0, start = 0;
   for (int i = 0; i <= (int)w.length() && idx < 7; i++) {
@@ -97,7 +129,7 @@ void displayWeather(const String& w, uint32_t wifiMs) {
     const int YO = 12;                               // nudge everything down a bit (tunable)
     u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
     drawCentered(city, 14 + YO);
-    drawWeatherIcon(cond, 100, 45 + YO);             // icon 48
+    if (cond.length()) drawWeatherIcon(cond, 100, 45 + YO);   // icon 48 (skip when no data)
     u8g2Fonts.setFont(u8g2_font_helvB18_tf);
     drawCentered(temp, 92 + YO);                      // current temp
     u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
@@ -110,10 +142,8 @@ void displayWeather(const String& w, uint32_t wifiMs) {
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
-    // Wi-Fi connect time (debug) — bottom line
-    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
-    u8g2Fonts.setCursor(6, 196);
-    u8g2Fonts.printf("wifi %u ms", wifiMs);
+    drawBottomLine(wifiMs, rssi);          // Wi-Fi time + signal icon
   } while (display.nextPage());
   display.hibernate();
 }
+
