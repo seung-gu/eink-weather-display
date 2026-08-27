@@ -74,9 +74,9 @@ src/
 - 날씨 조건 문자열(`뇌우`·`눈`·`비`…) = 서버 응답 매칭용, 코드에 한국어 유지
 
 ## 설계 노트
-- [Persistence & refresh](docs/persistence-and-refresh.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
+- [저장과 화면 갱신](docs/persistence-and-refresh.ko.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
   상태줄만 부분 갱신이 안 되는 이유
-- [JTAG debugging](docs/jtag-debug.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
+- [JTAG 디버깅](docs/jtag-debug.ko.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
   다운로드 모드에서 디버깅이 안 되는 이유
 
 ## 서버 (MCP)

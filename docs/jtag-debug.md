@@ -1,3 +1,5 @@
+[English](jtag-debug.md) | [한국어](jtag-debug.ko.md)
+
 # JTAG debugging on the ESP32-C3
 
 Step debugging works over the C3's **built-in USB Serial/JTAG** — no external probe. Getting

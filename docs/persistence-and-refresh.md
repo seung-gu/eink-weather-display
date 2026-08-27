@@ -1,3 +1,5 @@
+[English](persistence-and-refresh.md) | [한국어](persistence-and-refresh.ko.md)
+
 # Persistence & refresh notes
 
 Why the last weather lives in **NVS (flash)** instead of RTC memory, and why the status line
