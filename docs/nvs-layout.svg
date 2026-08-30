@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 545" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1180" height="545" fill="#ffffff"/>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker></defs>
+<text x="590.0" y="34" font-size="19" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">NVS on flash — partition &#8594; page &#8594; entries</text>
+<text x="40" y="62" font-size="13" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">① Flash partition table (4 MB)</text>
+<rect x="40" y="78" width="250" height="44" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+<text x="52" y="98" font-size="13.5" fill="#4f46e5" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">nvs</text>
+<text x="278" y="98" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x009000</text>
+<text x="52" y="114" font-size="11" fill="#6366f1" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">20 KB — key/value store</text>
+<rect x="40" y="128" width="250" height="34" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="149" font-size="12.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">otadata</text>
+<text x="278" y="149" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x00E000</text>
+<text x="278" y="149" font-size="11" fill="#0f172a" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1"></text>
+<rect x="40" y="168" width="250" height="34" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="189" font-size="12.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">app0</text>
+<text x="278" y="189" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x010000</text>
+<text x="278" y="189" font-size="11" fill="#0f172a" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1"></text>
+<rect x="40" y="208" width="250" height="34" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="229" font-size="12.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">app1</text>
+<text x="278" y="229" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x150000</text>
+<text x="278" y="229" font-size="11" fill="#0f172a" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1"></text>
+<rect x="40" y="248" width="250" height="34" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="269" font-size="12.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">spiffs</text>
+<text x="278" y="269" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x290000</text>
+<text x="278" y="269" font-size="11" fill="#0f172a" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1"></text>
+<rect x="40" y="288" width="250" height="34" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="309" font-size="12.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">coredump</text>
+<text x="278" y="309" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">0x3F0000</text>
+<text x="278" y="309" font-size="11" fill="#0f172a" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1"></text>
+<text x="40" y="342" font-size="11" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">our data lives only in the nvs partition</text>
+<path d="M300,100 L336,100" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#ah)"/>
+<text x="350" y="62" font-size="13" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">② One NVS page (4 KB) × 5</text>
+<rect x="350" y="78" width="270" height="46" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="362" y="98" font-size="12.5" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">Page header</text>
+<text x="608" y="98" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">32 B</text>
+<text x="362" y="115" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">state, seq no, CRC</text>
+<rect x="350" y="132" width="270" height="46" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+<text x="362" y="152" font-size="12.5" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">Entry state bitmap</text>
+<text x="608" y="152" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">32 B</text>
+<text x="362" y="169" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">empty / written / erased</text>
+<rect x="350" y="186" width="270" height="56" rx="6" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="362" y="206" font-size="12.5" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">Entry 0 … 125</text>
+<text x="608" y="206" font-size="11.5" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">32 B each</text>
+<text x="362" y="223" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">keys + values live here</text>
+<text x="362" y="237" font-size="10.5" fill="#0d9488" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">126 × 32 B = 4032 B</text>
+<rect x="350" y="256" width="270" height="44" rx="6" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="362" y="274" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">Overwrite = append a NEW entry;</text>
+<text x="362" y="288" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">old one just flagged erased in the bitmap</text>
+<path d="M630,100 L666,100" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#ah)"/>
+<text x="676" y="62" font-size="13" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">③ What our data actually looks like (flash 0xC040 …)</text>
+<rect x="676" y="78" width="464" height="74" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+<text x="688" y="97" font-size="12.5" fill="#4f46e5" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">0xC040 — namespace registration</text>
+<text x="688" y="114" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">00 01 01 ff  7696324c  "weather"  … 07</text>
+<text x="688" y="129" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">NsIndex=0 (name table) · Type=uint8 · Span=1 → "weather" = 7</text>
+<rect x="676" y="161" width="464" height="90" rx="6" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+<text x="688" y="180" font-size="12.5" fill="#0d9488" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">0xC060 — "last" key header</text>
+<text x="688" y="197" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">07 21 03 ff  ea65d479  "last"  …  3a00  0d926a00</text>
+<text x="688" y="212" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">NsIndex=7 ("weather") · Type=0x21 string · Span=3 entries</text>
+<text x="688" y="227" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">len = 0x003A = 58 bytes · data CRC32</text>
+<rect x="676" y="260" width="464" height="92" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="688" y="279" font-size="12.5" fill="#d97706" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">0xC080 — the value (next entry slots)</text>
+<text x="688" y="296" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">4d c3bc 6e 63 68 6e 65 72 20 46 72 65 69 68 65 69 74 0a</text>
+<text x="688" y="311" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">M  ü    n  c  h  n  e  r  _  F  r  e  i  h  e  i  t  \n</text>
+<text x="688" y="326" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">ü = 0xC3 0xBC (UTF-8, 2 bytes) — same bytes as in RAM</text>
+<rect x="676" y="361" width="464" height="74" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="688" y="380" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">0xC0E8, 0xC188, 0xC228 … — later writes</text>
+<text x="688" y="397" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">"last" appears 6× — every update appends a new entry</text>
+<text x="688" y="412" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">old entries stay until the page fills → erase is rare</text>
+<rect x="676" y="444" width="464" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="688" y="463" font-size="12.5" fill="#94a3b8" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">0xC0C0 — not ours</text>
+<text x="688" y="480" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace" opacity="1">"WIFI_STA_DEF"  c0a801b3  = 192.168.1.179</text>
+<text x="688" y="495" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" opacity="1">the Wi-Fi stack caches the last IP in NVS too</text>
+</svg>

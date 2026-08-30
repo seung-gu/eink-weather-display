@@ -73,6 +73,8 @@ src/
   (not RTC memory), and why a partial refresh of just the status line doesn't work here
 - [JTAG debugging](docs/jtag-debug.md) — step debugging over the built-in USB-JTAG: the OpenOCD
   overrides it needs, and why download mode silently breaks it
+- [NVS internals](docs/nvs-internals.md) — what `putString()` actually writes to flash, dumped
+  from the device: namespace numbering, the 32-byte entry, and why writes barely wear the flash
 
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
