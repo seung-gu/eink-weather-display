@@ -78,8 +78,8 @@ src/
   상태줄만 부분 갱신이 안 되는 이유
 - [JTAG 디버깅](docs/jtag-debug.ko.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
   다운로드 모드에서 디버깅이 안 되는 이유
-- [NVS 내부 구조](docs/nvs-internals.ko.md) — `putString()`이 플래시에 실제로 쓰는 것(기기 덤프):
-  네임스페이스 번호화, 32바이트 엔트리, 쓰기가 플래시를 거의 안 닳게 하는 이유
+- [NVS에 상태 저장하기](docs/nvs-internals.ko.md) — RTC 대신 NVS인 이유, NVS가 무엇인지,
+  `Preferences` API, 그리고 `putString()`이 플래시에서 어떤 모습이 되는지 (기기 덤프 기반)
 
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**

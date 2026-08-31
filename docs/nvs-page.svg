@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 350" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1340" height="350" fill="#ffffff"/>
+<text x="670.0" y="30.0" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Where a page's state and seq actually live</text>
+<text x="40.0" y="64.0" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">① The 5 pages</text>
+<rect x="40.0" y="74.0" width="270.0" height="40.0" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="52.0" y="91.0" font-size="11.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace">page 0</text>
+<text x="298.0" y="91.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0x9000</text>
+<text x="52.0" y="106.0" font-size="10" fill="#64748b" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">FULL / 0</text>
+<rect x="40.0" y="120.0" width="270.0" height="40.0" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="52.0" y="137.0" font-size="11.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace">page 1</text>
+<text x="298.0" y="137.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xA000</text>
+<text x="52.0" y="152.0" font-size="10" fill="#64748b" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">FULL / 1</text>
+<rect x="40.0" y="166.0" width="270.0" height="40.0" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="52.0" y="183.0" font-size="11.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace">page 2</text>
+<text x="298.0" y="183.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xB000</text>
+<text x="52.0" y="198.0" font-size="10" fill="#64748b" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">FULL / 2</text>
+<rect x="40.0" y="212.0" width="270.0" height="40.0" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="2.5"/>
+<text x="52.0" y="229.0" font-size="11.5" fill="#4f46e5" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">page 3</text>
+<text x="298.0" y="229.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC000</text>
+<text x="52.0" y="244.0" font-size="10" fill="#4f46e5" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">ACTIVE / 7</text>
+<rect x="40.0" y="258.0" width="270.0" height="40.0" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="52.0" y="275.0" font-size="11.5" fill="#475569" text-anchor="start" font-weight="500" font-family="'SF Mono',Menlo,Consolas,monospace">page 4</text>
+<text x="298.0" y="275.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xD000</text>
+<text x="52.0" y="290.0" font-size="10" fill="#64748b" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">EMPTY / —</text>
+<text x="390.0" y="64.0" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">② Inside page 3 — 4 KB</text>
+<rect x="382.0" y="70.0" width="316.0" height="200.0" rx="8" fill="#fbfcfe" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="390.0" y="80.0" width="300.0" height="56.0" rx="5" fill="#ccfbf1" stroke="#0d9488" stroke-width="2.5"/>
+<text x="402.0" y="101.0" font-size="12" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Page header</text>
+<text x="678.0" y="101.0" font-size="10" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC000</text>
+<text x="402.0" y="119.0" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">state · seq · CRC</text>
+<text x="678.0" y="119.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">32 B</text>
+<rect x="390.0" y="142.0" width="300.0" height="56.0" rx="5" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+<text x="402.0" y="163.0" font-size="12" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Entry state bitmap</text>
+<text x="678.0" y="163.0" font-size="10" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC020</text>
+<text x="402.0" y="181.0" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">2 bits per entry</text>
+<text x="678.0" y="181.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">32 B</text>
+<rect x="390.0" y="204.0" width="300.0" height="56.0" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="402.0" y="225.0" font-size="12" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Entries 0 … 125</text>
+<text x="678.0" y="225.0" font-size="10" fill="#64748b" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC040</text>
+<text x="402.0" y="243.0" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">keys and values</text>
+<text x="678.0" y="243.0" font-size="10" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">32 B each</text>
+<text x="390.0" y="280.0" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">The header is the page's first 32 bytes.</text>
+<text x="760.0" y="64.0" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">③ The header's first 8 bytes</text>
+<rect x="752.0" y="70.0" width="556.0" height="228.0" rx="8" fill="#fbfcfe" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="774.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="797.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">fe</text>
+<text x="775.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 0</text>
+<rect x="826.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="849.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">ff</text>
+<text x="827.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 1</text>
+<rect x="878.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="901.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">ff</text>
+<text x="879.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 2</text>
+<rect x="930.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="953.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">ff</text>
+<text x="931.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 3</text>
+<rect x="982.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="1005.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">07</text>
+<text x="983.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 4</text>
+<rect x="1034.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="1057.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">00</text>
+<text x="1035.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 5</text>
+<rect x="1086.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="1109.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">00</text>
+<text x="1087.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 6</text>
+<rect x="1138.0" y="108.0" width="47.0" height="36.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="1161.5" y="132.0" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">00</text>
+<text x="1139.0" y="103.0" font-size="8.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">byte 7</text>
+<path d="M774,150 L774,156 L977,156 L977,150" stroke="#0d9488" stroke-width="1.5" fill="none"/>
+<text x="875.5" y="171.0" font-size="11.5" fill="#0d9488" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">state</text>
+<text x="875.5" y="186.0" font-size="10.5" fill="#334155" text-anchor="middle" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">= ACTIVE</text>
+<path d="M982,150 L982,156 L1185,156 L1185,150" stroke="#d97706" stroke-width="1.5" fill="none"/>
+<text x="1083.5" y="171.0" font-size="11.5" fill="#d97706" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">seq</text>
+<text x="1083.5" y="186.0" font-size="10.5" fill="#334155" text-anchor="middle" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">= 7</text>
+<text x="774.0" y="204.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">little-endian → 07 00 00 00 reads as 7</text>
+<text x="774.0" y="224.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">state only ever takes three values:</text>
+<text x="778.0" y="243.0" font-size="10" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">ff ff ff ff</text>
+<text x="886.0" y="243.0" font-size="10" fill="#0d9488" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">EMPTY</text>
+<text x="950.0" y="243.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">— never used, or erased</text>
+<text x="778.0" y="260.0" font-size="10" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">fe ff ff ff</text>
+<text x="886.0" y="260.0" font-size="10" fill="#0d9488" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">ACTIVE</text>
+<text x="950.0" y="260.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">— writes go here</text>
+<text x="778.0" y="277.0" font-size="10" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">fc ff ff ff</text>
+<text x="886.0" y="277.0" font-size="10" fill="#0d9488" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">FULL</text>
+<text x="950.0" y="277.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">— no free entries left</text>
+<text x="760.0" y="314.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Erasing a page clears both fields back to ff, so the old seq is gone with it.</text>
+<path d="M310.0,212.0 L382.0,70.0" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+<path d="M310.0,252.0 L382.0,270.0" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+<path d="M690.0,80.0 L752.0,70.0" stroke="#0d9488" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+<path d="M690.0,136.0 L752.0,298.0" stroke="#0d9488" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+</svg>

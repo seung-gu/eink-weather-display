@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 300" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1180" height="300" fill="#ffffff"/>
+<text x="590" y="30" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Why a partial refresh cannot work on this device</text>
+<text x="40" y="62" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">① What a partial update draws from</text>
+<rect x="40" y="72" width="300" height="118" rx="6" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+<text x="56" y="98" font-size="12" fill="#0f172a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">The panel controller's own RAM</text>
+<text x="56" y="120" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0x24  current image</text>
+<text x="56" y="138" font-size="11" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0x26  previous image</text>
+<text x="56" y="164" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">It updates only the pixels that differ,</text>
+<text x="56" y="178" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">so both must already hold the screen.</text>
+<text x="40" y="210" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Not ESP32 memory — it lives on the display module.</text>
+<path d="M352,131 L389,131" stroke="#94a3b8" stroke-width="1.6" fill="none"/><path d="M388,127 L396,131 L388,135 z" fill="#94a3b8"/>
+<text x="408" y="62" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">② What every wake does to that RAM</text>
+<rect x="408" y="72" width="350" height="118" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="424" y="98" font-size="11" fill="#dc2626" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">display.hibernate()</text>
+<text x="424" y="112" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">controller deep sleep → RAM lost</text>
+<text x="424" y="130" font-size="11" fill="#dc2626" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">manual RST pulse</text>
+<text x="424" y="144" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">controller reset  (needed for the C3 SPI fix)</text>
+<text x="424" y="162" font-size="11" fill="#dc2626" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">init(…, false)</text>
+<text x="424" y="176" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">skips the initial clear → never refilled</text>
+<text x="408" y="210" font-size="10" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">So the RAM is undefined by the time anything is drawn.</text>
+<path d="M770,131 L807,131" stroke="#94a3b8" stroke-width="1.6" fill="none"/><path d="M806,127 L814,131 L806,135 z" fill="#94a3b8"/>
+<text x="826" y="62" font-size="12" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">③ Both init modes therefore fail</text>
+<rect x="826" y="72" width="314" height="54" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="842" y="92" font-size="11" fill="#d97706" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">init(…, true)</text>
+<text x="842" y="108" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">first refresh is forced full,</text>
+<text x="1124" y="92" font-size="13" fill="#dc2626" text-anchor="end" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">✕</text>
+<text x="1124" y="108" font-size="9.5" fill="#dc2626" text-anchor="end" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">weather area cleared to white</text>
+<rect x="826" y="134" width="314" height="54" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="842" y="154" font-size="11" fill="#d97706" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">init(…, false)</text>
+<text x="842" y="170" font-size="10" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">draws from that undefined RAM</text>
+<text x="1124" y="154" font-size="13" fill="#dc2626" text-anchor="end" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">✕</text>
+<text x="1124" y="170" font-size="9.5" fill="#dc2626" text-anchor="end" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">whole panel turns to noise</text>
+<rect x="826" y="200" width="314" height="34" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="842" y="222" font-size="12" fill="#16a34a" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">✓  always full refresh</text>
+<text x="40" y="272" font-size="11" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">A correct partial refresh would need the whole image back in controller RAM first — which means redrawing the full screen anyway.</text>
+</svg>

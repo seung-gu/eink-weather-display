@@ -1,53 +1,40 @@
 [English](persistence-and-refresh.md) | [한국어](persistence-and-refresh.ko.md)
 
-# Persistence & refresh notes
+# Persistence & refresh
 
-Why the last weather lives in **NVS (flash)** instead of RTC memory, and why the status line
-is drawn with a **full refresh** instead of a partial one.
+A deep-sleep wake is a full reset: execution restarts at `setup()` with ordinary RAM gone, and the
+panel controller comes up reset as well. Two decisions follow — the last good response is kept in
+**NVS (flash)**, not RTC memory, and the screen is always redrawn with a **full refresh**, never a
+partial one.
 
-Context: every wake is a full reset (deep sleep). When Wi-Fi or the fetch fails we still want
-the screen to show the last known weather plus the *current* status (`offline`, signal gauge).
+The requirement behind both: when Wi-Fi or the fetch fails, the screen still shows the last known
+weather plus the status of the *current* wake (`offline`, signal gauge).
+
+Refresh times and currents are this hardware's — an ESP32-C3 with a 1.54" SSD1681 panel — and are
+marked where they appear. The GxEPD2 behaviour holds on any board.
+
+Related: [Storing state in NVS](nvs-internals.md).
 
 ---
 
-## 1. Why not a partial refresh of just the bottom strip?
+## 1. The status line is redrawn by full refresh
 
-The plan was: leave the weather area untouched, `setPartialWindow()` the bottom ~22 px, redraw
-only the status line. What we got instead:
+A partial update is *differential*: it drives only the pixels that differ from the previous image,
+so the current screen must already sit in the panel controller's own RAM — on the display module,
+not the ESP32's memory. Every wake leaves that RAM undefined, which breaks both `init()` modes.
 
-![Whole panel filled with random pixel noise after a partial refresh](partial-refresh-noise.jpg)
+![Three panels: a partial update draws from the panel controller's own RAM (0x24 current, 0x26 previous); every wake destroys that RAM through display.hibernate(), the manual RST pulse and init(…, false); so init(…, true) forces a full refresh and clears the weather area to white, while init(…, false) draws from undefined RAM and fills the whole panel with noise — always full refresh](epd-partial-fail.png)
 
-The **entire panel** turned into random noise — not just the strip we asked to update.
-
-### What the driver actually does
-
-Two separate mechanisms broke it, both in the installed GxEPD2:
-
-**a) `init(..., initial=true)` ignores the partial window.**
+The installed GxEPD2 states both modes in its source:
 
 ```cpp
 // GxEPD2_154_D67.cpp:274 — refresh(x, y, w, h)
 if (_initial_refresh) return refresh(false);   // initial update needs be full update
 ```
 
-`init(bitrate)` (and `init(bitrate, true)`) sets `_initial_refresh = true`, so the first
-`refresh(x,y,w,h)` silently becomes a **full-screen** `_Update_Full()`. The partial window is
-discarded. Result: the weather area was cleared to white.
-
-**b) `init(..., initial=false)` refreshes from garbage controller RAM.**
-
-Partial update is *differential*: `_Update_Part()` drives the panel from the controller's own
-RAM (0x24 "current" / 0x26 "previous"). That RAM is **not** the ESP32's memory — it lives in the
-SSD1681 on the display module, and we destroy it on every wake:
-
-- `display.hibernate()` puts the controller into deep sleep (`0x10`/`0x01`) → RAM lost
-- `displayBegin()` issues a manual RST pulse (needed for the C3 SPI pin fix) → controller reset
-- `init(..., false)` deliberately skips the initial clear, so nothing refills that RAM
-
-Writing only the strip therefore leaves everything outside it undefined, and the update drives
-the whole panel from that undefined RAM — the photo above.
-
-The library documents this exact failure mode:
+`init(bitrate)` — the same as `init(bitrate, true)` — sets `_initial_refresh = true`, so the first
+`refresh(x, y, w, h)` silently becomes a full-screen `_Update_Full()` and the partial window is
+discarded.
 
 ```
 // GxEPD2_BW.h:320
@@ -55,19 +42,29 @@ The library documents this exact failure mode:
 //       if initial full update is omitted after power loss
 ```
 
-### Conclusion
+`init(…, false)` skips that initial full update, so `_Update_Part()` drives the whole panel from
+RAM the wake left undefined.
 
-A correct partial refresh would require the **entire** controller RAM to hold the current image
-first — i.e. redrawing the full screen anyway, then refreshing only the strip. That buys a
-shorter refresh (0.5 s vs 2.6 s) at the cost of a fragile dependency on controller state that a
-deep-sleep device resets on every wake. Not worth it here: **always full refresh**.
+Observed on this panel — `setPartialWindow()` over the bottom ~22 px after `init(…, false)`:
+
+![The whole e-Paper panel filled with random pixel noise after a partial refresh of the bottom status strip](partial-refresh-noise.jpg)
+
+### The trade-off
+
+| | Refresh time *(this panel)* | Precondition |
+|---|---|---|
+| Partial | 0.5 s | the whole current image already in controller RAM |
+| **Full** | 2.6 s | none |
+
+A device that resets the controller on every wake cannot meet that precondition:
+**always full refresh**.
 
 ---
 
-## 2. Why NVS (flash), not RTC memory?
+## 2. The last response lives in NVS (flash), not RTC memory
 
-To redraw the previous weather after a failed fetch we need the last good response to survive
-the wake. Two options:
+Redrawing the previous weather after a failed fetch requires the last good response to outlive the
+wake. RTC SRAM outlives deep sleep only; NVS outlives every reset this device sees.
 
 | | `RTC_DATA_ATTR` (RTC SRAM) | **NVS (flash)** |
 |---|---|---|
@@ -77,14 +74,14 @@ the wake. Two options:
 | Firmware re-upload | **lost** | survives (NVS partition is untouched) |
 | Access | direct variable, no copying | `Preferences` get/put |
 
-RTC memory is only retained across *deep sleep*. During development — reset button, re-flash —
-it is wiped every time, which is exactly when the screen went blank. NVS survives all of it.
+Reset presses and re-flashes are routine during development, and each one empties RTC memory,
+leaving the screen with nothing to redraw.
 
-### Cost
+### Energy cost
 
-Current draw is effectively identical; the awake Wi-Fi window dominates everything:
+The NVS write disappears next to the awake Wi-Fi window:
 
-| | draw |
+| | draw *(this board)* |
 |---|---|
 | Wi-Fi connect + HTTPS | ~80–120 mA for 1–4 s ← dominates |
 | e-Paper full refresh | ~10 mA for 2.6 s |
@@ -93,16 +90,25 @@ Current draw is effectively identical; the awake Wi-Fi window dominates everythi
 
 ### Flash wear
 
-NOR flash endures ~100,000 erase cycles per sector, and NVS appends entries into a page,
-erasing only when the page fills — plus it skips the write entirely when the value is unchanged.
+NVS appends entries into a page and erases only when the page fills, and it skips the write
+entirely when the value is unchanged. At this wake interval the erase budget is nowhere near the
+limit:
 
-At one write per 10 min (~52,500/year), with a ~100-byte value and the default ~20 KB NVS
-partition, that works out to a few hundred sector erases per year: **decades of headroom**.
-This only becomes a concern at second-level intervals.
+| | |
+|---|---|
+| NOR endurance | ~100,000 erase cycles per sector |
+| Writes | 1 per 10 min ≈ 52,500/year |
+| Value size | ~100 bytes |
+| `nvs` partition | ~20 KB (default) |
+| Sector erases | a few hundred per year |
+| **Headroom** | **decades** |
+
+Second-level wake intervals are where this turns into a concern. Slot-level accounting:
+[Storing state in NVS](nvs-internals.md) §6.
 
 ---
 
-## 3. Resulting flow
+## 3. The resulting flow
 
 ```cpp
 WifiResult wifi = connectWiFi();          // 1 try + 1 retry, no restart loop
@@ -128,5 +134,5 @@ displayWeather(w, wifi.ok ? wifi.ms : 0,            // 0 ms  -> "offline"
 | Wi-Fi failed | last weather (NVS) + `offline` + empty gauge |
 | No stored data yet | empty frame + `offline` |
 
-The status line always reflects the *current* wake, so a stale screen is still distinguishable
-from a fresh one.
+The status line always reflects the *current* wake, so a stale screen stays distinguishable from a
+fresh one.

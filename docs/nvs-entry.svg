@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1180" height="400" fill="#ffffff"/>
+<text x="590.0" y="32.0" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">One key-value pair, slot by slot</text>
+<text x="45.0" y="68.0" font-size="12.5" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">The entry slots — 32 B each</text>
+<rect x="45.0" y="84.0" width="430.0" height="46.0" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+<text x="57.0" y="104.0" font-size="12" fill="#4f46e5" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">0xC040</text>
+<text x="137.0" y="104.0" font-size="11" fill="#64748b" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">slot 0</text>
+<text x="57.0" y="121.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">namespace table: "weather" = 7</text>
+<rect x="45.0" y="138.0" width="430.0" height="46.0" rx="5" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+<text x="57.0" y="158.0" font-size="12" fill="#0d9488" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">0xC060</text>
+<text x="137.0" y="158.0" font-size="11" fill="#64748b" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">slot 1</text>
+<text x="57.0" y="175.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">"last" key header · Span=3 · len 58</text>
+<rect x="45.0" y="192.0" width="430.0" height="46.0" rx="5" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="57.0" y="212.0" font-size="12" fill="#d97706" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">0xC080</text>
+<text x="137.0" y="212.0" font-size="11" fill="#64748b" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">slot 2</text>
+<text x="57.0" y="229.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">4d c3bc 6e…  "M ü n c h n e r…"</text>
+<rect x="45.0" y="246.0" width="430.0" height="46.0" rx="5" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="57.0" y="266.0" font-size="12" fill="#d97706" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">0xC0A0</text>
+<text x="137.0" y="266.0" font-size="11" fill="#64748b" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">slot 3</text>
+<text x="57.0" y="283.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">value continued  "14km/h\n79%…"</text>
+<rect x="45.0" y="300.0" width="430.0" height="46.0" rx="5" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="57.0" y="320.0" font-size="12" fill="#94a3b8" text-anchor="start" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">0xC0C0</text>
+<text x="137.0" y="320.0" font-size="11" fill="#64748b" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">slot 4</text>
+<text x="57.0" y="337.0" font-size="10.5" fill="#334155" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">"WIFI_STA_DEF" (Wi-Fi stack)</text>
+<rect x="38" y="131" width="444" height="168" rx="9" fill="none" stroke="#0d9488" stroke-width="2" stroke-dasharray="6,4"/>
+<text x="45.0" y="374.0" font-size="11" fill="#0d9488" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">slots 1–3 = one key-value pair  (Span = 3)</text>
+<text x="570.0" y="68.0" font-size="12.5" fill="#334155" text-anchor="start" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Inside those slots — byte by byte</text>
+<rect x="560.0" y="78.0" width="590.0" height="300.0" rx="8" fill="#fbfcfe" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="592.0" y="124.0" width="64.0" height="36.0" rx="3" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="624.0" y="147.0" font-size="9" fill="#334155" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Ns Ty</text>
+<text x="593.0" y="118.0" font-size="9" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0</text>
+<rect x="656.0" y="124.0" width="64.0" height="36.0" rx="3" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="688.0" y="147.0" font-size="9" fill="#334155" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">CRC32</text>
+<text x="657.0" y="118.0" font-size="9" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">4</text>
+<rect x="720.0" y="124.0" width="256.0" height="36.0" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+<text x="848.0" y="147.0" font-size="11" fill="#334155" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Key = "last"</text>
+<text x="721.0" y="118.0" font-size="9" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">8</text>
+<rect x="976.0" y="124.0" width="128.0" height="36.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="1040.0" y="147.0" font-size="9.5" fill="#334155" text-anchor="middle" font-weight="700" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">len 58 + CRC</text>
+<text x="977.0" y="118.0" font-size="9" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">24</text>
+<text x="1103.0" y="118.0" font-size="9" fill="#94a3b8" text-anchor="end" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">32</text>
+<text x="584.0" y="147.0" font-size="10.5" fill="#334155" text-anchor="end" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">slot 1</text>
+<text x="1112.0" y="147.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC060</text>
+<text x="848.0" y="178.0" font-size="10" fill="#0d9488" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">16 B — the key always sits here whole</text>
+<text x="1040.0" y="178.0" font-size="10" fill="#d97706" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">8 B</text>
+<text x="1040.0" y="192.0" font-size="9.5" fill="#d97706" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">too small for the value,</text>
+<text x="1040.0" y="204.0" font-size="9.5" fill="#d97706" text-anchor="middle" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">so it holds its length</text>
+<rect x="592.0" y="224.0" width="512.0" height="28.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="584.0" y="243.0" font-size="10.5" fill="#334155" text-anchor="end" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">slot 2</text>
+<text x="848.0" y="243.0" font-size="10" fill="#334155" text-anchor="middle" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">M ü n c h n e r   F r e i h e i t  1 6 ° C …</text>
+<text x="1112.0" y="243.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC080</text>
+<rect x="592.0" y="260.0" width="512.0" height="28.0" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="584.0" y="279.0" font-size="10.5" fill="#334155" text-anchor="end" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace">slot 3</text>
+<text x="848.0" y="279.0" font-size="10" fill="#334155" text-anchor="middle" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">… the rest of the value, then a NUL</text>
+<text x="1112.0" y="279.0" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="400" font-family="'SF Mono',Menlo,Consolas,monospace">0xC0A0</text>
+<text x="592.0" y="310.0" font-size="10" fill="#d97706" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">32 B of raw value bytes each — no fields, no key.</text>
+<text x="570.0" y="360.0" font-size="10.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">A 58-byte value does not fit in the 8-byte Data field, so it spills into the two following slots.</text>
+<text x="570.0" y="374.0" font-size="10.5" fill="#475569" text-anchor="start" font-weight="400" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">Header + spill = 3 slots, which is what Span = 3 counts.</text>
+<path d="M482.0,131.0 L560.0,78.0" stroke="#0d9488" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+<path d="M482.0,299.0 L560.0,378.0" stroke="#0d9488" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.75"/>
+</svg>

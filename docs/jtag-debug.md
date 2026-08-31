@@ -2,23 +2,22 @@
 
 # JTAG debugging on the ESP32-C3
 
-Step debugging works over the C3's **built-in USB Serial/JTAG** — no external probe. Getting
-there needed three OpenOCD overrides plus one firmware change, all recorded here because none
-of them are obvious from the error messages.
+Step debugging works over the C3's **built-in USB Serial/JTAG** — no external probe. It takes three
+OpenOCD overrides plus one build flag, none of which follow from the error messages they fix.
 
 Config lives in the `[dbg]` section of `platformio.ini`, inherited by every env via
 `[env] extends = dbg`.
 
 ---
 
-## The setup
+## 1. The config
 
 ```ini
 [dbg]
 debug_tool = esp-builtin                       ; C3's internal USB-JTAG
 debug_init_break = tbreak setup                ; stop at setup()
-debug_build_flags = -Og -g2 -DDEBUG_NO_SLEEP   ; symbols + no deep sleep (see below)
-debug_server =
+debug_build_flags = -Og -g2 -DDEBUG_NO_SLEEP   ; symbols + no deep sleep (§3)
+debug_server =                                 ; openocd path and gdb_port elided
     ...openocd
     -f interface/esp_usb_jtag.cfg
     -c set ESP_RTOS none                       ; (1)
@@ -28,29 +27,22 @@ debug_server =
     -c gdb_breakpoint_override hard            ; (3)
 ```
 
+`tbreak` is a **temporary** breakpoint, consumed on its first hit — which matters after a reset
+(§4).
+
 ---
 
-## Why each override
+## 2. Why each override
 
-### (1) `set ESP_RTOS none`
+**All three are mandatory, and only two announce themselves in the log.**
 
-Without it, OpenOCD tries to enumerate FreeRTOS tasks while the chip is still in ROM, before the
-RTOS has initialised, and reads garbage:
+| Override | What breaks without it | The error it produces |
+|---|---|---|
+| `set ESP_RTOS none` | OpenOCD enumerates FreeRTOS tasks while the chip is still in ROM, before the RTOS has initialised, and reads garbage. GDB then loses thread state, the session sticks at "running" and the toolbar buttons go dead. | `Error: FreeRTOS maximum used priority is unreasonably big, not proceeding: 202`, then on `continue`: *"Cannot execute this command while the selected thread is running"* |
+| `gdb_memory_map disable` | OpenOCD probes flash on attach and fails while the app is running, so GDB is refused at connect time — before any breakpoint can be set. | `Error: attempted 'gdb' connection rejected` (full text below) |
+| `gdb_breakpoint_override hard` | With no memory map GDB cannot tell flash from RAM and picks software breakpoints, which cannot be planted in flash. | **none** — the breakpoint is accepted and silently never hits |
 
-```
-Error: FreeRTOS maximum used priority is unreasonably big, not proceeding: 202
-```
-
-GDB then loses track of thread state and the session gets stuck "running" — `continue` fails
-with *"Cannot execute this command while the selected thread is running"*, and the toolbar
-buttons go dead.
-
-Note that Arduino on ESP32 **does** run on FreeRTOS (`setup()`/`loop()` live in a task), so this
-disables task-aware debugging — a fair trade for a session that actually works.
-
-### (2) `gdb_memory_map disable`
-
-Must be set, or GDB is refused at connect time while the app is running:
+The connect-time refusal in full:
 
 ```
 Memory protection is enabled. Reset target to disable it...
@@ -61,21 +53,17 @@ Error: Connect failed. Consider setting up a gdb-attach event ... or use 'gdb_me
 Error: attempted 'gdb' connection rejected
 ```
 
-OpenOCD's own message names the fix. With the memory map disabled it stops probing flash on
-attach, which is also why (3) is needed.
-
-### (3) `gdb_breakpoint_override hard`
-
-With no memory map, GDB can't tell flash from RAM and would pick software breakpoints, which
-can't be planted in flash. Forcing hardware breakpoints makes them land (the C3 has 8 triggers,
-so that many at a time).
+- **(2) and (3) are one pair**: OpenOCD's own message names the fix, and disabling the memory map
+  is exactly what makes forced hardware breakpoints necessary. The C3 has **8 hardware triggers**,
+  so 8 breakpoints at a time.
+- Arduino on ESP32 **does** run on FreeRTOS (`setup()`/`loop()` live in a task), so (1) trades
+  task-aware debugging for a session that works.
 
 ---
 
-## `DEBUG_NO_SLEEP`: deep sleep vs the debugger
+## 3. `DEBUG_NO_SLEEP`: deep sleep vs the debugger
 
-Deep sleep kills the debug session — the chip powers down and JTAG drops. So the debug build
-skips it:
+**Deep sleep ends the session** — the chip powers down and JTAG drops. The debug build skips it:
 
 ```cpp
 #ifndef DEBUG_NO_SLEEP
@@ -91,40 +79,66 @@ skips it:
 
 ---
 
-## The part that cost the most time: download mode
+## 4. Why a session silently fails to stop
 
-Debugging requires the app to be **running**. If the board is in USB download mode, no
-breakpoint will ever hit — the app never starts, and everything stalls in ROM:
+**A breakpoint that never hits has two causes, and neither is reported.** Either the app is not
+running, or a reset went around the debugger.
+
+![Two silent failure modes. ① Is the app actually running? Normal boot, boot:0x8 (SPI_FAST_FLASH_BOOT), the app runs and breakpoints hit; download mode, boot:0x0 (USB_BOOT) plus wait usb download, the app never starts and the CPU sits in ROM, so nothing can ever hit. ② Did the reset go through the debugger? A debugger reset — Restart, monitor reset halt, or PIO Debug without uploading — makes GDB re-plant the hardware breakpoints and they hit; the reset button resets the chip behind GDB's back, the trigger registers are cleared, nothing re-plants them, and execution never stops again.](jtag-fail-modes.png)
+
+### Download mode blocks every breakpoint
+
+**Debugging requires the app to be running.** In USB download mode it never starts, so a halt lands
+in ROM with no symbols:
 
 ```
 Program received signal SIGINT, Interrupt.
 0x400462dc in ?? ()
 ```
 
-Check the boot line over serial:
+**BOOT+RESET is for *flashing*, not for debugging.** The way out is to **unplug and replug USB**
+without holding BOOT — a software reset alone does not leave download mode.
 
-| Boot log | Meaning |
+### The RESET button clears hardware breakpoints
+
+**A physical RESET press clears the CPU's hardware breakpoint trigger registers, and does so
+without the debugger's knowledge** — nothing re-plants them, so execution never stops again. Only a
+debugger-mediated reset re-plants them:
+
+| Reset | Re-plants the triggers |
 |---|---|
-| `boot:0x8 (SPI_FAST_FLASH_BOOT)` | app running — debuggable |
-| `boot:0x0 (USB_BOOT)` + `wait usb download` | download mode — **nothing will hit** |
+| **Restart** button | yes |
+| `monitor reset halt`, then `c` in the Debug Console | yes |
+| **PIO Debug (without uploading)** | yes — and skips reflashing when the code has not changed |
+| **RESET** button on the board | **no** — cleared behind GDB's back |
 
-BOOT+RESET is for *flashing*, not for debugging. If the board is stuck in download mode,
-**unplug and replug USB** (without holding BOOT) — a software reset alone won't leave it.
+Editor breakpoints (the red dots) are GDB's own list and survive such a reset. `debug_init_break =
+tbreak setup` does not: a temporary breakpoint is consumed on its first hit.
 
 ---
 
 ## Workflow
 
-1. Board asleep (deep-sleep firmware)? Wake it for flashing: hold **BOOT**, tap **RESET** —
-   or just replug USB.
-2. Press **F5** (Run and Debug). PlatformIO builds with debug flags, flashes over JTAG, and
-   breaks at `setup()`.
+1. Board asleep (deep-sleep firmware)? Wake it for flashing: hold **BOOT**, tap **RESET** — or
+   replug USB.
+2. Press **F5** (Run and Debug). PlatformIO builds with debug flags, flashes over JTAG, and breaks
+   at `setup()`.
 3. Step with **F10**; **F11** only where you mean it.
-4. Since the debug build stays awake, later F5 runs need no BOOT+RESET dance.
+4. Later runs need no BOOT+RESET — the debug build stays awake. To re-enter without reflashing
+   unchanged code, launch **PIO Debug (without uploading)**.
 
-Notes:
-- Step **over** (`F10`) network calls. Halting inside `connectWiFi()`/`http.GET()` lets TCP/TLS
-  timers run while the CPU is stopped, so the connection dies and behaviour diverges.
-- Toolbar buttons occasionally stop responding; the Debug Console still works — `c` (continue),
-  `n` (next), `s` (step), `bt`, `info breakpoints`.
-- `platformio.ini` changes need **Developer: Reload Window** before they take effect.
+**Step *over* (`F10`) network calls.** Halting inside `connectWiFi()`/`http.GET()` lets TCP/TLS
+timers run while the CPU is stopped, so the connection dies and behaviour diverges.
+
+Toolbar buttons occasionally stop responding; the Debug Console still works:
+
+| Command | |
+|---|---|
+| `c` | continue |
+| `n` | next (step over) |
+| `s` | step into |
+| `bt` | backtrace |
+| `info breakpoints` | list what is planted |
+| `monitor reset halt` | debugger-mediated reset, then `c` (§4) |
+
+`platformio.ini` changes need **Developer: Reload Window** before they take effect.
