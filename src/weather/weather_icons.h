@@ -1,5 +1,5 @@
 #pragma once
-// Weather Icons (erikflowers, SIL OFL 1.1) 렌더 흑백 비트맵
+// Weather Icons (erikflowers, SIL OFL 1.1), rendered to 1-bit bitmaps
 #define WI_W 48
 #define WI_H 48
 #define WI_S 20

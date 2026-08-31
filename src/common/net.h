@@ -16,3 +16,7 @@ bool wifiConnected();
 
 // HTTPS GET -> response body string (empty on failure)
 String httpGet(const char* url);
+
+// Drop the connection and power the radio down. Call it once the last request is done —
+// everything after that (NVS, e-Paper) runs for seconds with no need for Wi-Fi.
+void wifiOff();

@@ -27,6 +27,12 @@ bool wifiConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
+void wifiOff() {
+  // true brings the STA interface down so the radio stops. The second argument stays false:
+  // erasing the AP config would write to NVS and slow down the next connect.
+  WiFi.disconnect(true);
+}
+
 String httpGet(const char* url) {
   for (int attempt = 1; attempt <= 2; attempt++) {   // 1 try + 1 retry (server cold start)
     WiFiClientSecure client;                         // fresh client each attempt (no stale TLS)
