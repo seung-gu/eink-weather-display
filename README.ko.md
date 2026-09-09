@@ -40,10 +40,22 @@
 | CS | 10 | GPIO10 | D10 |
 | DC | 5 | GPIO5 | D3 |
 | RST | 4 | GPIO4 | D2 |
-| BUSY | 3 | GPIO3 | D1 |
+| BUSY | 20 | GPIO20 | D7 |
+
+배터리 전압 측정 (선택 — 펌웨어가 시리얼에 찍기만 하고 아직 다른 용도 없음):
+
+| | GPIO | Super Mini 핀 | XIAO 라벨 |
+|---|---|---|---|
+| 분압 탭 | 3 | GPIO3 | D1 |
+
+`BAT+ ──[1M]──┬──[1M]── GND`, 가운데 탭을 D1로, 탭에서 `100nF`을 GND로. Wi-Fi가 켜지면 ADC2를
+못 쓰므로 탭은 ADC1(GPIO0~4)에 있어야 하고, GPIO2는 스트래핑 핀이라 분압을 물리면 부팅 시 LOW로
+읽힌다 — 그래서 BUSY를 GPIO3에서 비켜냈다.
 
 - Super Mini는 핀에 GPIO 번호 직접 표기, XIAO는 `D0–D10`(보드 위치 이름, GPIO와 매핑 다름)
 - ⚠️ C3 기본 SPI핀(SCK=4·MISO=5) ↔ RST(4)/DC(5) 충돌 → `display.cpp`에서 SPI 재지정 후 핀 재확정
+- RST와 BUSY 모두 연결한 채로 둔다. GxEPD2는 둘 다 `-1`을 받아 소프트웨어 리셋과 고정 대기로
+  대체할 수 있지만, 시도해보니 화면이 제대로 나오지 않았다. 원인은 확인하지 않았다
 
 ## 설정 (secrets)
 WiFi 값 = `secrets.h` (git 제외). 클론 후:
@@ -80,6 +92,8 @@ src/
   다운로드 모드에서 디버깅이 안 되는 이유
 - [NVS에 상태 저장하기](docs/nvs-internals.ko.md) — RTC 대신 NVS인 이유, NVS가 무엇인지,
   `Preferences` API, 그리고 `putString()`이 플래시에서 어떤 모습이 되는지 (기기 덤프 기반)
+- [e-Paper 전원 게이팅](docs/epd-power-gating.ko.md) — 모듈 VCC를 GPIO로 끊어 딥슬립 중 소비를
+  없애는 방법: 배선, 핀 선택, 그리고 병합하지 않고 보류한 이유
 
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**

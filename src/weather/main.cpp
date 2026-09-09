@@ -3,6 +3,7 @@
 #include "esp_sleep.h"
 #include "config.h"
 #include "net.h"
+#include "battery.h"
 #include "display.h"
 
 // Sleep this long, then wake and refresh the weather (shorten while testing)
@@ -13,6 +14,8 @@ static Preferences prefs;
 
 void setup() {
   Serial.begin(115200);
+  uint32_t batteryMv = batteryMillivolts();   // before Wi-Fi: a resting voltage, comparable across wakes
+  Serial.printf("battery %u mV\n", batteryMv);
 
   WifiResult wifi = connectWiFi();
 
@@ -32,7 +35,7 @@ void setup() {
 
   // Always redraw, so the status line reflects THIS wake. 0 = offline.
   displayBegin();
-  displayWeather(w, wifi.ok ? wifi.ms : 0, wifi.ok ? wifi.rssi : 0);
+  displayWeather(w, wifi.ok ? wifi.ms : 0, wifi.ok ? wifi.rssi : 0, batteryMv);
 
 #ifndef DEBUG_NO_SLEEP
   // On timer expiry the chip resets and restarts from setup()
@@ -47,4 +50,7 @@ void setup() {
 
 void loop() {
   // A deep-sleep wake is a full reset -> execution restarts from setup(), so loop() is unused
+  //uint32_t batteryMv = batteryMillivolts();
+  //Serial.printf("battery %u mV\n", batteryMv);
+  //delay(1000);
 }

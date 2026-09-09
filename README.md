@@ -40,10 +40,22 @@ Both boards use the **same GPIO numbers** (identical code) — only the physical
 | CS | 10 | GPIO10 | D10 |
 | DC | 5 | GPIO5 | D3 |
 | RST | 4 | GPIO4 | D2 |
-| BUSY | 3 | GPIO3 | D1 |
+| BUSY | 20 | GPIO20 | D7 |
+
+Battery sense (optional — the firmware prints it, nothing else uses it yet):
+
+| | GPIO | Super Mini pin | XIAO label |
+|---|---|---|---|
+| Divider tap | 3 | GPIO3 | D1 |
+
+`BAT+ ──[1M]──┬──[1M]── GND`, tap to D1, plus `100nF` from tap to GND. ADC2 stops working once
+Wi-Fi is on, so the tap has to sit on ADC1 (GPIO0–4); GPIO2 is a strapping pin that reads low
+through the divider at boot, which is why BUSY moved off GPIO3 to make room.
 
 - Super Mini labels pins by GPIO number; XIAO uses `D0–D10` (board positions mapped to different GPIOs)
 - ⚠️ The C3's default SPI pins (SCK=4 / MISO=5) collide with RST(4)/DC(5) → `display.cpp` remaps SPI and re-asserts the pins
+- RST and BUSY both stay wired. GxEPD2 accepts `-1` for either, falling back to a software reset
+  and to fixed delays; tried here, and the display did not render correctly. Cause not investigated
 
 ## Setup (secrets)
 Wi-Fi values live in `secrets.h` (not committed). After cloning:
@@ -75,6 +87,8 @@ src/
   overrides it needs, and why download mode silently breaks it
 - [Storing state in NVS](docs/nvs-internals.md) — why NVS over RTC memory, what NVS is, the
   `Preferences` API, and what a `putString()` becomes on flash, read back from a device dump
+- [e-Paper power gating](docs/epd-power-gating.md) — switching the module's VCC from a GPIO so it
+  stops drawing in deep sleep: the wiring, the pin choice, and why it is parked rather than merged
 
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.

@@ -99,16 +99,19 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
 }
 
 // Bottom line: Wi-Fi connect time (left) + signal gauge (right)
-static void drawBottomLine(uint32_t wifiMs, int rssi) {
+static void drawBottomLine(uint32_t wifiMs, int rssi, uint32_t batteryMv) {
   u8g2Fonts.setFont(u8g2_font_helvB08_tf);
-  u8g2Fonts.setCursor(6, display.height() - 4);
+  int baseline = display.height() - 4;
+  u8g2Fonts.setCursor(6, baseline);
   if (wifiMs) u8g2Fonts.printf("wifi %u ms", wifiMs);
   else        u8g2Fonts.print("offline");
-  drawSignalGauge(rssi, 172, display.height() - 4);
+  u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
+  u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
+  drawSignalGauge(rssi, 172, baseline);
 }
 
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w, uint32_t wifiMs, int rssi) {
+void displayWeather(const String& w, uint32_t wifiMs, int rssi, uint32_t batteryMv) {
   String p[7];
   int idx = 0, start = 0;
   for (int i = 0; i <= (int)w.length() && idx < 7; i++) {
@@ -142,7 +145,7 @@ void displayWeather(const String& w, uint32_t wifiMs, int rssi) {
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
-    drawBottomLine(wifiMs, rssi);          // Wi-Fi time + signal icon
+    drawBottomLine(wifiMs, rssi, batteryMv);   // Wi-Fi time + battery + signal icon
   } while (display.nextPage());
   display.hibernate();
 }

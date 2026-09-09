@@ -14,9 +14,15 @@
 #define EPD_CS    10
 #define EPD_DC     5
 #define EPD_RST    4
-#define EPD_BUSY   3
+#define EPD_BUSY  20    // moved off GPIO3 to free an ADC1 channel for BAT_ADC
 #define EPD_SCK    6
 #define EPD_MOSI   7
+
+// ==== Battery sense ====
+// 1:1 divider from BAT+ (2x 1M + 100nF). ADC2 is unusable while Wi-Fi is on, so this
+// has to be an ADC1 pin (GPIO0-4); GPIO2 is a strapping pin and reads low through the
+// divider at boot, which leaves GPIO3 as the only workable choice.
+#define BAT_ADC    3
 
 // ==== Polling intervals ====
 #define LED_POLL_MS      1000
