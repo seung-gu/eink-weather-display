@@ -48,7 +48,28 @@ String httpGet(const char* url) {
       Serial.printf("httpGet attempt %d failed (code %d)\n", attempt, code);
       http.end();
     }
-    delay(500);                                      // brief pause -> let a cold server wake
+    if (attempt < 2) delay(500);                     // let a cold server wake before retrying
+  }
+  return "";   // both attempts failed -> caller sleeps & retries next wake
+}
+
+String httpPost(const char* url, const String& body) {
+  for (int attempt = 1; attempt <= 2; attempt++) {   // 1 try + 1 retry (server cold start)
+    WiFiClientSecure client;                         // fresh client each attempt (no stale TLS)
+    client.setInsecure();
+    HTTPClient http;
+    if (http.begin(client, url)) {
+      http.addHeader("Content-Type", "text/plain");
+      int code = http.POST(body);
+      if (code == 200) {                             // success -> return body
+        String out = http.getString();
+        http.end();
+        return out;
+      }
+      Serial.printf("httpPost attempt %d failed (code %d)\n", attempt, code);
+      http.end();
+    }
+    if (attempt < 2) delay(500);
   }
   return "";   // both attempts failed -> caller sleeps & retries next wake
 }

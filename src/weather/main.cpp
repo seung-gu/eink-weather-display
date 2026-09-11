@@ -20,7 +20,11 @@ void setup() {
   WifiResult wifi = connectWiFi();
 
   String fetched;
-  if (wifi.ok) fetched = httpGet(WEATHER_URL);       // retries once inside
+  if (wifi.ok) {
+    // This wake's state rides along on the weather request, so it costs no extra round trip.
+    String report = String(batteryMv) + "," + String(wifi.ms) + "," + String(wifi.rssi);
+    fetched = httpPost(WEATHER_URL, report);         // retries once inside
+  }
   wifiOff();                                         // wifi.ms/rssi are already captured
 
   // NVS is the single source of truth: store what is fresh, then draw what is stored.
@@ -33,9 +37,9 @@ void setup() {
                                   : (wifi.ok ? "fetch failed — redraw stored weather"
                                              : "Wi-Fi failed — redraw stored weather"));
 
-  // Always redraw, so the status line reflects THIS wake. 0 = offline.
+  // Always redraw, so the status line reflects THIS wake.
   displayBegin();
-  displayWeather(w, wifi.ok ? wifi.ms : 0, wifi.ok ? wifi.rssi : 0, batteryMv);
+  displayWeather(w, fetched.length() > 0, wifi.ok ? wifi.rssi : 0, batteryMv);
 
 #ifndef DEBUG_NO_SLEEP
   // On timer expiry the chip resets and restarts from setup()

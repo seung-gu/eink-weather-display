@@ -99,26 +99,29 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
 }
 
 // Bottom line: Wi-Fi connect time (left) + signal gauge (right)
-static void drawBottomLine(uint32_t wifiMs, int rssi, uint32_t batteryMv) {
-  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+static void drawBottomLine(const String& clock, bool fresh, int rssi, uint32_t batteryMv) {
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);   // Latin only — the server sends an English weekday
   int baseline = display.height() - 4;
   u8g2Fonts.setCursor(6, baseline);
-  if (wifiMs) u8g2Fonts.printf("wifi %u ms", wifiMs);
-  else        u8g2Fonts.print("offline");
+  // A stored response carries the time it was fetched, so only show it on a wake that reached
+  // the server. Blank while the server still answers with the older 7-line body.
+  if (!fresh)              u8g2Fonts.print("offline");
+  else if (clock.length()) u8g2Fonts.print(clock);
   u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
   u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
   drawSignalGauge(rssi, 172, baseline);
 }
 
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w, uint32_t wifiMs, int rssi, uint32_t batteryMv) {
-  String p[7];
+void displayWeather(const String& w, bool fresh, int rssi, uint32_t batteryMv) {
+  String p[8];
   int idx = 0, start = 0;
-  for (int i = 0; i <= (int)w.length() && idx < 7; i++) {
+  for (int i = 0; i <= (int)w.length() && idx < 8; i++) {
     if (i == (int)w.length() || w[i] == '\n') { p[idx++] = w.substring(start, i); start = i + 1; }
   }
-  for (int i = 0; i < 7; i++) p[i].trim();
-  String city = p[0], temp = p[1], cond = p[2], wind = p[3], humid = p[4], hilo = p[5], pop = p[6];
+  for (int i = 0; i < 8; i++) p[i].trim();
+  String city = p[0], temp = p[1], cond = p[2], wind = p[3], humid = p[4], hilo = p[5], pop = p[6],
+         clock = p[7];
 
   display.setRotation(1);
   u8g2Fonts.setFontMode(1);
@@ -145,7 +148,7 @@ void displayWeather(const String& w, uint32_t wifiMs, int rssi, uint32_t battery
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
-    drawBottomLine(wifiMs, rssi, batteryMv);   // Wi-Fi time + battery + signal icon
+    drawBottomLine(clock, fresh, rssi, batteryMv);   // clock + battery + signal icon
   } while (display.nextPage());
   display.hibernate();
 }
