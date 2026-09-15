@@ -99,13 +99,13 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
 }
 
 // Bottom line: Wi-Fi connect time (left) + signal gauge (right)
-static void drawBottomLine(const String& clock, bool fresh, int rssi, uint32_t batteryMv) {
+static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t batteryMv) {
   u8g2Fonts.setFont(u8g2_font_helvB08_tf);   // Latin only — the server sends an English weekday
   int baseline = display.height() - 4;
   u8g2Fonts.setCursor(6, baseline);
-  // A stored response carries the time it was fetched, so only show it on a wake that reached
-  // the server. Blank while the server still answers with the older 7-line body.
-  if (!fresh)              u8g2Fonts.print("offline");
+  // A stored response carries the time it was fetched, so only show it on a wake that brought
+  // a new one. Blank while the server still answers with the older 7-line body.
+  if (!updated)            u8g2Fonts.print("offline");
   else if (clock.length()) u8g2Fonts.print(clock);
   u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
   u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
@@ -141,7 +141,7 @@ void displayMessage(const String& title, const String& body) {
 }
 
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w, bool fresh, int rssi, uint32_t batteryMv) {
+void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv) {
   String p[8];
   int idx = 0, start = 0;
   for (int i = 0; i <= (int)w.length() && idx < 8; i++) {
@@ -176,7 +176,7 @@ void displayWeather(const String& w, bool fresh, int rssi, uint32_t batteryMv) {
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
-    drawBottomLine(clock, fresh, rssi, batteryMv);   // clock + battery + signal icon
+    drawBottomLine(clock, updated, rssi, batteryMv);   // clock + battery + signal icon
   } while (display.nextPage());
   display.hibernate();
 }

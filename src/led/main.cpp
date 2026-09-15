@@ -15,8 +15,8 @@ void setup() {
 void loop() {
   if (!wifiConnected()) connectWiFi();
 
-  String led = httpGet(LED_URL);            // server returns "1" (on) or "0" (off)
-  if (led.length()) setLed(led[0] == '1');
+  HttpResult http = httpGet(LED_URL);       // server returns "1" (on) or "0" (off)
+  if (http.code == 200 && http.body.length()) setLed(http.body[0] == '1');
 
   delay(LED_POLL_MS);
 }

@@ -57,31 +57,40 @@ void setup() {
   bool    firstRun = !wifiProvisioned();
   if (firstRun || fails >= WIFI_FAIL_LIMIT) runSetupPortal(firstRun);
 
+  // connectWiFi() brings the radio up and wifiOff() puts it down, so this brackets the whole
+  // window that draws ~100 mA — the figure the battery pays, of which the connect is only part.
+  uint32_t radioOnAt = millis();
   WifiResult wifi = connectWiFi();
 
-  String fetched;
+  // How far the wake gets decides what to store and how soon to come back. Reaching the network
+  // is all the portal counter tracks — a server being down is no reason to ask someone to set up
+  // Wi-Fi again.
+  bool    updated  = false;
+  uint8_t nextWake = RETRY_MINUTES;
   if (wifi.ok) {
+    clearWifiAttempts();
     // This wake's state rides along on the weather request, so it costs no extra round trip.
     String report = String(batteryMv) + "," + String(wifi.ms) + "," + String(wifi.rssi);
-    fetched = httpPost(WEATHER_URL, report);         // retries once inside
+    HttpResult http = httpPost(WEATHER_URL, report);
+    if (http.code == 200) {
+      saveWeather(http.body);
+      updated  = true;
+      nextWake = SLEEP_MINUTES;
+      Serial.println("[weather updated]\n" + http.body);
+    } else {
+      Serial.println("fetch failed — redraw stored weather");
+    }
+  } else {
+    Serial.println("Wi-Fi failed — redraw stored weather");
   }
-  uint32_t radioMs = wifiOff();                      // wifi.ms/rssi are already captured
-  Serial.printf("radio on for %u ms\n", radioMs);
+  wifiOff();
+  Serial.printf("radio on for %u ms\n", millis() - radioOnAt);
 
-  // NVS is the single source of truth: store what is fresh, then draw what is stored.
-  if (fetched.length()) saveWeather(fetched);
-  String w = lastWeather();
-  if (wifi.ok) clearWifiAttempts();   // reaching the network is what clears the count
-
-  Serial.println(fetched.length() ? "[weather updated]\n" + w
-                                  : (wifi.ok ? "fetch failed — redraw stored weather"
-                                  : "Wi-Fi failed — redraw stored weather"));
-
-  // Always redraw, so the status line reflects THIS wake.
+  // NVS is the single source of truth, so the screen draws what is stored whether or not this
+  // wake added to it. Redraw every time, so the status line reflects THIS wake.
   displayBegin();
-  displayWeather(w, fetched.length() > 0, wifi.ok ? wifi.rssi : 0, batteryMv);
-
-  sleepUntilNextWake(wifi.ok ? SLEEP_MINUTES : RETRY_MINUTES);
+  displayWeather(lastWeather(), updated, wifi.rssi, batteryMv);
+  sleepUntilNextWake(nextWake);
 }
 
 void loop() {

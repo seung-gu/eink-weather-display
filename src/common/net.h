@@ -8,20 +8,25 @@ struct WifiResult {
   int rssi;       // signal strength in dBm (valid when ok)
 };
 
-// Connect to Wi-Fi (retries with timeout). Returns {ok, ms} — caller handles failure.
+// Connect to Wi-Fi (one attempt, CONNECT_TIMEOUT_MS). Returns {ok, ms} — caller handles failure.
 WifiResult connectWiFi();
 
 // Current connection state
 bool wifiConnected();
 
-// HTTPS GET -> response body string (empty on failure)
-String httpGet(const char* url);
+// Result of one HTTPS request. Keeping the status separate from the body means an empty body
+// is not mistaken for a failure, and lets the caller act on the reason — a 401 once the server
+// checks tokens means "not registered yet", which wants a different screen than "fetch failed".
+struct HttpResult {
+  int code;      // HTTP status, or negative when the request never reached a server
+  String body;   // response body, empty unless code is 200
+};
 
-// HTTPS POST of a plain-text body. Same contract as httpGet: response body, empty on failure.
-String httpPost(const char* url, const String& body);
+// Neither retries: a POST has a side effect on the server, and the caller comes back after
+// RETRY_MINUTES anyway.
+HttpResult httpGet(const char* url);
+HttpResult httpPost(const char* url, const String& body);
 
 // Drop the connection and power the radio down. Call it once the last request is done —
 // everything after that (NVS, e-Paper) runs for seconds with no need for Wi-Fi.
-// Returns how long the radio was on, counted from connectWiFi(). That whole window draws
-// ~100 mA, so it is the figure the battery actually pays; the connect time is only part of it.
-uint32_t wifiOff();
+void wifiOff();
