@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 412" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1180" height="412" fill="#ffffff"/>
+<text x="590" y="32" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700">What the gate does, seen in cross-section</text>
+
+<!-- ============ left panel: off ============ -->
+<rect x="40" y="56" width="540" height="268" rx="8" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+<text x="62" y="88" font-size="14.5" fill="#0f172a" font-weight="700">Gate left alone</text>
+<text x="62" y="112" font-size="12.5" fill="#5a6a7f" font-family="ui-monospace,Menlo,monospace">gate 3.7 V  ·  source 3.7 V  ·  V_GS = 0 V</text>
+
+<rect x="180" y="140" width="260" height="16" rx="2" fill="#64748b"/>
+<text x="310" y="134" font-size="11.5" fill="#5a6a7f" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">gate plate</text>
+<rect x="180" y="156" width="260" height="12" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.2"/>
+<path d="M440 162 H472" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+<text x="478" y="166" font-size="11.5" fill="#5a6a7f" font-family="ui-monospace,Menlo,monospace">insulator</text>
+
+<rect x="80" y="176" width="460" height="100" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<rect x="92" y="190" width="86" height="44" rx="4" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+<text x="135" y="217" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">source</text>
+<rect x="402" y="190" width="86" height="44" rx="4" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+<text x="445" y="217" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">drain</text>
+<path d="M186 212 H394" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6 7" fill="none"/>
+<text x="290" y="194" font-size="12.5" fill="#5a6a7f" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">no channel</text>
+<text x="290" y="262" font-size="12" fill="#5a6a7f" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">nothing is drawn in</text>
+
+<text x="62" y="306" font-size="13" fill="#475569" font-family="ui-monospace,Menlo,monospace">source and drain stay disconnected</text>
+
+<!-- ============ right panel: on ============ -->
+<rect x="600" y="56" width="540" height="268" rx="8" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+<text x="622" y="88" font-size="14.5" fill="#9a3412" font-weight="700">Gate pulled down to 0 V</text>
+<text x="622" y="112" font-size="12.5" fill="#5a6a7f" font-family="ui-monospace,Menlo,monospace">gate 0 V  ·  source 3.7 V  ·  V_GS = −3.7 V</text>
+
+<rect x="740" y="140" width="260" height="16" rx="2" fill="#c2410c"/>
+<text x="870" y="134" font-size="11.5" fill="#9a3412" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">gate plate, held negative</text>
+<rect x="740" y="156" width="260" height="12" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.2"/>
+<path d="M1000 162 H1032" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
+<text x="1038" y="166" font-size="11.5" fill="#5a6a7f" font-family="ui-monospace,Menlo,monospace">insulator</text>
+
+<rect x="640" y="176" width="460" height="100" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<rect x="652" y="190" width="86" height="44" rx="4" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+<text x="695" y="217" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">source</text>
+<rect x="962" y="190" width="86" height="44" rx="4" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+<text x="1005" y="217" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">drain</text>
+
+<rect x="746" y="202" width="208" height="20" rx="10" fill="#fed7aa"/>
+<circle cx="758" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="784" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="810" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="836" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="862" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="888" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="914" cy="212" r="4.5" fill="#c2410c"/>
+<circle cx="940" cy="212" r="4.5" fill="#c2410c"/>
+<text x="850" y="194" font-size="12.5" fill="#9a3412" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">a channel forms</text>
+
+<path d="M752 248 H930" stroke="#c2410c" stroke-width="2.5" fill="none"/>
+<path d="M948 248 L928 240 L928 256 Z" fill="#c2410c"/>
+<text x="850" y="266" font-size="12" fill="#9a3412" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">current</text>
+
+<text x="622" y="306" font-size="13" fill="#9a3412" font-family="ui-monospace,Menlo,monospace">current flows from source to drain</text>
+
+<!-- ============ caption ============ -->
+<text x="40" y="360" font-size="13.5" fill="#475569">The gate never touches the channel — an insulator sits between them, so no current enters the gate and</text>
+<text x="40" y="382" font-size="13.5" fill="#475569">holding it costs nothing. What crosses is the field, not charge. Release the gate and the channel dissolves,</text>
+<text x="40" y="404" font-size="13.5" fill="#475569">which is why off is the state the device falls back to.</text>
+</svg>

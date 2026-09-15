@@ -89,6 +89,8 @@ src/
   `Preferences` API, and what a `putString()` becomes on flash, read back from a device dump
 - [e-Paper power gating](docs/epd-power-gating.md) — switching the module's VCC from a GPIO so it
   stops drawing in deep sleep: the wiring, the pin choice, and why it is parked rather than merged
+- [Low-voltage cutoff](docs/battery-cutoff.md) — a P-MOSFET that disconnects the battery outright
+  at 3.4 V and comes back when a charger is plugged in, with no button and no standby current
 
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.

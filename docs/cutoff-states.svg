@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 488" font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<rect width="1180" height="488" fill="#ffffff"/>
+<text x="590" y="32" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700">Three states, and why no button is needed</text>
+
+<!-- ================= row 1: running ================= -->
+<rect x="40" y="54" width="1100" height="118" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="62" y="92" font-size="14.5" fill="#15803d" font-weight="700">Running</text>
+<text x="62" y="116" font-size="12.5" fill="#475569" font-family="ui-monospace,Menlo,monospace">battery above 3.4 V</text>
+
+<text x="286" y="98" font-size="12.5" fill="#475569" text-anchor="end" font-family="ui-monospace,Menlo,monospace">battery</text>
+<path d="M296 94 H372" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="372" y="80" width="78" height="28" rx="5" fill="#ffedd5" stroke="#c2410c" stroke-width="2"/>
+<text x="411" y="99" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">switch</text>
+<path d="M450 94 H566" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="566" y="80" width="76" height="28" rx="5" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.6"/>
+<text x="604" y="99" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">LDO</text>
+<path d="M642 94 H742" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="742" y="80" width="72" height="28" rx="5" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.6"/>
+<text x="778" y="99" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">MCU</text>
+<path d="M778 108 V140 H411 V108" stroke="#475569" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+<text x="594" y="156" font-size="12" fill="#15803d" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">the GPIO holds the switch closed</text>
+
+<text x="944" y="92" font-size="14.5" fill="#15803d" font-weight="700" text-anchor="start">✓</text>
+<text x="1118" y="92" font-size="12.5" fill="#15803d" text-anchor="end" font-family="ui-monospace,Menlo,monospace">the battery powers</text>
+<text x="1118" y="112" font-size="12.5" fill="#15803d" text-anchor="end" font-family="ui-monospace,Menlo,monospace">the board</text>
+
+<!-- ================= row 2: parked ================= -->
+<rect x="40" y="188" width="1100" height="98" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+<text x="62" y="226" font-size="14.5" fill="#334155" font-weight="700">Parked</text>
+<text x="62" y="250" font-size="12.5" fill="#475569" font-family="ui-monospace,Menlo,monospace">battery dropped below 3.4 V</text>
+
+<text x="286" y="232" font-size="12.5" fill="#64748b" text-anchor="end" font-family="ui-monospace,Menlo,monospace">battery</text>
+<path d="M296 228 H372" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 5" fill="none"/>
+<rect x="372" y="214" width="78" height="28" rx="5" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="411" y="233" font-size="12.5" fill="#64748b" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">switch</text>
+<!-- open contact: the switch keeps its label, the break shows the state -->
+<path d="M450 228 H462" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 5" fill="none"/>
+<path d="M462 228 L493 215" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<circle cx="462" cy="228" r="2.6" fill="#64748b"/>
+<circle cx="498" cy="228" r="2.6" fill="#64748b"/>
+<path d="M498 228 H566" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 5" fill="none"/>
+<rect x="566" y="214" width="76" height="28" rx="5" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="604" y="233" font-size="12.5" fill="#64748b" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">LDO</text>
+<path d="M642 228 H742" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 5" fill="none"/>
+<rect x="742" y="214" width="72" height="28" rx="5" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="778" y="233" font-size="12.5" fill="#64748b" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">MCU</text>
+<text x="594" y="268" font-size="12" fill="#475569" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">the gate is released and the pull-up holds it open — only the sense divider still draws</text>
+
+<text x="944" y="226" font-size="14.5" fill="#64748b" font-weight="700" text-anchor="start">—</text>
+<text x="1118" y="226" font-size="12.5" fill="#475569" text-anchor="end" font-family="ui-monospace,Menlo,monospace">1.7 µA, divider only</text>
+<text x="1118" y="246" font-size="12.5" fill="#475569" text-anchor="end" font-family="ui-monospace,Menlo,monospace">cannot self-restart</text>
+
+<!-- ================= row 3: charging ================= -->
+<rect x="40" y="302" width="1100" height="150" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+<text x="62" y="340" font-size="14.5" fill="#15803d" font-weight="700">Charger plugged in</text>
+<text x="62" y="364" font-size="12.5" fill="#475569" font-family="ui-monospace,Menlo,monospace">USB 5 V present</text>
+
+<text x="286" y="346" font-size="12.5" fill="#475569" text-anchor="end" font-family="ui-monospace,Menlo,monospace">battery</text>
+<path d="M296 342 H372" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="372" y="328" width="78" height="28" rx="5" fill="#ffedd5" stroke="#c2410c" stroke-width="2"/>
+<text x="411" y="347" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">switch</text>
+<path d="M450 342 H566" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="566" y="328" width="76" height="28" rx="5" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.6"/>
+<text x="604" y="347" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">LDO</text>
+<path d="M642 342 H742" stroke="#c2410c" stroke-width="3" fill="none"/>
+<rect x="742" y="328" width="72" height="28" rx="5" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.6"/>
+<text x="778" y="347" font-size="12.5" fill="#0f172a" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">MCU</text>
+<path d="M778 356 V388 H411 V356" stroke="#475569" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+<text x="500" y="404" font-size="12" fill="#15803d" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">the GPIO closes it again</text>
+
+<!-- the USB rail crosses the gate line without touching it: gap first, then the rail -->
+<path d="M604 382 V394" stroke="#f0fdf4" stroke-width="14" fill="none"/>
+<text x="286" y="434" font-size="12.5" fill="#475569" text-anchor="end" font-family="ui-monospace,Menlo,monospace">USB</text>
+<path d="M296 430 H604 V372" stroke="#16a34a" stroke-width="3" fill="none"/>
+<path d="M604 356 L596 372 L612 372 Z" fill="#16a34a"/>
+<text x="626" y="434" font-size="12" fill="#15803d" font-family="ui-monospace,Menlo,monospace">5 V reaches the LDO while the battery is still cut</text>
+
+<text x="944" y="340" font-size="14.5" fill="#15803d" font-weight="700" text-anchor="start">✓</text>
+<text x="1118" y="340" font-size="12.5" fill="#15803d" text-anchor="end" font-family="ui-monospace,Menlo,monospace">boots on USB and</text>
+<text x="1118" y="360" font-size="12.5" fill="#15803d" text-anchor="end" font-family="ui-monospace,Menlo,monospace">recloses the switch</text>
+
+<!-- ================= caption ================= -->
+<text x="40" y="480" font-size="13.5" fill="#475569">Gate and source both sit on the battery, so V_GS stays 0 V however the battery moves. Only the USB path brings the board back.</text>
+</svg>
