@@ -5,6 +5,13 @@
 #define WEATHER_URL   "https://emcp-led.fly.dev/weather"
 // Weather response (up to 7 lines): city / temp / condition / wind / humidity / high-low / precip%
 
+// ==== Wake schedule ====
+#define SLEEP_MINUTES 30
+// After a wake that could not reach the network, come back sooner. A router reboot is over in
+// a minute or two, and WIFI_FAIL_LIMIT caps the number of failed wakes either way, so this
+// halves the time spent stale without costing anything.
+#define RETRY_MINUTES 5
+
 // ==== Wi-Fi setup portal ====
 #define AP_NAME        "XIAO-ESP32-C3"    // the access point the board puts up when it has no network
 #define PORTAL_MINUTES 5
@@ -31,6 +38,5 @@
 // divider at boot, which leaves GPIO3 as the only workable choice.
 #define BAT_ADC    3
 
-// ==== Polling intervals ====
-#define LED_POLL_MS      1000
-#define WEATHER_POLL_MS  600000UL    // 10 min
+// ==== Polling interval (the LED build stays awake and polls) ====
+#define LED_POLL_MS 1000

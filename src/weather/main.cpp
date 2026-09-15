@@ -7,9 +7,6 @@
 #include "store.h"
 #include "display.h"
 
-// Sleep this long, then wake and refresh the weather (shorten while testing)
-#define SLEEP_MINUTES 10
-
 // Puts the setup page on the air, and never returns: the board either restarts with a network
 // or sleeps with no wake timer until someone presses RESET.
 static void runSetupPortal(bool firstRun) {
@@ -37,12 +34,12 @@ static void runSetupPortal(bool firstRun) {
   esp_deep_sleep_start();                     // no wake timer: asleep until someone resets it
 }
 
-static void sleepUntilNextWake() {
+static void sleepUntilNextWake(uint8_t minutes) {
 #ifndef DEBUG_NO_SLEEP
   // On timer expiry the chip resets and restarts from setup()
-  Serial.printf("deep sleep for %d min...\n", SLEEP_MINUTES);
+  Serial.printf("deep sleep for %u min...\n", minutes);
   Serial.flush();
-  esp_sleep_enable_timer_wakeup((uint64_t)SLEEP_MINUTES * 60 * 1000000ULL);
+  esp_sleep_enable_timer_wakeup((uint64_t)minutes * 60 * 1000000ULL);
   esp_deep_sleep_start();
 #else
   Serial.println("[debug] staying awake (no deep sleep)");
@@ -68,7 +65,8 @@ void setup() {
     String report = String(batteryMv) + "," + String(wifi.ms) + "," + String(wifi.rssi);
     fetched = httpPost(WEATHER_URL, report);         // retries once inside
   }
-  wifiOff();                                         // wifi.ms/rssi are already captured
+  uint32_t radioMs = wifiOff();                      // wifi.ms/rssi are already captured
+  Serial.printf("radio on for %u ms\n", radioMs);
 
   // NVS is the single source of truth: store what is fresh, then draw what is stored.
   if (fetched.length()) saveWeather(fetched);
@@ -83,7 +81,7 @@ void setup() {
   displayBegin();
   displayWeather(w, fetched.length() > 0, wifi.ok ? wifi.rssi : 0, batteryMv);
 
-  sleepUntilNextWake();
+  sleepUntilNextWake(wifi.ok ? SLEEP_MINUTES : RETRY_MINUTES);
 }
 
 void loop() {

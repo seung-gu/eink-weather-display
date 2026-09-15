@@ -22,4 +22,6 @@ String httpPost(const char* url, const String& body);
 
 // Drop the connection and power the radio down. Call it once the last request is done —
 // everything after that (NVS, e-Paper) runs for seconds with no need for Wi-Fi.
-void wifiOff();
+// Returns how long the radio was on, counted from connectWiFi(). That whole window draws
+// ~100 mA, so it is the figure the battery actually pays; the connect time is only part of it.
+uint32_t wifiOff();
