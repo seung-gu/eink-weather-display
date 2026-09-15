@@ -112,6 +112,34 @@ static void drawBottomLine(const String& clock, bool fresh, int rssi, uint32_t b
   drawSignalGauge(rssi, 172, baseline);
 }
 
+// Plain full-screen message, for the states that have no weather to show yet.
+void displayMessage(const String& title, const String& body) {
+  display.setRotation(1);
+  u8g2Fonts.setFontMode(1);
+  u8g2Fonts.setForegroundColor(GxEPD_BLACK);
+  u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
+  display.setFullWindow();
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
+    u8g2Fonts.setFont(u8g2_font_helvB12_tf);
+    drawCentered(title, 46);
+    display.drawLine(20, 58, 180, 58, GxEPD_BLACK);
+    u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+    int y = 84;
+    for (int start = 0; start <= (int)body.length() && y < display.height() - 8; y += 19) {
+      int nl = body.indexOf('\n', start);
+      if (nl < 0) nl = body.length();
+      u8g2Fonts.setCursor(16, y);
+      u8g2Fonts.print(body.substring(start, nl));
+      if (nl == (int)body.length()) break;
+      start = nl + 1;
+    }
+  } while (display.nextPage());
+  display.hibernate();
+}
+
 // Response -> screen. Call only when it changed.
 void displayWeather(const String& w, bool fresh, int rssi, uint32_t batteryMv) {
   String p[8];

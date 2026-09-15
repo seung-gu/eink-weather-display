@@ -12,13 +12,13 @@ Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink
 
 - Everything in `setup()`, `loop()` empty (a wake is a full reset)
 - Bistable e-ink → 0 current to hold the image, draws only on refresh
-- Persist state across sleeps with `RTC_DATA_ATTR`
+- State that has to survive a sleep goes to NVS, not RTC memory (see the design notes)
 
 ## Data pipeline
 ![Data pipeline: public weather API to MCP server to device; server also exposed over MCP to an AI](docs/pipeline.png)
 
 - Formatting is server-side → the device stays light (less RAM/power)
-- Device: one HTTPS GET; AI analyze/control is an optional path
+- Device: one HTTPS POST per wake — it reports its own state and gets the weather back
 
 ## Hardware
 | Part | Used |
@@ -42,7 +42,7 @@ Both boards use the **same GPIO numbers** (identical code) — only the physical
 | RST | 4 | GPIO4 | D2 |
 | BUSY | 20 | GPIO20 | D7 |
 
-Battery sense (optional — the firmware prints it, nothing else uses it yet):
+Battery sense — shown on the display and reported to the server:
 
 | | GPIO | Super Mini pin | XIAO label |
 |---|---|---|---|
@@ -57,11 +57,19 @@ through the divider at boot, which is why BUSY moved off GPIO3 to make room.
 - RST and BUSY both stay wired. GxEPD2 accepts `-1` for either, falling back to a software reset
   and to fixed delays; tried here, and the display did not render correctly. Cause not investigated
 
-## Setup (secrets)
-Wi-Fi values live in `secrets.h` (not committed). After cloning:
-```bash
-cp src/secrets.example.h src/secrets.h   # then fill in WIFI_SSID / WIFI_PASSWORD
-```
+## Setup (Wi-Fi)
+Nothing to edit before building — the board asks for Wi-Fi itself. On a board with no stored
+network it puts up an access point and shows the instructions on the e-Paper:
+
+1. Join the Wi-Fi network **XIAO-weather** from a phone
+2. Open **192.168.4.1** in a browser and pick your network
+
+Credentials go into the Wi-Fi driver's own NVS namespace, so they survive firmware uploads.
+
+To change networks later: the board offers the page again after five failed connections, and
+pressing **RESET five times in a row** — faster than a connect takes — reaches the same point
+immediately. Five minutes with nobody configuring anything and it goes back to sleep, keeping
+whatever was stored.
 
 ## Build & Upload
 ```bash
@@ -73,11 +81,16 @@ pio device monitor -b 115200
 ## Layout
 ```
 src/
-├─ config.h         all settings (URLs · pins · intervals)
-├─ net.h / .cpp     Wi-Fi connect + HTTP GET
-├─ display.h / .cpp e-Paper init + rendering (globals kept static = encapsulated)
-├─ weather_icons.h  weather icon bitmaps
-└─ main.cpp         flow only (setup/loop)
+├─ common/          shared by every build target
+│  ├─ config.h         all settings (URLs · pins · intervals)
+│  ├─ net.h/.cpp       Wi-Fi connect + HTTPS GET/POST
+│  ├─ battery.h/.cpp   battery voltage through the divider
+│  └─ provision.h/.cpp the Wi-Fi setup portal
+├─ weather/         the e-Paper display build
+│  ├─ display.h/.cpp   e-Paper init + rendering (globals kept static = encapsulated)
+│  ├─ weather_icons.h  weather icon bitmaps
+│  └─ main.cpp         flow only (setup/loop)
+└─ led/             the LED-only build
 ```
 
 ## Design notes
@@ -95,5 +108,5 @@ src/
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
 
-- The device only hits a plain HTTPS GET endpoint
+- The device only hits a plain-text HTTPS endpoint
 - The same server is exposed over MCP, so an AI client (e.g. ChatGPT) can query and control it

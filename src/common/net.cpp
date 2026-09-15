@@ -9,7 +9,7 @@ WifiResult connectWiFi() {
   uint32_t t0 = millis();
 
   for (int attempt = 1; attempt <= 2; attempt++) {           // 1 try + 1 retry
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    WiFi.begin();                                          // stored by the setup portal
     if (WiFi.waitForConnectResult(10000) == WL_CONNECTED) {  // wait up to 10s
       uint32_t ms = millis() - t0;
       int rssi = WiFi.RSSI();

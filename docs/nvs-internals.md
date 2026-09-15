@@ -211,7 +211,8 @@ it.
 and the last IP (`WIFI_STA_DEF`), so it can reconnect without a full scan. This is ESP32 behaviour,
 not something the firmware does. In this dump they sit on page 1.
 
-Keeping `secrets.h` out of git therefore does not protect the password: never share an `nvs.bin`
+Keeping credentials out of the source therefore does not protect the password — they end up here
+regardless of how they were entered. Never share an `nvs.bin`
 taken from a real device. The mitigation is ESP-IDF's Flash Encryption, which encrypts flash
 contents with a key burned into eFuse — a one-way change to the chip that the Arduino build does not
 enable for you.

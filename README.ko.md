@@ -12,13 +12,13 @@
 
 - 모든 작업 `setup()`, `loop()` 비움 (웨이크 = 리셋)
 - e-ink 쌍안정 → 화면 유지 전류 0, 갱신 순간만 소비
-- 상태 유지 필요 시 `RTC_DATA_ATTR`
+- 잠들어도 남아야 하는 상태는 RTC 메모리가 아니라 NVS에 둔다 (설계 노트 참고)
 
 ## 데이터 파이프라인
 ![데이터 파이프라인](docs/pipeline.png)
 
 - 정제 = 서버 담당 → 기기 경량 (RAM·전력 절약)
-- 기기: HTTPS GET 하나. AI 분석·제어 = 선택 경로
+- 기기: wake마다 HTTPS POST 하나 — 자기 상태를 보고하고 날씨를 응답으로 받는다
 
 ## 하드웨어
 | 부품 | 사용 |
@@ -42,7 +42,7 @@
 | RST | 4 | GPIO4 | D2 |
 | BUSY | 20 | GPIO20 | D7 |
 
-배터리 전압 측정 (선택 — 펌웨어가 시리얼에 찍기만 하고 아직 다른 용도 없음):
+배터리 전압 측정 — 화면에 표시되고 서버로도 전송된다:
 
 | | GPIO | Super Mini 핀 | XIAO 라벨 |
 |---|---|---|---|
@@ -57,11 +57,18 @@
 - RST와 BUSY 모두 연결한 채로 둔다. GxEPD2는 둘 다 `-1`을 받아 소프트웨어 리셋과 고정 대기로
   대체할 수 있지만, 시도해보니 화면이 제대로 나오지 않았다. 원인은 확인하지 않았다
 
-## 설정 (secrets)
-WiFi 값 = `secrets.h` (git 제외). 클론 후:
-```bash
-cp src/secrets.example.h src/secrets.h   # WIFI_SSID / WIFI_PASSWORD 입력
-```
+## 설정 (Wi-Fi)
+빌드 전에 고칠 게 없다 — 보드가 직접 Wi-Fi를 물어본다. 저장된 네트워크가 없으면 AP를 띄우고
+e-Paper에 안내를 표시한다:
+
+1. 휴대폰에서 **XIAO-weather** 네트워크에 접속
+2. 브라우저로 **192.168.4.1** 을 열고 쓰는 네트워크를 고른다
+
+자격증명은 Wi-Fi 드라이버 전용 NVS 네임스페이스에 저장되므로 펌웨어를 다시 올려도 남는다.
+
+나중에 바꾸려면: 접속에 다섯 번 연속 실패하면 보드가 알아서 이 화면을 다시 띄우고,
+**RESET을 다섯 번 연타**하면(접속이 끝나기 전에 눌러야 한다) 즉시 같은 상태가 된다. 5분 동안
+아무도 설정하지 않으면 저장된 값을 그대로 둔 채 다시 잠든다.
 
 ## 빌드 & 업로드
 ```bash
@@ -73,11 +80,16 @@ pio device monitor -b 115200
 ## 구조
 ```
 src/
-├─ config.h         설정 (URL · 핀 · 주기)
-├─ net.h / .cpp     WiFi 연결 + HTTP GET
-├─ display.h / .cpp e-Paper 초기화 + 렌더링 (전역 객체 static 캡슐화)
-├─ weather_icons.h  날씨 아이콘 비트맵
-└─ main.cpp         흐름 (setup/loop)
+├─ common/          모든 빌드가 공유
+│  ├─ config.h         설정 (URL · 핀 · 주기)
+│  ├─ net.h/.cpp       WiFi 연결 + HTTPS GET/POST
+│  ├─ battery.h/.cpp   분압을 통한 배터리 전압
+│  └─ provision.h/.cpp Wi-Fi 설정 포털
+├─ weather/         e-Paper 표시기 빌드
+│  ├─ display.h/.cpp   e-Paper 초기화 + 렌더링 (전역 객체 static 캡슐화)
+│  ├─ weather_icons.h  날씨 아이콘 비트맵
+│  └─ main.cpp         흐름 (setup/loop)
+└─ led/             LED 전용 빌드
 ```
 
 ## 참고 (스터디)
@@ -94,9 +106,11 @@ src/
   `Preferences` API, 그리고 `putString()`이 플래시에서 어떤 모습이 되는지 (기기 덤프 기반)
 - [e-Paper 전원 게이팅](docs/epd-power-gating.ko.md) — 모듈 VCC를 GPIO로 끊어 딥슬립 중 소비를
   없애는 방법: 배선, 핀 선택, 그리고 병합하지 않고 보류한 이유
+- [저전압 차단](docs/battery-cutoff.ko.md) — 3.4V에서 P-MOSFET으로 배터리를 아예 떼어내고
+  충전기를 꽂으면 돌아오는 회로. 버튼도 대기전류도 없다
 
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**
 
-- 기기: 평문 HTTPS GET 엔드포인트만
+- 기기: 평문 HTTPS 엔드포인트만
 - 동일 서버 MCP 노출 → AI(ChatGPT 등) 조회·제어

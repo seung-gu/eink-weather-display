@@ -1,11 +1,18 @@
 #pragma once
 
-#include "secrets.h"   // WIFI_SSID / WIFI_PASSWORD (git-ignored — copy secrets.example.h and fill in)
-
 // ==== MCP server ====
 #define LED_URL       "https://emcp-led.fly.dev/led"
 #define WEATHER_URL   "https://emcp-led.fly.dev/weather"
 // Weather response (up to 7 lines): city / temp / condition / wind / humidity / high-low / precip%
+
+// ==== Wi-Fi setup portal ====
+#define AP_NAME        "XIAO-ESP32-C3"    // the access point the board puts up when it has no network
+#define PORTAL_MINUTES 5
+// Attempts that did not reach the network before the board offers the setup page again. The
+// counter is bumped at the top of every boot and only cleared on a successful connect, so five
+// wakes with the router gone gets you there — and so does pressing RESET five times in a row,
+// faster than a connect takes.
+#define WIFI_FAIL_LIMIT 5
 
 // ==== Onboard LED (GPIO8, active-LOW) ====
 #define LED_PIN 8
