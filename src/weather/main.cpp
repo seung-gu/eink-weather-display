@@ -95,9 +95,9 @@ static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi
   // A cell holds less charge when it is cold, so without this the battery curve mixes the
   // weather in with the discharge and neither can be read off it.
   req["chip_c"]        = roundf(chipC * 10) / 10;
-  // The previous wake's, not this one's — see store.h. Wakes are alike enough that the figure
-  // still pairs with the battery reading beside it.
-  req["prev_awake_ms"] = lastAwakeMs();
+  // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
+  // NVS, where there is no previous one: zero would read as a wake that took no time at all.
+  if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;
   req["nvs_free"]      = nvsFreeEntries();
   req["nvs_total"]     = nvsTotalEntries();
   // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
