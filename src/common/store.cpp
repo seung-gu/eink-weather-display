@@ -86,3 +86,9 @@ uint16_t nvsFreeEntries() {
   if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;
   return st.free_entries;
 }
+
+uint16_t nvsTotalEntries() {
+  nvs_stats_t st;
+  if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;
+  return st.total_entries;
+}

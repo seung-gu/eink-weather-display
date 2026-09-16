@@ -31,6 +31,8 @@ void    clearLog();
 uint32_t lastAwakeMs();
 void     saveAwakeMs(uint32_t ms);
 
-// Free entries in the NVS partition, 32 bytes each. Worth watching because putString stops
-// working silently when it runs out, and the failure log writes here on every failed wake.
+// Entries in the NVS partition, 32 bytes each. Worth watching because putString stops working
+// silently when it runs out, and the failure log writes here on every failed wake. The total
+// goes along so the free count means something without knowing the partition table.
 uint16_t nvsFreeEntries();
+uint16_t nvsTotalEntries();

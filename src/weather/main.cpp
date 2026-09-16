@@ -99,6 +99,7 @@ static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi
   // still pairs with the battery reading beside it.
   req["prev_awake_ms"] = lastAwakeMs();
   req["nvs_free"]      = nvsFreeEntries();
+  req["nvs_total"]     = nvsTotalEntries();
   // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
   // array crosses the wire without being parsed here and taken apart again at the far end.
   String backlog = lastLog();
