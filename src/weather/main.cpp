@@ -110,6 +110,7 @@ static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("fw " FW_VERSION);           // a -dirty suffix means this build matches no commit
   // Both before Wi-Fi: a resting voltage, and a die that has not warmed itself up on the radio
   // yet, so the reading is close to the room. Comparable across wakes because it is always here.
   uint32_t batteryMv = batteryMillivolts();

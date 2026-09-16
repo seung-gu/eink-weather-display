@@ -1,10 +1,12 @@
 #pragma once
 
 // ==== Firmware build ====
-// Goes out with every report so a change in the numbers can be pinned to a build. Bump it by
-// hand when flashing something whose effect you want to see in the data — the battery figures
-// only mean anything next to what was running when they were taken.
-#define FW_VERSION "2026-09-16"
+// Goes out with every report so a change in the numbers can be pinned to a build — the battery
+// figures only mean something next to what was running when they were taken. Normally set by
+// scripts/fw_version.py at compile time; this is what you get building outside a checkout.
+#ifndef FW_VERSION
+#define FW_VERSION "unknown"
+#endif
 
 // ==== MCP server ====
 #define LED_URL       "https://emcp-led.fly.dev/led"
