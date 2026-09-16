@@ -24,3 +24,13 @@ void    saveWeather(const String& body);
 String  lastLog();
 void    appendLog(const String& entry);
 void    clearLog();
+
+// How long the previous wake stayed awake. This wake cannot measure its own: the figure is only
+// final once the screen has been redrawn, which happens long after the report has gone. Stored
+// on the way into sleep and read back on the way out, so every report carries the one before it.
+uint32_t lastAwakeMs();
+void     saveAwakeMs(uint32_t ms);
+
+// Free entries in the NVS partition, 32 bytes each. Worth watching because putString stops
+// working silently when it runs out, and the failure log writes here on every failed wake.
+uint16_t nvsFreeEntries();

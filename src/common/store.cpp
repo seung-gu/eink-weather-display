@@ -1,5 +1,6 @@
 #include "store.h"
 #include <Preferences.h>
+#include "nvs.h"                    // IDF's, for nvs_get_stats — ours is store.h and does not clash
 #include "config.h"
 
 static const char* NS = "weather";
@@ -65,4 +66,23 @@ void clearLog() {
   prefs.begin(NS, false);
   prefs.remove(LOG_KEY);            // not putString(""): NVS rewrites the entry, key and all,
   prefs.end();                      // so an empty write would still burn a slot every wake
+}
+
+uint32_t lastAwakeMs() {
+  prefs.begin(NS, true);            // read-only
+  uint32_t ms = prefs.getUInt("awake", 0);
+  prefs.end();
+  return ms;
+}
+
+void saveAwakeMs(uint32_t ms) {
+  prefs.begin(NS, false);
+  prefs.putUInt("awake", ms);
+  prefs.end();
+}
+
+uint16_t nvsFreeEntries() {
+  nvs_stats_t st;
+  if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;
+  return st.free_entries;
 }

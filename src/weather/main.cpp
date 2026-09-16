@@ -59,11 +59,15 @@ static void runSetupPortal(bool firstRun, uint8_t fails, uint32_t batteryMv) {
   logWake("portal-timeout", fails, batteryMv, timedOut);
 
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
+  saveAwakeMs(millis());            // minutes of access point at ~100 mA — the costliest wake there is
   Serial.flush();
   esp_deep_sleep_start();                     // no wake timer: asleep until someone resets it
 }
 
 static void sleepUntilNextWake(uint8_t minutes) {
+  // Last thing before sleeping, so this covers the whole wake — the screen refresh included,
+  // which is seconds of it. The next wake reports it; this one's report left long ago.
+  saveAwakeMs(millis());
 #ifndef DEBUG_NO_SLEEP
   // On timer expiry the chip resets and restarts from setup()
   Serial.printf("deep sleep for %u min...\n", minutes);
@@ -79,13 +83,22 @@ static void sleepUntilNextWake(uint8_t minutes) {
 // do the wakes that never got to send one. reset_reason and wifi_attempts are what let the server
 // place those in time: it stamps this report and counts backwards through the sleep constants,
 // and a gap in wifi_attempts tells it a boot went by without even managing to leave an entry.
-static String wakeReport(uint32_t batteryMv, const WifiResult& wifi, uint8_t attempts) {
+static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi,
+                         uint8_t attempts) {
   JsonDocument req;
   req["battery_mv"]    = batteryMv;
   req["wifi_ms"]       = wifi.ms;
   req["rssi"]          = wifi.rssi;
   req["reset_reason"]  = (int)esp_reset_reason();
   req["wifi_attempts"] = attempts;
+  req["fw"]            = FW_VERSION;
+  // A cell holds less charge when it is cold, so without this the battery curve mixes the
+  // weather in with the discharge and neither can be read off it.
+  req["chip_c"]        = roundf(chipC * 10) / 10;
+  // The previous wake's, not this one's — see store.h. Wakes are alike enough that the figure
+  // still pairs with the battery reading beside it.
+  req["prev_awake_ms"] = lastAwakeMs();
+  req["nvs_free"]      = nvsFreeEntries();
   // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
   // array crosses the wire without being parsed here and taken apart again at the far end.
   String backlog = lastLog();
@@ -97,8 +110,11 @@ static String wakeReport(uint32_t batteryMv, const WifiResult& wifi, uint8_t att
 
 void setup() {
   Serial.begin(115200);
-  uint32_t batteryMv = batteryMillivolts();   // before Wi-Fi: a resting voltage, comparable across wakes
-  Serial.printf("battery %u mV\n", batteryMv);
+  // Both before Wi-Fi: a resting voltage, and a die that has not warmed itself up on the radio
+  // yet, so the reading is close to the room. Comparable across wakes because it is always here.
+  uint32_t batteryMv = batteryMillivolts();
+  float    chipC     = temperatureRead();
+  Serial.printf("battery %u mV, chip %.1f C\n", batteryMv, chipC);
 
   // Two ways to need the portal: the board has never been set up, or the network it was set up
   // for has stopped answering. Nothing below runs until that is resolved — nothing to fetch.
@@ -118,7 +134,7 @@ void setup() {
   uint8_t nextWake = RETRY_MINUTES;
   if (wifi.ok) {
     clearWifiAttempts();
-    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, wifi, fails));
+    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, chipC, wifi, fails));
     if (http.code == 200) {
       saveWeather(http.body);
       clearLog();                 // only a 200 retires the log: anything else may not have landed
