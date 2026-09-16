@@ -71,7 +71,7 @@ HttpResult httpPost(const char* url, const String& payload) {
   HTTPClient http;
   if (!http.begin(client, url)) return { -1, "" };
 
-  http.addHeader("Content-Type", "text/plain");
+  http.addHeader("Content-Type", "application/json");
   int code = http.POST(payload);
   String body = (code == 200) ? http.getString() : String();
   if (code != 200) Serial.printf("httpPost failed (code %d)\n", code);

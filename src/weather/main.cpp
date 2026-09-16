@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include "esp_sleep.h"
 #include "config.h"
 #include "net.h"
@@ -46,6 +47,17 @@ static void sleepUntilNextWake(uint8_t minutes) {
 #endif
 }
 
+// This wake's state rides along on the weather request, so it costs no extra round trip.
+static String wakeReport(uint32_t batteryMv, const WifiResult& wifi) {
+  JsonDocument req;
+  req["battery_mv"] = batteryMv;
+  req["wifi_ms"]    = wifi.ms;
+  req["rssi"]       = wifi.rssi;
+  String body;
+  serializeJson(req, body);
+  return body;
+}
+
 void setup() {
   Serial.begin(115200);
   uint32_t batteryMv = batteryMillivolts();   // before Wi-Fi: a resting voltage, comparable across wakes
@@ -69,9 +81,7 @@ void setup() {
   uint8_t nextWake = RETRY_MINUTES;
   if (wifi.ok) {
     clearWifiAttempts();
-    // This wake's state rides along on the weather request, so it costs no extra round trip.
-    String report = String(batteryMv) + "," + String(wifi.ms) + "," + String(wifi.rssi);
-    HttpResult http = httpPost(WEATHER_URL, report);
+    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, wifi));
     if (http.code == 200) {
       saveWeather(http.body);
       updated  = true;

@@ -1,5 +1,6 @@
 #include "display.h"
 #include <SPI.h>
+#include <ArduinoJson.h>
 #include <GxEPD2_BW.h>
 #include <U8g2_for_Adafruit_GFX.h>
 #include "weather_icons.h"
@@ -104,9 +105,9 @@ static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t
   int baseline = display.height() - 4;
   u8g2Fonts.setCursor(6, baseline);
   // A stored response carries the time it was fetched, so only show it on a wake that brought
-  // a new one. Blank while the server still answers with the older 7-line body.
-  if (!updated)            u8g2Fonts.print("offline");
-  else if (clock.length()) u8g2Fonts.print(clock);
+  // a new one.
+  if (updated) u8g2Fonts.print(clock);
+  else         u8g2Fonts.print("offline");
   u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
   u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
   drawSignalGauge(rssi, 172, baseline);
@@ -142,14 +143,20 @@ void displayMessage(const String& title, const String& body) {
 
 // Response -> screen. Call only when it changed.
 void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv) {
-  String p[8];
-  int idx = 0, start = 0;
-  for (int i = 0; i <= (int)w.length() && idx < 8; i++) {
-    if (i == (int)w.length() || w[i] == '\n') { p[idx++] = w.substring(start, i); start = i + 1; }
-  }
-  for (int i = 0; i < 8; i++) p[i].trim();
-  String city = p[0], temp = p[1], cond = p[2], wind = p[3], humid = p[4], hilo = p[5], pop = p[6],
-         clock = p[7];
+  // The server sends numbers as numbers, so the units go on here — they are a display decision.
+  // A lookup the server could not complete leaves the weather keys null, and so does an empty
+  // NVS; both read back as empty strings, which the drawing code below already skips over.
+  JsonDocument d;
+  deserializeJson(d, w);
+  String city  = d["city"]  | "";
+  String cond  = d["cond"]  | "";
+  String clock = d["stamp"] | "";
+  String temp  = d["temp_c"].isNull()     ? String() : String(d["temp_c"].as<int>())   + "°C";
+  String wind  = d["wind_kmh"].isNull()   ? String() : String(d["wind_kmh"].as<int>()) + "km/h";
+  String humid = d["humidity"].isNull()   ? String() : String(d["humidity"].as<int>()) + "%";
+  String pop   = d["pop"].isNull()        ? String() : String(d["pop"].as<int>())      + "%";
+  String hilo  = d["temp_max_c"].isNull() ? String()
+               : String(d["temp_max_c"].as<int>()) + "°/" + String(d["temp_min_c"].as<int>()) + "°";
 
   display.setRotation(1);
   u8g2Fonts.setFontMode(1);

@@ -3,7 +3,8 @@
 // ==== MCP server ====
 #define LED_URL       "https://emcp-led.fly.dev/led"
 #define WEATHER_URL   "https://emcp-led.fly.dev/weather"
-// Weather response (up to 7 lines): city / temp / condition / wind / humidity / high-low / precip%
+// Weather response: city / temp_c / cond / wind_kmh / humidity / temp_max_c / temp_min_c /
+// pop / stamp. Numbers arrive as numbers; the units are a display decision and go on here.
 
 // ==== Wake schedule ====
 #define SLEEP_MINUTES 30
