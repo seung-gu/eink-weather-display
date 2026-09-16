@@ -22,6 +22,13 @@
 // faster than a connect takes.
 #define WIFI_FAIL_LIMIT 5
 
+// ==== Failure log ====
+// Wakes that never reached the server pile up here until one does. Wi-Fi failures stop
+// themselves at WIFI_FAIL_LIMIT, but HTTP failures never touch that counter — a live router
+// with a dead uplink clears it on every wake and retries every RETRY_MINUTES with nothing to
+// stop it. NVS refuses a string past 4000 bytes without saying so, so stop well short.
+#define LOG_MAX_BYTES 1024
+
 // ==== Onboard LED (GPIO8, active-LOW) ====
 #define LED_PIN 8
 

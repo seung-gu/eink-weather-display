@@ -8,9 +8,29 @@
 #include "store.h"
 #include "display.h"
 
+// Files a wake the server never heard about, to ride along on the next report that gets through.
+// No timestamp: the board has no clock, so the server stamps the report carrying these and counts
+// forward with the sleep constants. That is why reset_reason is on every entry — a crash or a
+// brownout comes back immediately rather than after RETRY_MINUTES, and nothing else says so.
+//
+// batteryMv is always the reading from the top of setup(), taken before the radio came up. Read
+// again under the portal's ~100 mA and the number stops comparing with the other entries.
+static void logWake(const char* kind, uint8_t attempts, uint32_t batteryMv, JsonDocument& e) {
+  e["kind"]          = kind;
+  e["wifi_attempts"] = attempts;
+  e["reset_reason"]  = (int)esp_reset_reason();
+  e["battery_mv"]    = batteryMv;
+  String entry;
+  serializeJson(e, entry);
+  appendLog(entry);
+}
+
 // Puts the setup page on the air, and never returns: the board either restarts with a network
 // or sleeps with no wake timer until someone presses RESET.
-static void runSetupPortal(bool firstRun) {
+static void runSetupPortal(bool firstRun, uint8_t fails, uint32_t batteryMv) {
+  JsonDocument opened;
+  logWake(firstRun ? "portal-new" : "portal-lost", fails, batteryMv, opened);
+
   displayBegin();
   displayMessage(firstRun ? "Wi-Fi setup" : "Wi-Fi not found",
                 "1. Connect your phone\n"
@@ -30,6 +50,14 @@ static void runSetupPortal(bool firstRun) {
 
   // Nobody came. Sleeping on the timer would mean another access point every WIFI_FAIL_LIMIT
   // wakes, and an access point costs ~100 mA — that empties the battery in a day.
+  //
+  // This entry closes the timeline. Everything before it sits on a fixed schedule the server can
+  // count through; past it the board is asleep with no timer, and how long it stays that way is
+  // up to whoever walks over and presses RESET. Without the marker the server keeps counting and
+  // reports a confident, wrong time.
+  JsonDocument timedOut;
+  logWake("portal-timeout", fails, batteryMv, timedOut);
+
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
   Serial.flush();
   esp_deep_sleep_start();                     // no wake timer: asleep until someone resets it
@@ -47,12 +75,21 @@ static void sleepUntilNextWake(uint8_t minutes) {
 #endif
 }
 
-// This wake's state rides along on the weather request, so it costs no extra round trip.
-static String wakeReport(uint32_t batteryMv, const WifiResult& wifi) {
+// This wake's state rides along on the weather request, so it costs no extra round trip — and so
+// do the wakes that never got to send one. reset_reason and wifi_attempts are what let the server
+// place those in time: it stamps this report and counts backwards through the sleep constants,
+// and a gap in wifi_attempts tells it a boot went by without even managing to leave an entry.
+static String wakeReport(uint32_t batteryMv, const WifiResult& wifi, uint8_t attempts) {
   JsonDocument req;
-  req["battery_mv"] = batteryMv;
-  req["wifi_ms"]    = wifi.ms;
-  req["rssi"]       = wifi.rssi;
+  req["battery_mv"]    = batteryMv;
+  req["wifi_ms"]       = wifi.ms;
+  req["rssi"]          = wifi.rssi;
+  req["reset_reason"]  = (int)esp_reset_reason();
+  req["wifi_attempts"] = attempts;
+  // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
+  // array crosses the wire without being parsed here and taken apart again at the far end.
+  String backlog = lastLog();
+  if (backlog.length()) req["log"] = serialized(backlog);
   String body;
   serializeJson(req, body);
   return body;
@@ -67,7 +104,7 @@ void setup() {
   // for has stopped answering. Nothing below runs until that is resolved — nothing to fetch.
   uint8_t fails    = recordWifiAttempt();
   bool    firstRun = !wifiProvisioned();
-  if (firstRun || fails >= WIFI_FAIL_LIMIT) runSetupPortal(firstRun);
+  if (firstRun || fails >= WIFI_FAIL_LIMIT) runSetupPortal(firstRun, fails, batteryMv);
 
   // connectWiFi() brings the radio up and wifiOff() puts it down, so this brackets the whole
   // window that draws ~100 mA — the figure the battery pays, of which the connect is only part.
@@ -81,16 +118,26 @@ void setup() {
   uint8_t nextWake = RETRY_MINUTES;
   if (wifi.ok) {
     clearWifiAttempts();
-    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, wifi));
+    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, wifi, fails));
     if (http.code == 200) {
       saveWeather(http.body);
+      clearLog();                 // only a 200 retires the log: anything else may not have landed
       updated  = true;
       nextWake = SLEEP_MINUTES;
       Serial.println("[weather updated]\n" + http.body);
     } else {
+      JsonDocument e;
+      e["wifi_ms"]   = wifi.ms;
+      e["rssi"]      = wifi.rssi;
+      e["http_code"] = http.code;
+      logWake("http", fails, batteryMv, e);
       Serial.println("fetch failed — redraw stored weather");
     }
   } else {
+    JsonDocument e;
+    e["wifi_ms"]     = wifi.ms;   // near the timeout means it waited it out, far under means it
+    e["wifi_status"] = wifi.status;   // gave up early on a status that was already final
+    logWake("wifi", fails, batteryMv, e);
     Serial.println("Wi-Fi failed — redraw stored weather");
   }
   wifiOff();

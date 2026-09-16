@@ -3,9 +3,11 @@
 
 // Result of a Wi-Fi connect attempt
 struct WifiResult {
-  bool ok;        // connected?
-  uint32_t ms;    // connect time in ms
-  int rssi;       // signal strength in dBm (valid when ok)
+  bool ok;         // connected?
+  uint32_t ms;     // connect time in ms
+  int rssi;        // signal strength in dBm (valid when ok)
+  uint8_t status;  // the wl_status_t it stopped on. 1 and 4 mean the network was not there or
+                   // the password was wrong; 0 and 6 mean it was there and the join still failed
 };
 
 // Connect to Wi-Fi (one attempt, CONNECT_TIMEOUT_MS). Returns {ok, ms} — caller handles failure.

@@ -1,7 +1,9 @@
 #include "store.h"
 #include <Preferences.h>
+#include "config.h"
 
 static const char* NS = "weather";
+static const char* LOG_KEY = "faillog";
 static Preferences prefs;
 
 uint8_t recordWifiAttempt() {
@@ -29,4 +31,38 @@ void saveWeather(const String& body) {
   prefs.begin(NS, false);
   prefs.putString("last", body);
   prefs.end();
+}
+
+String lastLog() {
+  prefs.begin(NS, true);            // read-only
+  String log = prefs.getString(LOG_KEY, "");
+  prefs.end();
+  return log;
+}
+
+void appendLog(const String& entry) {
+  prefs.begin(NS, false);
+  String log = prefs.getString(LOG_KEY, "");
+
+  // Stop at a marker instead of letting the array outgrow what NVS will take: putString fails
+  // silently past its limit, and would take every earlier entry down with it. See LOG_MAX_BYTES.
+  String add = entry;
+  if (log.length() + entry.length() + 2 > LOG_MAX_BYTES) {
+    if (log.endsWith("\"full\"}]")) { prefs.end(); return; }   // already marked, nothing to add
+    add = "{\"kind\":\"full\"}";
+  }
+
+  // Appended without parsing. The only edit this array ever needs is at the end, and linking a
+  // parser in here would add a way for one bad byte to take the whole history with it.
+  if (!log.length()) log = "[" + add + "]";
+  else { log.remove(log.length() - 1); log += "," + add + "]"; }
+
+  prefs.putString(LOG_KEY, log);
+  prefs.end();
+}
+
+void clearLog() {
+  prefs.begin(NS, false);
+  prefs.remove(LOG_KEY);            // not putString(""): NVS rewrites the entry, key and all,
+  prefs.end();                      // so an empty write would still burn a slot every wake
 }
