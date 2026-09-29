@@ -8,7 +8,7 @@ Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink
 > Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
 
 ## Runtime (5 steps)
-![Runtime: wake, Wi-Fi, server GET, draw e-Paper, deep sleep, then reset on wake](docs/runtime.png)
+![Runtime: wake, read battery, Wi-Fi or setup portal, POST to the server, draw e-Paper, deep sleep, then reset on wake](docs/runtime.png)
 
 - Everything in `setup()`, `loop()` empty (a wake is a full reset)
 - Bistable e-ink → 0 current to hold the image, draws only on refresh

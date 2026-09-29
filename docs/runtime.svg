@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 966 158" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 900" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
   <defs>
     <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
@@ -6,23 +6,124 @@
     <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
     </marker>
+    <marker id="ahR" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#ef4444"/>
+    </marker>
   </defs>
-  <rect x="1.5" y="1.5" width="963" height="155" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-  <rect x="26" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="102.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">wake</text>
-  <rect x="220" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="296.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">Wi-Fi</text>
-  <rect x="414" y="30" width="152" height="52" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="1.5"/>
-  <text x="490.0" y="52.0" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">GET</text>
-  <text x="490.0" y="72.0" text-anchor="middle" font-size="12.5" fill="#4b5563">MCP server</text>
-  <rect x="608" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="684.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">draw e-Paper</text>
-  <rect x="802" y="30" width="152" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="878.0" y="61.0" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">deep sleep</text>
-  <line x1="180" y1="56.0" x2="216" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
-  <line x1="374" y1="56.0" x2="410" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
-  <line x1="568" y1="56.0" x2="604" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
-  <line x1="762" y1="56.0" x2="798" y2="56.0" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
-  <path d="M 878.0 82 L 878.0 128 L 102.0 128 L 102.0 84" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
-  <text x="490.0" y="122" text-anchor="middle" font-size="12.5" fill="#b45309">reset on wake</text>
+  <rect x="1.5" y="1.5" width="917" height="897" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+
+  <!-- main column -->
+  <rect x="130" y="28" width="200" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="59" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">wake (reset)</text>
+
+  <rect x="130" y="100" width="200" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="121" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">battery mV · chip °C</text>
+  <text x="230" y="139" text-anchor="middle" font-size="11.5" fill="#4b5563">before the radio comes up</text>
+
+  <rect x="130" y="172" width="200" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="193" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">recordWifiAttempt()</text>
+  <text x="230" y="211" text-anchor="middle" font-size="11.5" fill="#4b5563">+1 on every boot</text>
+
+  <rect x="118" y="244" width="224" height="46" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="230" y="272" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">first run or fails ≥ 5 ?</text>
+
+  <rect x="130" y="350" width="200" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="371" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">connectWiFi()</text>
+  <text x="230" y="389" text-anchor="middle" font-size="11.5" fill="#4b5563">3 s, no retry</text>
+
+  <rect x="140" y="422" width="180" height="46" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="230" y="450" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">wifi.ok ?</text>
+
+  <rect x="130" y="510" width="200" height="56" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="1.5"/>
+  <text x="230" y="532" text-anchor="middle" font-size="14" font-weight="600" fill="#134e4a">POST /weather</text>
+  <text x="230" y="551" text-anchor="middle" font-size="11.5" fill="#4b5563">report + backlog</text>
+
+  <rect x="140" y="588" width="180" height="46" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="230" y="616" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">http 200 ?</text>
+
+  <rect x="120" y="676" width="220" height="76" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="698" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e1b4b">saveWeather() · clearLog()</text>
+  <text x="230" y="717" text-anchor="middle" font-size="11.5" fill="#4b5563">updated = true</text>
+  <text x="230" y="735" text-anchor="middle" font-size="11.5" fill="#4b5563">nextWake = 30 min</text>
+
+  <!-- failure log column -->
+  <rect x="450" y="422" width="180" height="46" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="540" y="450" text-anchor="middle" font-size="14" font-weight="600" fill="#7f1d1d">log "wifi"</text>
+
+  <rect x="390" y="588" width="180" height="46" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="480" y="616" text-anchor="middle" font-size="14" font-weight="600" fill="#7f1d1d">log "http"</text>
+
+  <!-- setup portal column -->
+  <rect x="690" y="244" width="200" height="56" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="790" y="266" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">setup portal, 5 min</text>
+  <text x="790" y="285" text-anchor="middle" font-size="11.5" fill="#92400e">AP draws ~100 mA</text>
+
+  <rect x="690" y="322" width="200" height="46" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="790" y="350" text-anchor="middle" font-size="14" font-weight="600" fill="#78350f">credentials saved ?</text>
+
+  <rect x="700" y="390" width="180" height="44" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="790" y="417" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">ESP.restart()</text>
+
+  <rect x="690" y="456" width="200" height="56" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="790" y="478" text-anchor="middle" font-size="14" font-weight="600" fill="#7f1d1d">deep sleep, no timer</text>
+  <text x="790" y="497" text-anchor="middle" font-size="11.5" fill="#991b1b">waits for RESET</text>
+
+  <!-- tail -->
+  <rect x="90" y="800" width="170" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="175" y="831" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">wifiOff()</text>
+
+  <rect x="310" y="800" width="210" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="415" y="821" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">draw e-Paper</text>
+  <text x="415" y="839" text-anchor="middle" font-size="11.5" fill="#4b5563">from NVS, every wake</text>
+
+  <rect x="570" y="800" width="220" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="680" y="821" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">deep sleep</text>
+  <text x="680" y="839" text-anchor="middle" font-size="11.5" fill="#4b5563">30 min or 5 min</text>
+
+  <!-- main column arrows -->
+  <line x1="230" y1="78"  x2="230" y2="96"  stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="230" y1="150" x2="230" y2="168" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="230" y1="222" x2="230" y2="240" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="230" y1="290" x2="230" y2="346" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="243" y="322" font-size="12" fill="#6b7280">no</text>
+  <line x1="230" y1="400" x2="230" y2="418" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="230" y1="468" x2="230" y2="506" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="243" y="492" font-size="12" fill="#6b7280">yes</text>
+  <line x1="230" y1="566" x2="230" y2="584" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="230" y1="634" x2="230" y2="672" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="243" y="658" font-size="12" fill="#6b7280">yes</text>
+
+  <!-- branch to portal -->
+  <line x1="342" y1="267" x2="686" y2="267" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="500" y="259" text-anchor="middle" font-size="12" fill="#6b7280">yes</text>
+
+  <!-- branches to the failure log -->
+  <line x1="320" y1="445" x2="446" y2="445" stroke="#ef4444" stroke-width="2" marker-end="url(#ahR)"/>
+  <text x="383" y="437" text-anchor="middle" font-size="12" fill="#b91c1c">no</text>
+  <line x1="320" y1="611" x2="386" y2="611" stroke="#ef4444" stroke-width="2" marker-end="url(#ahR)"/>
+  <text x="353" y="603" text-anchor="middle" font-size="12" fill="#b91c1c">no</text>
+
+  <!-- inside the portal -->
+  <line x1="790" y1="300" x2="790" y2="318" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="790" y1="368" x2="790" y2="386" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="803" y="382" font-size="12" fill="#6b7280">yes</text>
+  <path d="M 690 345 L 664 345 L 664 484 L 686 484" fill="none" stroke="#ef4444" stroke-width="2" marker-end="url(#ahR)"/>
+  <text x="659" y="339" text-anchor="end" font-size="12" fill="#b91c1c">no</text>
+
+  <!-- the two failure paths and the success path all drop onto one line into the tail -->
+  <path d="M 600 468 L 600 775" fill="none" stroke="#ef4444" stroke-width="2"/>
+  <path d="M 480 634 L 480 775" fill="none" stroke="#ef4444" stroke-width="2"/>
+  <text x="350" y="767" text-anchor="middle" font-size="12" fill="#b91c1c">nextWake = 5 min</text>
+  <path d="M 230 752 L 230 775" fill="none" stroke="#6b7280" stroke-width="2"/>
+  <path d="M 600 775 L 179 775 L 179 796" fill="none" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- tail arrows -->
+  <line x1="260" y1="825" x2="306" y2="825" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="825" x2="566" y2="825" stroke="#6b7280" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- back to wake -->
+  <path d="M 680 850 L 680 876 L 40 876 L 40 53 L 126 53" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
+  <text x="360" y="868" text-anchor="middle" font-size="12" fill="#b45309">timer fires — full reset, back through setup()</text>
+  <path d="M 880 412 L 898 412 L 898 53 L 334 53" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
+  <text x="620" y="45" text-anchor="middle" font-size="12" fill="#b45309">clean boot, STA only</text>
 </svg>
