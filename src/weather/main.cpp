@@ -8,28 +8,44 @@
 #include "store.h"
 #include "display.h"
 
+// What this wake knows about itself. Filled as the values become available — battery and chip
+// before the radio, since both change once it is on — and read by everything downstream, so the
+// helpers below take one of these instead of their own selection of the same four numbers.
+struct Wake {
+  uint32_t   batteryMv;     // resting voltage, comparable across wakes
+  float      chipC;         // die temperature, close to the room before the radio warms it
+  uint8_t    attempts;      // boots since the last success; 1 means none were missed
+  uint8_t    resetReason;   // esp_reset_reason(). 8 is the timer, anything else is worth seeing
+  WifiResult wifi;
+};
+
+// The fields that describe the wake itself. They go on the report and on every log entry alike,
+// so the names live here once rather than being spelled out on both paths.
+static void addWakeFacts(JsonDocument& d, const Wake& w) {
+  d["battery_mv"]    = w.batteryMv;
+  d["wifi_attempts"] = w.attempts;
+  d["reset_reason"]  = w.resetReason;
+}
+
 // Files a wake the server never heard about, to ride along on the next report that gets through.
 // No timestamp: the board has no clock, so the server stamps the report carrying these and counts
 // forward with the sleep constants. That is why reset_reason is on every entry — a crash or a
 // brownout comes back immediately rather than after RETRY_MINUTES, and nothing else says so.
-//
-// batteryMv is always the reading from the top of setup(), taken before the radio came up. Read
-// again under the portal's ~100 mA and the number stops comparing with the other entries.
-static void logWake(const char* kind, uint8_t attempts, uint32_t batteryMv, JsonDocument& e) {
-  e["kind"]          = kind;
-  e["wifi_attempts"] = attempts;
-  e["reset_reason"]  = (int)esp_reset_reason();
-  e["battery_mv"]    = batteryMv;
+// The caller fills in whatever is particular to this kind of failure before calling.
+static void logWake(const char* kind, const Wake& w, JsonDocument& e) {
+  e["kind"] = kind;
+  addWakeFacts(e, w);
   String entry;
   serializeJson(e, entry);
   appendLog(entry);
 }
 
 // Puts the setup page on the air, and never returns: the board either restarts with a network
-// or sleeps with no wake timer until someone presses RESET.
-static void runSetupPortal(bool firstRun, uint8_t fails, uint32_t batteryMv) {
+// or sleeps with no wake timer until someone presses RESET. firstRun only decides what the
+// screen says — the board has never been set up, or the network it knows stopped answering.
+static void enterSetupMode(bool firstRun, const Wake& w) {
   JsonDocument opened;
-  logWake(firstRun ? "portal-new" : "portal-lost", fails, batteryMv, opened);
+  logWake(firstRun ? "portal-new" : "portal-lost", w, opened);
 
   displayBegin();
   displayMessage(firstRun ? "Wi-Fi setup" : "Wi-Fi not found",
@@ -40,10 +56,9 @@ static void runSetupPortal(bool firstRun, uint8_t fails, uint32_t batteryMv) {
                 "2. Open in a browser\n"
                 "   192.168.4.1");
 
-  // A first run has nothing to preserve; a recovery keeps the saved network, so the board can
-  // reconnect by itself if the router simply came back.
-  bool saved = firstRun ? runProvisioningPortal(AP_NAME, PORTAL_MINUTES * 60)
-                        : runRecoveryPortal(AP_NAME, PORTAL_MINUTES * 60);
+  // Whatever is stored stays stored, so a portal nobody answers still leaves the board able to
+  // reconnect by itself once the router comes back.
+  bool saved = runSetupPortal(AP_NAME, PORTAL_MINUTES * 60);
 
   clearWifiAttempts();
   if (saved) ESP.restart();                   // clean boot: STA only, portal memory released
@@ -56,7 +71,7 @@ static void runSetupPortal(bool firstRun, uint8_t fails, uint32_t batteryMv) {
   // up to whoever walks over and presses RESET. Without the marker the server keeps counting and
   // reports a confident, wrong time.
   JsonDocument timedOut;
-  logWake("portal-timeout", fails, batteryMv, timedOut);
+  logWake("portal-timeout", w, timedOut);
 
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
   saveAwakeMs(millis());            // minutes of access point at ~100 mA — the costliest wake there is
@@ -83,18 +98,15 @@ static void sleepUntilNextWake(uint8_t minutes) {
 // do the wakes that never got to send one. reset_reason and wifi_attempts are what let the server
 // place those in time: it stamps this report and counts backwards through the sleep constants,
 // and a gap in wifi_attempts tells it a boot went by without even managing to leave an entry.
-static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi,
-                         uint8_t attempts) {
+static String wakeReport(const Wake& w) {
   JsonDocument req;
-  req["battery_mv"]    = batteryMv;
-  req["wifi_ms"]       = wifi.ms;
-  req["rssi"]          = wifi.rssi;
-  req["reset_reason"]  = (int)esp_reset_reason();
-  req["wifi_attempts"] = attempts;
+  addWakeFacts(req, w);
+  req["wifi_ms"]       = w.wifi.ms;
+  req["rssi"]          = w.wifi.rssi;
   req["fw"]            = FW_VERSION;
   // A cell holds less charge when it is cold, so without this the battery curve mixes the
   // weather in with the discharge and neither can be read off it.
-  req["chip_c"]        = roundf(chipC * 10) / 10;
+  req["chip_c"]        = roundf(w.chipC * 10) / 10;
   // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
   // NVS, where there is no previous one: zero would read as a wake that took no time at all.
   if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;
@@ -112,31 +124,32 @@ static String wakeReport(uint32_t batteryMv, float chipC, const WifiResult& wifi
 void setup() {
   Serial.begin(115200);
   Serial.println("fw " FW_VERSION);           // a -dirty suffix means this build matches no commit
+  Wake w;
   // Both before Wi-Fi: a resting voltage, and a die that has not warmed itself up on the radio
   // yet, so the reading is close to the room. Comparable across wakes because it is always here.
-  uint32_t batteryMv = batteryMillivolts();
-  float    chipC     = temperatureRead();
-  Serial.printf("battery %u mV, chip %.1f C\n", batteryMv, chipC);
+  w.batteryMv   = batteryMillivolts();
+  w.chipC       = temperatureRead();
+  w.resetReason = esp_reset_reason();
+  Serial.printf("battery %u mV, chip %.1f C\n", w.batteryMv, w.chipC);
 
   // Two ways to need the portal: the board has never been set up, or the network it was set up
   // for has stopped answering. Nothing below runs until that is resolved — nothing to fetch.
-  uint8_t fails    = recordWifiAttempt();
-  bool    firstRun = !wifiProvisioned();
-  if (firstRun || fails >= WIFI_FAIL_LIMIT) runSetupPortal(firstRun, fails, batteryMv);
+  w.attempts     = recordWifiAttempt();
+  bool  firstRun = !wifiProvisioned();
+  if (firstRun || w.attempts >= WIFI_FAIL_LIMIT) enterSetupMode(firstRun, w);
 
   // connectWiFi() brings the radio up and wifiOff() puts it down, so this brackets the whole
   // window that draws ~100 mA — the figure the battery pays, of which the connect is only part.
   uint32_t radioOnAt = millis();
-  WifiResult wifi = connectWiFi();
+  w.wifi = connectWiFi();
 
   // How far the wake gets decides what to store and how soon to come back. Reaching the network
   // is all the portal counter tracks — a server being down is no reason to ask someone to set up
   // Wi-Fi again.
   bool    updated  = false;
   uint8_t nextWake = RETRY_MINUTES;
-  if (wifi.ok) {
-    clearWifiAttempts();
-    HttpResult http = httpPost(WEATHER_URL, wakeReport(batteryMv, chipC, wifi, fails));
+  if (w.wifi.ok) {
+    HttpResult http = httpPost(WEATHER_URL, wakeReport(w));
     if (http.code == 200) {
       saveWeather(http.body);
       clearLog();                 // only a 200 retires the log: anything else may not have landed
@@ -145,17 +158,17 @@ void setup() {
       Serial.println("[weather updated]\n" + http.body);
     } else {
       JsonDocument e;
-      e["wifi_ms"]   = wifi.ms;
-      e["rssi"]      = wifi.rssi;
+      e["wifi_ms"]   = w.wifi.ms;
+      e["rssi"]      = w.wifi.rssi;
       e["http_code"] = http.code;
-      logWake("http", fails, batteryMv, e);
+      logWake("http", w, e);
       Serial.println("fetch failed — redraw stored weather");
     }
   } else {
     JsonDocument e;
-    e["wifi_ms"]     = wifi.ms;   // near the timeout means it waited it out, far under means it
-    e["wifi_status"] = wifi.status;   // gave up early on a status that was already final
-    logWake("wifi", fails, batteryMv, e);
+    e["wifi_ms"]     = w.wifi.ms;   // near the timeout means it waited it out, far under means it
+    e["wifi_status"] = w.wifi.status;   // gave up early on a status that was already final
+    logWake("wifi", w, e);
     Serial.println("Wi-Fi failed — redraw stored weather");
   }
   wifiOff();
@@ -164,7 +177,14 @@ void setup() {
   // NVS is the single source of truth, so the screen draws what is stored whether or not this
   // wake added to it. Redraw every time, so the status line reflects THIS wake.
   displayBegin();
-  displayWeather(lastWeather(), updated, wifi.rssi, batteryMv);
+  displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv);
+
+  // Cleared here rather than the moment the connect succeeds, which is 0.5 s into a 4.4 s wake.
+  // Five resets in a row is how someone asks for the setup page, and hitting a half-second
+  // window five times is not something anyone can do — the whole wake is the window now. It
+  // still means the same thing, only written later: a boot that got interrupted before the
+  // screen was drawn should count, the same as one that never reached the network.
+  if (w.wifi.ok) clearWifiAttempts();
   sleepUntilNextWake(nextWake);
 }
 
