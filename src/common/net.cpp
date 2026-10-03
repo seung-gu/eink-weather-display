@@ -53,9 +53,11 @@ bool wifiConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-void wifiOff() {
-  // true brings the STA interface down so the radio stops. The second argument stays false:
-  // erasing the AP config would write to NVS and slow down the next connect.
+void disconnectWifi() {
+  // The first argument brings the STA interface down, which is what actually stops the radio.
+  // The second one erases the stored credentials and is left alone: without them the next wake
+  // finds nothing to connect to and opens the setup portal, which ends in a sleep with no wake
+  // timer. The board would sit there until someone pressed RESET and set up Wi-Fi again.
   WiFi.disconnect(true);
 }
 

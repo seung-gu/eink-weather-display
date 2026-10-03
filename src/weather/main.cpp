@@ -138,7 +138,7 @@ void setup() {
   bool  firstRun = !wifiProvisioned();
   if (firstRun || w.attempts >= WIFI_FAIL_LIMIT) enterSetupMode(firstRun, w);
 
-  // connectWiFi() brings the radio up and wifiOff() puts it down, so this brackets the whole
+  // connectWiFi() brings the radio up and disconnectWifi() puts it down, so this brackets the whole
   // window that draws ~100 mA — the figure the battery pays, of which the connect is only part.
   uint32_t radioOnAt = millis();
   w.wifi = connectWiFi();
@@ -171,7 +171,7 @@ void setup() {
     logWake("wifi", w, e);
     Serial.println("Wi-Fi failed — redraw stored weather");
   }
-  wifiOff();
+  disconnectWifi();
   Serial.printf("radio on for %u ms\n", millis() - radioOnAt);
 
   // NVS is the single source of truth, so the screen draws what is stored whether or not this

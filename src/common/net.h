@@ -13,6 +13,10 @@ struct WifiResult {
 // Connect to Wi-Fi (one attempt, CONNECT_TIMEOUT_MS). Returns {ok, ms} — caller handles failure.
 WifiResult connectWiFi();
 
+// Drop the connection and power the radio down. Call it once the last request is done —
+// everything after that (NVS, e-Paper) runs for seconds with no need for Wi-Fi.
+void disconnectWifi();
+
 // Current connection state
 bool wifiConnected();
 
@@ -28,7 +32,3 @@ struct HttpResult {
 // RETRY_MINUTES anyway.
 HttpResult httpGet(const char* url);
 HttpResult httpPost(const char* url, const String& body);
-
-// Drop the connection and power the radio down. Call it once the last request is done —
-// everything after that (NVS, e-Paper) runs for seconds with no need for Wi-Fi.
-void wifiOff();
