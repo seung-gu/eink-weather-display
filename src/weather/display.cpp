@@ -99,8 +99,9 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
   }
 }
 
-// Bottom line: Wi-Fi connect time (left) + signal gauge (right)
-static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t batteryMv) {
+// Bottom line: clock, room, battery, signal — everything about this wake rather than the weather
+static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t batteryMv,
+                           const Room& room) {
   u8g2Fonts.setFont(u8g2_font_helvB08_tf);   // Latin only — the server sends an English weekday
   int baseline = display.height() - 4;
   u8g2Fonts.setCursor(6, baseline);
@@ -108,6 +109,12 @@ static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t
   // a new one.
   if (updated) u8g2Fonts.print(clock);
   else         u8g2Fonts.print("offline");
+  // The gap between the longest clock and the battery is about 50 px, so this is rounded to whole
+  // degrees and percent. The row above carries the same two readings from outdoors.
+  if (room.ok) {
+    u8g2Fonts.setCursor(90, baseline);
+    u8g2Fonts.printf("%.0f° %.0f%%", room.c, room.rh);
+  }
   u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
   u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
   drawSignalGauge(rssi, 172, baseline);
@@ -142,7 +149,8 @@ void displayMessage(const String& title, const String& body) {
 }
 
 // Response -> screen. Call only when it changed.
-void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv) {
+void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
+                    const Room& room) {
   // The server sends numbers as numbers, so the units go on here — they are a display decision.
   // A lookup the server could not complete leaves the weather keys null, and so does an empty
   // NVS; both read back as empty strings, which the drawing code below already skips over.
@@ -183,7 +191,7 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv)
       drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
       drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
     }
-    drawBottomLine(clock, updated, rssi, batteryMv);   // clock + battery + signal icon
+    drawBottomLine(clock, updated, rssi, batteryMv, room);
   } while (display.nextPage());
   display.hibernate();
 }

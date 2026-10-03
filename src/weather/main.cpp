@@ -4,6 +4,7 @@
 #include "config.h"
 #include "net.h"
 #include "battery.h"
+#include "room.h"
 #include "provision.h"
 #include "store.h"
 #include "display.h"
@@ -14,6 +15,7 @@
 struct Wake {
   uint32_t   batteryMv;     // resting voltage, comparable across wakes
   float      chipC;         // die temperature, close to the room before the radio warms it
+  Room       room;          // the actual room, if the sensor is fitted
   uint8_t    attempts;      // boots since the last success; 1 means none were missed
   uint8_t    resetReason;   // esp_reset_reason(). 8 is the timer, anything else is worth seeing
   WifiResult wifi;
@@ -111,6 +113,12 @@ static String wakeReport(const Wake& w) {
   // A cell holds less charge when it is cold, so without this the battery curve mixes the
   // weather in with the discharge and neither can be read off it.
   req["chip_c"]        = roundf(w.chipC * 10) / 10;
+  // Left out entirely when the sensor is missing, rather than sent as zero — a board without one
+  // should read as "no sensor", not as a freezing room.
+  if (w.room.ok) {
+    req["room_c"]  = roundf(w.room.c * 10) / 10;
+    req["room_rh"] = roundf(w.room.rh * 10) / 10;
+  }
   // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
   // NVS, where there is no previous one: zero would read as a wake that took no time at all.
   if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;
@@ -133,8 +141,11 @@ void setup() {
   // yet, so the reading is close to the room. Comparable across wakes because it is always here.
   w.batteryMv   = batteryMillivolts();
   w.chipC       = temperatureRead();
+  w.room        = readRoom();
   w.resetReason = esp_reset_reason();
-  Serial.printf("battery %u mV, chip %.1f C\n", w.batteryMv, w.chipC);
+  Serial.printf("battery %u mV, chip %.1f C", w.batteryMv, w.chipC);
+  if (w.room.ok) Serial.printf(", room %.1f C %.1f%%", w.room.c, w.room.rh);
+  Serial.println();
 
   // Two ways to need the portal: the board has never been set up, or the network it was set up
   // for has stopped answering. Nothing below runs until that is resolved — nothing to fetch.
@@ -181,7 +192,7 @@ void setup() {
   // NVS is the single source of truth, so the screen draws what is stored whether or not this
   // wake added to it. Redraw every time, so the status line reflects THIS wake.
   displayBegin();
-  displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv);
+  displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv, w.room);
 
   // Cleared here rather than the moment the connect succeeds, which is 0.5 s into a 4.4 s wake.
   // Five resets in a row is how someone asks for the setup page, and hitting a half-second

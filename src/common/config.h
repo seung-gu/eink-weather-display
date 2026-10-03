@@ -48,6 +48,13 @@
 #define EPD_SCK    6
 #define EPD_MOSI   7
 
+// ==== Room sensor (SHT40, I2C) ====
+// The pins XIAO prints as SDA/SCL are taken by the e-Paper's SPI, so the bus moves. GPIO2 is a
+// strapping pin and has to be high at boot, which the bus pull-ups already do. GPIO9 is left
+// alone — that one is the BOOT button, and a press would land in the middle of a transfer.
+#define SHT_SDA   21
+#define SHT_SCL    2
+
 // ==== Battery sense ====
 // 1:1 divider from BAT+ (2x 1M + 100nF). ADC2 is unusable while Wi-Fi is on, so this
 // has to be an ADC1 pin (GPIO0-4); GPIO2 is a strapping pin and reads low through the
