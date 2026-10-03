@@ -89,3 +89,9 @@ HttpResult httpPost(const char* url, const String& payload) {
   http.end();
   return { code, body };
 }
+
+String readMacAddress() {
+  String mac = WiFi.macAddress();   // "A1:B2:C3:D4:E5:F6"
+  mac.replace(":", "");
+  return mac;
+}

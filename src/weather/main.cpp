@@ -100,6 +100,10 @@ static void sleepUntilNextWake(uint8_t minutes) {
 // and a gap in wifi_attempts tells it a boot went by without even managing to leave an entry.
 static String wakeReport(const Wake& w) {
   JsonDocument req;
+  // Which board this came from. Without it the server has one stream of readings from however
+  // many boards are pointed at it, and anything that compares a row with the one before it —
+  // the battery curve, the wake time — is comparing two different devices.
+  req["mac"]           = readMacAddress();
   addWakeFacts(req, w);
   req["wifi_ms"]       = w.wifi.ms;
   req["rssi"]          = w.wifi.rssi;

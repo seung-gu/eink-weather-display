@@ -32,3 +32,7 @@ struct HttpResult {
 // RETRY_MINUTES anyway.
 HttpResult httpGet(const char* url);
 HttpResult httpPost(const char* url, const String& body);
+
+// The radio's MAC, as "A1B2C3D4E5F6". Burned into the chip, so it is the same string across
+// reflashes and NVS erases — which is what makes it usable as a name for the board.
+String readMacAddress();
