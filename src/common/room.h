@@ -8,6 +8,9 @@ struct Room {
   bool  ok = false;   // false if the sensor did not answer — the board works without one
   float c  = 0.0f;
   float rh = 0.0f;
+  bool  stuck = false;  // SDA was being held low when the wake started, so the bus had latched
+                        // and was cleared before reading. Reported, because nothing else says
+                        // whether a failed read found a jammed bus or a quiet sensor
 };
 
 Room readRoom();

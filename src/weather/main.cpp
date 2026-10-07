@@ -119,6 +119,10 @@ static String wakeReport(const Wake& w) {
     req["room_c"]  = roundf(w.room.c * 10) / 10;
     req["room_rh"] = roundf(w.room.rh * 10) / 10;
   }
+  // Sent on every wake rather than only when true, so its presence also marks a build that knows
+  // how to clear the bus. The firmware stamp cannot do that: it is the commit plus a dirty flag,
+  // so two different working trees on the same commit report the same string.
+  req["room_stuck"]    = w.room.stuck;
   // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
   // NVS, where there is no previous one: zero would read as a wake that took no time at all.
   if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;

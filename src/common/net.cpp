@@ -74,9 +74,7 @@ HttpResult httpGet(const char* url) {
   return { code, body };
 }
 
-HttpResult httpPost(const char* url, const String& payload) {
-  // No retry: a non-200 means the request arrived and was processed, so sending it again would
-  // file the report twice. A failure here is handled like a Wi-Fi failure — by waking sooner.
+static HttpResult post(const char* url, const String& payload) {
   WiFiClientSecure client;
   client.setInsecure();
   HTTPClient http;
@@ -88,6 +86,16 @@ HttpResult httpPost(const char* url, const String& payload) {
   if (code != 200) Serial.printf("httpPost failed (code %d)\n", code);
   http.end();
   return { code, body };
+}
+
+HttpResult httpPost(const char* url, const String& payload) {
+  HttpResult r = post(url, payload);
+  // One retry, and only on this code. CONNECTION_REFUSED means the TCP/TLS connect never
+  // completed, so nothing was delivered and sending it again cannot file the report twice —
+  // which is what rules out retrying the rest. A 500 or a READ_TIMEOUT arrived and was
+  // processed; repeating those would duplicate the row on the server.
+  if (r.code == HTTPC_ERROR_CONNECTION_REFUSED) r = post(url, payload);
+  return r;
 }
 
 String readMacAddress() {
