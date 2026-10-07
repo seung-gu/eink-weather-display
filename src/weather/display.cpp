@@ -99,25 +99,66 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
   }
 }
 
-// Bottom line: clock, room, battery, signal — everything about this wake rather than the weather
-static void drawBottomLine(const String& clock, bool updated, int rssi, uint32_t batteryMv,
-                           const Room& room) {
-  u8g2Fonts.setFont(u8g2_font_helvB08_tf);   // Latin only — the server sends an English weekday
-  int baseline = display.height() - 4;
-  u8g2Fonts.setCursor(6, baseline);
-  // A stored response carries the time it was fetched, so only show it on a wake that brought
-  // a new one.
-  if (updated) u8g2Fonts.print(clock);
-  else         u8g2Fonts.print("offline");
-  // The gap between the longest clock and the battery is about 50 px, so this is rounded to whole
-  // degrees and percent. The row above carries the same two readings from outdoors.
-  if (room.ok) {
-    u8g2Fonts.setCursor(90, baseline);
-    u8g2Fonts.printf("%.0f° %.0f%%", room.c, room.rh);
-  }
-  u8g2Fonts.setCursor(138, baseline);        // always 5 glyphs (3.00V-4.20V), so a fixed x lines up
-  u8g2Fonts.printf("%.2fV", batteryMv / 1000.0f);
-  drawSignalGauge(rssi, 172, baseline);
+// Battery voltage -> 0..4 bars. A lithium cell's voltage is not proportional to what is left in
+// it — it falls fast from 4.2, sits near 3.8 for most of the discharge, then drops away — so the
+// thresholds are spaced to match that rather than split the range evenly.
+static int batteryBars(uint32_t mv) {
+  if (mv >= 4000) return 4;
+  if (mv >= 3850) return 3;
+  if (mv >= 3750) return 2;
+  if (mv >= 3650) return 1;
+  return 0;
+}
+
+// Battery outline with a terminal nub, filled from the left in quarters. 22x11 including the nub.
+static void drawBatteryIcon(uint32_t mv, int x, int top) {
+  const int w = 20, h = 11;
+  display.drawRect(x, top, w, h, GxEPD_BLACK);
+  display.drawRect(x + w, top + 3, 3, 5, GxEPD_BLACK);           // terminal, hollow like the body
+                                                                 // so only the charge reads as fill
+  int level = batteryBars(mv);
+  if (level) display.fillRect(x + 2, top + 2, (w - 4) * level / 4, h - 4, GxEPD_BLACK);
+}
+
+// Top row: when the weather was fetched on the left, the battery on the right, the city centred
+// below both. A stored response carries the time it was fetched, so only show it on a wake that
+// brought a new one. The time sits 2 px above the battery's baseline, which lines the two up on
+// their centres instead of their bottoms.
+static void drawStatusRow(const String& city, const String& clock, bool updated,
+                          uint32_t batteryMv, int batteryBaseline, int cityBaseline) {
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  u8g2Fonts.setCursor(6, batteryBaseline - 2);
+  u8g2Fonts.print(updated ? clock : "offline");
+  drawBatteryIcon(batteryMv, 170, batteryBaseline - 11);
+  // Centred on the screen. Only a name wide enough to reach the battery gets pushed left, so the
+  // usual ones land exactly where they always did rather than one pixel off.
+  u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
+  int w = u8g2Fonts.getUTF8Width(city.c_str());
+  int x = (display.width() - w) / 2;
+  if (x + w > 166) x = 166 - w;
+  u8g2Fonts.setCursor(x, cityBaseline);
+  u8g2Fonts.print(city);
+}
+
+// A roof over a room, drawn rather than stored: the stats icons are 20 px and this row is set in
+// the small face, so a bitmap that size would tower over its own text.
+static void drawHouse(int x, int top) {
+  const int w = 13, h = 12;
+  display.fillTriangle(x, top + 5, x + w / 2, top, x + w, top + 5, GxEPD_BLACK);
+  display.drawRect(x + 2, top + 5, w - 4, h - 5, GxEPD_BLACK);
+}
+
+// Bottom row: this room on the left, the signal on the right. Set in the small face — this row
+// is the aside, not the weather.
+static void drawRoomRow(const Room& room, int rssi, int baseline) {
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  // Drawn whether or not the sensor answered: dashes say it went quiet, where an empty corner
+  // would read as a board with no sensor on it.
+  drawHouse(6, baseline - 11);
+  u8g2Fonts.setCursor(24, baseline);
+  if (room.ok) u8g2Fonts.printf("%.0f°C/%.0f%%", room.c, room.rh);
+  else         u8g2Fonts.print("--°C/--%");
+  drawSignalGauge(rssi, 174, baseline);
 }
 
 // Plain full-screen message, for the states that have no weather to show yet.
@@ -175,23 +216,21 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   do {
     display.fillScreen(GxEPD_WHITE);
     display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
-    const int YO = 12;                               // nudge everything down a bit (tunable)
-    u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
-    drawCentered(city, 14 + YO);
+    const int YO = 12;                                // nudge everything down a bit (tunable)
+    drawStatusRow(city, clock, updated, batteryMv, 18, 19 + YO);
     if (cond.length()) drawWeatherIcon(cond, 100, 45 + YO);   // icon 48 (skip when no data)
     u8g2Fonts.setFont(u8g2_font_helvB18_tf);
-    drawCentered(temp, 92 + YO);                      // current temp
+    drawCentered(temp, 91 + YO);                      // current temp
     u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
-    drawCentered(cond, 110 + YO);                     // condition
-    if (hilo.length()) drawHighLow(hilo, 128 + YO);   // high/low
-    // Bottom stats: wind / humidity / precipitation
-    if (wind.length() || humid.length() || pop.length()) {
-      display.drawLine(12, 137 + YO, 188, 137 + YO, GxEPD_BLACK);
-      drawStat(icon_wind,     wind,  6,  28, 143 + YO, 158 + YO);
-      drawStat(icon_humidity, humid, 82, 104, 143 + YO, 158 + YO);
-      drawStat(icon_umbrella, pop,   142, 164, 143 + YO, 158 + YO);
-    }
-    drawBottomLine(clock, updated, rssi, batteryMv, room);
+    drawCentered(cond, 109 + YO);                     // condition
+    if (hilo.length()) drawHighLow(hilo, 127 + YO);   // high/low
+    // Two rows of the same shape, split by the line: outdoors above, indoors below. Wind,
+    // humidity and precipitation are what the server sent; the row under them is this room.
+    display.drawLine(12, 133 + YO, 188, 133 + YO, GxEPD_BLACK);
+    drawStat(icon_wind,     wind,  6,  30, 139 + YO, 154 + YO);
+    drawStat(icon_humidity, humid, 82, 106, 139 + YO, 154 + YO);
+    drawStat(icon_umbrella, pop,   142, 166, 139 + YO, 154 + YO);
+    drawRoomRow(room, rssi, 177 + YO);
   } while (display.nextPage());
   display.hibernate();
 }
