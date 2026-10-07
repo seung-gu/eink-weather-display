@@ -52,6 +52,20 @@
 못 쓰므로 탭은 ADC1(GPIO0~4)에 있어야 하고, GPIO2는 스트래핑 핀이라 분압을 물리면 부팅 시 LOW로
 읽힌다 — 그래서 BUSY를 GPIO3에서 비켜냈다.
 
+실내 온도·습도 — SHT40 브레이크아웃을 I2C로. 없어도 동작한다:
+
+| SHT40 | GPIO | Super Mini 핀 | XIAO 라벨 |
+|---|---|---|---|
+| VIN | — | 3V3 | 3V3 |
+| GND | — | GND | GND |
+| SDA | 8 | GPIO8 | D8 |
+| SCL | 2 | GPIO2 | D0 |
+
+남는 핀 중 GPIO21이 먼저 눈에 들어오지만 그건 UART0 TX라 리셋마다 ROM 부트로더가 그 핀을
+구동한다. GPIO9도 비어 있고 더 나쁘다 — 부트모드 선택 핀이라, SDA가 LOW로 멈춘 상태에서 리셋이
+걸리면 앱 대신 다운로드 모드로 부팅해 다시 깨어나지 않는다. Super Mini는 GPIO8에 온보드 LED가
+달려 있어 전송 중 깜빡이고 그 저항이 풀업으로 하나 더 붙는다.
+
 - Super Mini는 핀에 GPIO 번호 직접 표기, XIAO는 `D0–D10`(보드 위치 이름, GPIO와 매핑 다름)
 - ⚠️ C3 기본 SPI핀(SCK=4·MISO=5) ↔ RST(4)/DC(5) 충돌 → `display.cpp`에서 SPI 재지정 후 핀 재확정
 - RST와 BUSY 모두 연결한 채로 둔다. GxEPD2는 둘 다 `-1`을 받아 소프트웨어 리셋과 고정 대기로

@@ -52,6 +52,20 @@ Battery sense — shown on the display and reported to the server:
 Wi-Fi is on, so the tap has to sit on ADC1 (GPIO0–4); GPIO2 is a strapping pin that reads low
 through the divider at boot, which is why BUSY moved off GPIO3 to make room.
 
+Room temperature and humidity — an SHT40 breakout on I2C. The board works without one:
+
+| SHT40 | GPIO | Super Mini pin | XIAO label |
+|---|---|---|---|
+| VIN | — | 3V3 | 3V3 |
+| GND | — | GND | GND |
+| SDA | 8 | GPIO8 | D8 |
+| SCL | 2 | GPIO2 | D0 |
+
+GPIO21 would be the obvious free pin but it is UART0 TX, which the ROM bootloader drives at every
+reset. GPIO9 is free too, and worse: it picks the boot mode, so a bus left stuck with SDA low
+would boot to download mode and never wake again. On a Super Mini, GPIO8 also carries the onboard
+LED — it flickers during transfers and its resistor adds a second pull-up.
+
 - Super Mini labels pins by GPIO number; XIAO uses `D0–D10` (board positions mapped to different GPIOs)
 - ⚠️ The C3's default SPI pins (SCK=4 / MISO=5) collide with RST(4)/DC(5) → `display.cpp` remaps SPI and re-asserts the pins
 - RST and BUSY both stay wired. GxEPD2 accepts `-1` for either, falling back to a software reset

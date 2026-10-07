@@ -12,11 +12,14 @@ static GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
 static U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
 void displayBegin() {
-  display.init(115200);
-  SPI.end();
+  // Claimed with explicit pins before init(), because GxEPD2 calls SPI.begin() with no arguments
+  // and that falls back to the variant's defaults: SCK=4/MISO=5 on the Super Mini, which are
+  // RST and DC, and SCK=8 on the XIAO, which is the sensor's SDA. Having begun the bus already
+  // makes that call return early, so neither set is ever touched.
   SPI.begin(EPD_SCK, -1, EPD_MOSI, EPD_CS);
-  // NOTE: the C3's default SPI pins (SCK=4, MISO=5) collide with RST(4)/DC(5)
-  //       -> after remapping SPI, re-assert the pins as outputs + manual reset
+  display.init(115200);
+  // Kept from when the default mapping did take RST and DC: re-assert them, then reset the
+  // module by hand. This is the sequence the display is known to render with.
   pinMode(EPD_CS, OUTPUT);  digitalWrite(EPD_CS, HIGH);
   pinMode(EPD_DC, OUTPUT);  digitalWrite(EPD_DC, HIGH);
   pinMode(EPD_RST, OUTPUT);
