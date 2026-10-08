@@ -119,10 +119,13 @@ static String wakeReport(const Wake& w) {
     req["room_c"]  = roundf(w.room.c * 10) / 10;
     req["room_rh"] = roundf(w.room.rh * 10) / 10;
   }
-  // Sent on every wake rather than only when true, so its presence also marks a build that knows
-  // how to clear the bus. The firmware stamp cannot do that: it is the commit plus a dirty flag,
-  // so two different working trees on the same commit report the same string.
-  req["room_stuck"]    = w.room.stuck;
+  // Sent on every wake, not only on failure: a build that reports these can be told apart from
+  // one that cannot, which the firmware stamp fails at — it is the commit plus a dirty flag, so
+  // two different working trees on one commit report the same string.
+  req["room_err"]      = w.room.err;
+  req["room_sda"]      = w.room.sdaUp;
+  req["room_scl"]      = w.room.sclUp;
+  if (w.room.ack.length()) req["room_ack"] = w.room.ack;
   // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
   // NVS, where there is no previous one: zero would read as a wake that took no time at all.
   if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;
@@ -149,6 +152,8 @@ void setup() {
   w.resetReason = esp_reset_reason();
   Serial.printf("battery %u mV, chip %.1f C", w.batteryMv, w.chipC);
   if (w.room.ok) Serial.printf(", room %.1f C %.1f%%", w.room.c, w.room.rh);
+  else Serial.printf(", room failed at %s (sda %d scl %d, ack %s)", w.room.err,
+                     w.room.sdaUp, w.room.sclUp, w.room.ack.c_str());
   Serial.println();
 
   // Two ways to need the portal: the board has never been set up, or the network it was set up
