@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "esp_sleep.h"
+#include "driver/gpio.h"
 #include "config.h"
 #include "net.h"
 #include "battery.h"
@@ -78,6 +79,7 @@ static void enterSetupMode(bool firstRun, const Wake& w) {
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
   saveAwakeMs(millis());            // minutes of access point at ~100 mA — the costliest wake there is
   Serial.flush();
+  gpio_deep_sleep_hold_en();                  // pins isolated for the sleep, as in sleepUntilNextWake()
   esp_deep_sleep_start();                     // no wake timer: asleep until someone resets it
 }
 
@@ -90,6 +92,9 @@ static void sleepUntilNextWake(uint8_t minutes) {
   Serial.printf("deep sleep for %u min...\n", minutes);
   Serial.flush();
   esp_sleep_enable_timer_wakeup((uint64_t)minutes * 60 * 1000000ULL);
+  // The digital pins (GPIO6-21) have no guaranteed state in deep sleep. With this on, IDF turns
+  // each one's input, output and pulls off before sleeping, so SDA's pull-up has no path to ground.
+  gpio_deep_sleep_hold_en();
   esp_deep_sleep_start();
 #else
   Serial.println("[debug] staying awake (no deep sleep)");
