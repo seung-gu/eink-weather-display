@@ -21,11 +21,17 @@ static bool pullUpPresent(int pin) {
 // Every address that answers, as hex. Run only after a failed reading: it is a transaction per
 // address, and on a good wake it says nothing the reading has not already said. Nothing at all
 // answering means the bus is dead rather than the sensor.
-static String scanBus() {
+//
+// Skipped without pull-ups and stopped at the first timeout: on a transaction that gets no
+// response the IDF driver waits at least 1 s, so a full scan of a dead bus takes two minutes.
+static String scanBus(bool pulledUp) {
   String found;
+  if (!pulledUp) return found;
   for (uint8_t a = 8; a < 120; a++) {
     Wire.beginTransmission(a);
-    if (Wire.endTransmission() == 0) {
+    uint8_t err = Wire.endTransmission();
+    if (err == 5) break;            // timeout
+    if (err == 0) {
       if (found.length()) found += "-";
       found += String(a, HEX);
     }
@@ -57,22 +63,22 @@ Room readRoom() {
   Wire.begin(SHT_SDA, SHT_SCL);
 
   Wire.beginTransmission(SHT4x_DEFAULT_ADDR);
-  if (Wire.endTransmission() != 0) { r.err = "probe"; r.ack = scanBus(); return r; }
+  if (Wire.endTransmission() != 0) { r.err = "probe"; r.ack = scanBus(r.sdaUp && r.sclUp); return r; }
 
   // High precision with the heater off. The heater is for clearing condensation and draws tens
   // of mA — on a battery it would cost more than the whole wake.
   Wire.beginTransmission(SHT4x_DEFAULT_ADDR);
   Wire.write((uint8_t)SHT4x_NOHEAT_HIGHPRECISION);
-  if (Wire.endTransmission() != 0) { r.err = "write"; r.ack = scanBus(); return r; }
+  if (Wire.endTransmission() != 0) { r.err = "write"; r.ack = scanBus(r.sdaUp && r.sclUp); return r; }
   delay(10);
 
   uint8_t b[6];
   if (Wire.requestFrom((uint8_t)SHT4x_DEFAULT_ADDR, (uint8_t)6) != 6) {
-    r.err = "read"; r.ack = scanBus(); return r;
+    r.err = "read"; r.ack = scanBus(r.sdaUp && r.sclUp); return r;
   }
   for (uint8_t& v : b) v = Wire.read();
   if (b[2] != crc8(b, 2) || b[5] != crc8(b + 3, 2)) {
-    r.err = "crc"; r.ack = scanBus(); return r;
+    r.err = "crc"; r.ack = scanBus(r.sdaUp && r.sclUp); return r;
   }
 
   r.ok = true;
