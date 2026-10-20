@@ -12,9 +12,15 @@ static GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
     GxEPD2_154_D67(EPD_CS, EPD_DC, EPD_RST, EPD_BUSY));
 static U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
+// Every line into the panel. Each floats through deep sleep unless held by itself: GPIO0-5 are
+// never held, and gpio_deep_sleep_hold_en() cuts GPIO6-21 off.
+static const gpio_num_t panelInputs[] = {
+    (gpio_num_t)EPD_RST, (gpio_num_t)EPD_CS, (gpio_num_t)EPD_DC,
+    (gpio_num_t)EPD_SCK, (gpio_num_t)EPD_MOSI};
+
 void displayBegin() {
-  // Still held from the last deep sleep (see sleepUntilNextWake()), and a held pad ignores writes.
-  gpio_hold_dis((gpio_num_t)EPD_RST);
+  // Still held from the last deep sleep (see displayHoldPins()), and a held pad ignores writes.
+  for (gpio_num_t p : panelInputs) gpio_hold_dis(p);
   // Claimed with explicit pins before init(), because GxEPD2 calls SPI.begin() with no arguments
   // and that falls back to the variant's defaults: SCK=4/MISO=5 on the Super Mini, which are
   // RST and DC, and SCK=8 on the XIAO, which is the sensor's SDA. Having begun the bus already
@@ -30,6 +36,16 @@ void displayBegin() {
   digitalWrite(EPD_RST, LOW);  delay(20);
   digitalWrite(EPD_RST, HIGH); delay(50);
   u8g2Fonts.begin(display);
+}
+
+void displayHoldPins() {
+  SPI.end();                                  // CLK and DIN back from the SPI peripheral to plain pins
+  pinMode(EPD_SCK, OUTPUT);  digitalWrite(EPD_SCK, LOW);
+  pinMode(EPD_MOSI, OUTPUT); digitalWrite(EPD_MOSI, LOW);
+  digitalWrite(EPD_CS, HIGH);                 // deselected
+  digitalWrite(EPD_DC, LOW);
+  digitalWrite(EPD_RST, HIGH);                // low resets the panel out of its deep sleep
+  for (gpio_num_t p : panelInputs) gpio_hold_en(p);
 }
 
 static void drawCentered(const String& s, int y) {

@@ -43,6 +43,16 @@ static void logWake(const char* kind, const Wake& w, JsonDocument& e) {
   appendLog(entry);
 }
 
+// Both ways into deep sleep end here.
+static void deepSleep() {
+  displayHoldPins();
+  // The digital pins (GPIO6-21) have no guaranteed state in deep sleep. With this on, IDF turns
+  // each one's input, output and pulls off before sleeping, so SDA's pull-up has no path to ground.
+  // Pins held by themselves are left alone, and stay held only with this on.
+  gpio_deep_sleep_hold_en();
+  esp_deep_sleep_start();
+}
+
 // Puts the setup page on the air, and never returns: the board either restarts with a network
 // or sleeps with no wake timer until someone presses RESET. firstRun only decides what the
 // screen says — the board has never been set up, or the network it knows stopped answering.
@@ -79,9 +89,7 @@ static void enterSetupMode(bool firstRun, const Wake& w) {
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
   saveAwakeMs(millis());            // minutes of access point at ~100 mA — the costliest wake there is
   Serial.flush();
-  gpio_hold_en((gpio_num_t)EPD_RST);          // the panel's RST held high, as in sleepUntilNextWake()
-  gpio_deep_sleep_hold_en();                  // pins isolated for the sleep, as in sleepUntilNextWake()
-  esp_deep_sleep_start();                     // no wake timer: asleep until someone resets it
+  deepSleep();                                // no wake timer: asleep until someone resets it
 }
 
 static void sleepUntilNextWake(uint8_t minutes) {
@@ -93,13 +101,7 @@ static void sleepUntilNextWake(uint8_t minutes) {
   Serial.printf("deep sleep for %u min...\n", minutes);
   Serial.flush();
   esp_sleep_enable_timer_wakeup((uint64_t)minutes * 60 * 1000000ULL);
-  // The digital pins (GPIO6-21) have no guaranteed state in deep sleep. With this on, IDF turns
-  // each one's input, output and pulls off before sleeping, so SDA's pull-up has no path to ground.
-  // That leaves out GPIO0-5, and RST is GPIO4: floating, a multimeter alone pulls it low, and that
-  // resets the panel out of its deep sleep. Held by its own call instead.
-  gpio_hold_en((gpio_num_t)EPD_RST);
-  gpio_deep_sleep_hold_en();
-  esp_deep_sleep_start();
+  deepSleep();
 #else
   Serial.println("[debug] staying awake (no deep sleep)");
 #endif
