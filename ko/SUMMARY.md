@@ -2,7 +2,7 @@
 
 * [E-ink Weather Display](README.md)
 
-## 설계 노트
+## 설계 노트 <a href="#design-notes" id="design-notes"></a>
 
 * [저장과 화면 갱신](docs/persistence-and-refresh.md)
 * [ESP32-C3 JTAG 디버깅](docs/jtag-debug.md)
