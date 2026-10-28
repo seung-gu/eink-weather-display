@@ -14,27 +14,10 @@ RST를 LOW로 잡아 둔 적이 없었다. 7110254 전에는 떠 있었고 그 �
 
 ---
 
-## 1. V2.1 보드에서는 RST가 전원 스위치이기도 하다
+## 1. V2.1 보드에서는 RST가 모듈 전원도 켜고 끈다
 
-Waveshare 1.54" e-Paper Module 회로도 기준. 이 보드는 V2.1이다.
-
-- RST → R35 1 kΩ → Q32(S8050) 베이스, 베이스와 GND 사이에 R34 47 kΩ. Q32가 Q31(AO3401
-  P-MOSFET, 게이트 풀업 100 kΩ)의 게이트를 끌어내리면 모듈 전원이 연결된다.
-- RST → R36 1 kΩ → VCC_EN, GND 쪽에 R37 47 kΩ. VCC_EN은 RT9193-33 LDO의 enable이다.
-- 헤더와 패널 사이에 TXS0108E 레벨 시프터가 있다.
-
-RST HIGH면 모듈 전원 켜짐, LOW면 꺼짐. 이 보드에서 잰 RST–GND: 16.5 kΩ.
-
-RST를 HIGH로 잡아 두면 Q32 베이스로 약 (3.3 − 0.7) V / 1 kΩ ≈ 2.6 mA가 흐른다. 회로도로 계산한
-값이고 측정한 값은 아니다.
-
-다른 곳에도 같은 내용이 있다:
-- GxEPD2의 `_reset()`(`GxEPD2_EPD.cpp`)에 "NEEDED for Waveshare clever reset circuit"라는
-  주석이 있다.
-- Waveshare 위키에 리셋을 오래 LOW로 두면 드라이버 보드 전원이 껐다 켜질 수 있다고 나와 있다.
-
-[GPIO로 e-Paper 모듈 전원 켜고 끄기](epd-power-gating.md)는 GPIO로 모듈 VCC를 끊는 배선이다. V2.1
-보드에서는 RST가 이미 그 일을 한다.
+V2.1 보드에서는 RST가 LOW여야 모듈이 꺼지고 휴지전류가 흐르지 않는다. HIGH로 두면 자는 동안에도
+모듈이 계속 켜져 있다.
 
 ---
 

@@ -16,26 +16,10 @@ was flashed from the working tree before the commit, so the board reports it as 
 
 ---
 
-## 1. On the V2.1 board, RST is also the power switch
+## 1. On the V2.1 board, RST also switches the module
 
-From the Waveshare 1.54" e-Paper Module schematic. This board is V2.1.
-
-- RST → R35 1 kΩ → base of Q32 (S8050), with R34 47 kΩ from base to GND. Q32 pulls the gate of Q31
-  (AO3401 P-MOSFET, 100 kΩ gate pull-up) low, which connects the module's supply.
-- RST → R36 1 kΩ → VCC_EN, with R37 47 kΩ to GND. VCC_EN is the enable of the RT9193-33 LDO.
-- A TXS0108E level shifter sits between the header and the panel.
-
-RST high: module powered. RST low: module off. Measured RST–GND on this board: 16.5 kΩ.
-
-Held high, RST drives about (3.3 − 0.7) V / 1 kΩ ≈ 2.6 mA into Q32's base. Computed from the
-schematic, not measured.
-
-The same is said elsewhere:
-- GxEPD2's `_reset()` (`GxEPD2_EPD.cpp`) is commented "NEEDED for Waveshare clever reset circuit".
-- The Waveshare wiki says a long reset low can power-cycle the driver board.
-
-[Powering the e-Paper module from a GPIO](epd-power-gating.md) wires a GPIO into the module's VCC
-to switch it off. On the V2.1 board RST already does that.
+On the V2.1 board RST has to be low for the module to switch off and stop drawing current. Held
+high, the module stays on through deep sleep.
 
 ---
 
