@@ -15,5 +15,5 @@ site:
       title: 한국어
       path: ko
       content:
-        directory: ./ko
+        directory: ./docs/ko
         language: ko

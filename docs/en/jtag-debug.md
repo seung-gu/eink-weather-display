@@ -1,4 +1,4 @@
-[English](jtag-debug.md) | [한국어](../ko/docs/jtag-debug.md)
+[English](jtag-debug.md) | [한국어](../ko/jtag-debug.md)
 
 # JTAG debugging on the ESP32-C3
 
@@ -84,7 +84,7 @@ Error: attempted 'gdb' connection rejected
 **A breakpoint that never hits has two causes, and neither is reported.** Either the app is not
 running, or a reset went around the debugger.
 
-![Two silent failure modes. ① Is the app actually running? Normal boot, boot:0x8 (SPI_FAST_FLASH_BOOT), the app runs and breakpoints hit; download mode, boot:0x0 (USB_BOOT) plus wait usb download, the app never starts and the CPU sits in ROM, so nothing can ever hit. ② Did the reset go through the debugger? A debugger reset — Restart, monitor reset halt, or PIO Debug without uploading — makes GDB re-plant the hardware breakpoints and they hit; the reset button resets the chip behind GDB's back, the trigger registers are cleared, nothing re-plants them, and execution never stops again.](jtag-fail-modes.png)
+![Two silent failure modes. ① Is the app actually running? Normal boot, boot:0x8 (SPI_FAST_FLASH_BOOT), the app runs and breakpoints hit; download mode, boot:0x0 (USB_BOOT) plus wait usb download, the app never starts and the CPU sits in ROM, so nothing can ever hit. ② Did the reset go through the debugger? A debugger reset — Restart, monitor reset halt, or PIO Debug without uploading — makes GDB re-plant the hardware breakpoints and they hit; the reset button resets the chip behind GDB's back, the trigger registers are cleared, nothing re-plants them, and execution never stops again.](../images/jtag-fail-modes.png)
 
 ### Download mode blocks every breakpoint
 

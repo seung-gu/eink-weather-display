@@ -1,4 +1,4 @@
-[English](battery-cutoff.md) | [한국어](../ko/docs/battery-cutoff.md)
+[English](battery-cutoff.md) | [한국어](../ko/battery-cutoff.md)
 
 # Cutting the battery off at low voltage
 
@@ -27,7 +27,7 @@ Changing the cutoff from 3.4 V to 3.3 V is one number and a reflash. No part cha
 
 ## 2. The circuit
 
-![The switch in place: the battery feeds a P-MOSFET whose gate is held up to the battery + rail by a 1 MΩ pull-up and pulled down through a small N-MOSFET from one GPIO; past the switch sit the 3.3 V regulator and the MCU, with USB 5 V entering at the regulator. The sense divider is tapped on the battery side of the switch, ahead of it.](cutoff-circuit.png)
+![The switch in place: the battery feeds a P-MOSFET whose gate is held up to the battery + rail by a 1 MΩ pull-up and pulled down through a small N-MOSFET from one GPIO; past the switch sit the 3.3 V regulator and the MCU, with USB 5 V entering at the regulator. The sense divider is tapped on the battery side of the switch, ahead of it.](../images/cutoff-circuit.png)
 
 The divider taps **ahead of the switch**. Behind it, a disconnected battery reads 0 V and the
 firmware cannot tell a flat battery from a charged one after waking on USB.
@@ -44,7 +44,7 @@ The source is tied to the battery, so:
 | left floating, pulled to battery + | 0 V | **off** |
 | held at 0 V | −3.7 V | **on** |
 
-![A MOSFET in cross-section, twice. With the gate at the same voltage as the source, V_GS is 0 V, nothing is drawn under the gate, the gap between source and drain stays empty and the two are disconnected. With the gate pulled to 0 V, V_GS is −3.7 V, charge is dragged under the gate to bridge the gap, and current flows from source to drain. In both, an insulator separates the gate plate from the channel.](mosfet-inside.png)
+![A MOSFET in cross-section, twice. With the gate at the same voltage as the source, V_GS is 0 V, nothing is drawn under the gate, the gap between source and drain stays empty and the two are disconnected. With the gate pulled to 0 V, V_GS is −3.7 V, charge is dragged under the gate to bridge the gap, and current flows from source to drain. In both, an insulator separates the gate plate from the channel.](../images/mosfet-inside.png)
 
 The gate holds no charge of its own — it is a plate over an insulator, so nothing flows into it and
 nothing holds it anywhere. Without the pull-up it floats, and a floating gate switches on stray
@@ -84,7 +84,7 @@ survive goes first:
 
 ## 6. Why it stays off, and how it comes back
 
-![Three states. Running: the battery reaches the board through a closed switch and the GPIO holds it closed. Parked: the gate is released, the switch is open, every line from the battery is dead, and holding it open draws nothing — it cannot restart itself. Charger plugged in: USB 5 V reaches the regulator while the battery is still cut, the MCU boots on it and recloses the switch.](cutoff-states.png)
+![Three states. Running: the battery reaches the board through a closed switch and the GPIO holds it closed. Parked: the gate is released, the switch is open, every line from the battery is dead, and holding it open draws nothing — it cannot restart itself. Charger plugged in: USB 5 V reaches the regulator while the battery is still cut, the MCU boots on it and recloses the switch.](../images/cutoff-states.png)
 
 Gate and source both sit on the battery, so **V_GS is 0 V however the battery moves**. A battery that
 recovers to 3.5 V once the load is gone moves both terminals together and changes nothing. The MCU

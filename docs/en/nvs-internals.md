@@ -1,4 +1,4 @@
-[English](nvs-internals.md) | [한국어](../ko/docs/nvs-internals.md)
+[English](nvs-internals.md) | [한국어](../ko/nvs-internals.md)
 
 # Storing state in NVS
 
@@ -50,7 +50,7 @@ prefs.end();
 
 ## 4. What NVS writes to flash
 
-![NVS layout, from one device's dump: zooming from the 4 MB flash chip, into the nvs partition's 5 pages, into the active page, down to the 32-byte entries holding the stored value](nvs-layout.png)
+![NVS layout, from one device's dump: zooming from the 4 MB flash chip, into the nvs partition's 5 pages, into the active page, down to the 32-byte entries holding the stored value](../images/nvs-layout.png)
 
 Four levels, each nested inside the one before it. "Slot" and "entry" below mean the same thing —
 one of a page's 126 positions:
@@ -85,7 +85,7 @@ bytes 24–31  Data        values of ≤8 bytes sit here whole; larger ones leav
 
 Storing a 58-byte string under the key `"last"` lands like this:
 
-![Zooming from the entry-slot list into slot 1's 32 bytes: Ns/Type, CRC32, a 16-byte Key, an 8-byte Data field, and the value spilling into slots 2 and 3](nvs-entry.png)
+![Zooming from the entry-slot list into slot 1's 32 bytes: Ns/Type, CRC32, a 16-byte Key, an 8-byte Data field, and the value spilling into slots 2 and 3](../images/nvs-entry.png)
 
 `Key` (16 B) looks larger than `Data` (8 B), but the value actually occupies 64 B. **The key is
 bounded, so it is inline; the value is not, so it spills.**
@@ -141,7 +141,7 @@ One dump, as an illustration:
 State and sequence live in **the first 8 bytes of each page header**. There is no separate index;
 every page carries its own, and that is what the `xxd` loop below prints:
 
-![Three zoom steps: the five pages, then inside page 3 (header 32 B, bitmap 32 B, entries), then that header's first 8 bytes — bytes 0–3 the state, bytes 4–7 the seq](nvs-page.png)
+![Three zoom steps: the five pages, then inside page 3 (header 32 B, bitmap 32 B, entries), then that header's first 8 bytes — bytes 0–3 the state, bytes 4–7 the seq](../images/nvs-page.png)
 
 The contents column above comes from searching each page for known key names. The BLE keys are there
 even though this firmware never enables BLE.

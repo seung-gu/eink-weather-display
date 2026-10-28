@@ -1,4 +1,4 @@
-[English](../../docs/persistence-and-refresh.md) | [한국어](persistence-and-refresh.md)
+[English](../en/persistence-and-refresh.md) | [한국어](persistence-and-refresh.md)
 
 # 저장과 화면 갱신
 
@@ -22,7 +22,7 @@
 컨트롤러 자체 RAM에 이미 들어 있어야 함. 이 RAM은 **ESP32 메모리가 아니라** 디스플레이 모듈 위에
 있음. 매 웨이크가 그 RAM을 미정의 상태로 만들기 때문에 `init()`의 두 모드가 모두 깨짐.
 
-![3단 구성: 부분 갱신이 참조하는 것(패널 컨트롤러 자체 RAM, 0x24 현재 / 0x26 직전) → 매 웨이크가 그 RAM에 하는 일(display.hibernate(), 수동 RST 펄스, init(…, false)) → 그래서 두 init 모드가 각각 실패하는 방식(init(…, true)은 전체 갱신을 강제해 날씨 영역이 백색화, init(…, false)는 미정의 RAM으로 구동해 패널 전체가 노이즈) → 항상 전체 갱신](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/epd-partial-fail.png)
+![3단 구성: 부분 갱신이 참조하는 것(패널 컨트롤러 자체 RAM, 0x24 현재 / 0x26 직전) → 매 웨이크가 그 RAM에 하는 일(display.hibernate(), 수동 RST 펄스, init(…, false)) → 그래서 두 init 모드가 각각 실패하는 방식(init(…, true)은 전체 갱신을 강제해 날씨 영역이 백색화, init(…, false)는 미정의 RAM으로 구동해 패널 전체가 노이즈) → 항상 전체 갱신](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/epd-partial-fail.png)
 
 설치된 GxEPD2 소스가 두 모드를 그대로 기술함:
 
@@ -45,7 +45,7 @@ if (_initial_refresh) return refresh(false);   // initial update needs be full u
 
 이 패널에서의 관측 — `init(…, false)` 뒤 하단 ~22px에 `setPartialWindow()`:
 
-![하단 상태줄만 부분 갱신했는데 e-Paper 패널 전체가 랜덤 픽셀 노이즈로 깨진 사진](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/partial-refresh-noise.jpg)
+![하단 상태줄만 부분 갱신했는데 e-Paper 패널 전체가 랜덤 픽셀 노이즈로 깨진 사진](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/partial-refresh-noise.jpg)
 
 ### 득실
 

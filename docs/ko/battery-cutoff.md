@@ -1,4 +1,4 @@
-[English](../../docs/battery-cutoff.md) | [한국어](battery-cutoff.md)
+[English](../en/battery-cutoff.md) | [한국어](battery-cutoff.md)
 
 # 저전압에서 배터리 차단하기
 
@@ -26,7 +26,7 @@
 
 ## 2. 회로
 
-![스위치가 놓이는 자리. 배터리가 P-MOSFET으로 들어가고, 그 게이트는 1MΩ 풀업이 끌어올리며 작은 N-MOSFET을 통해 GPIO 하나가 끌어내린다. 스위치 뒤에 3.3V 레귤레이터와 MCU가 있고 USB 5V는 레귤레이터로 들어온다. 분압은 스위치보다 앞, 배터리 쪽에서 딴다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/cutoff-circuit.png)
+![스위치가 놓이는 자리. 배터리가 P-MOSFET으로 들어가고, 그 게이트는 1MΩ 풀업이 끌어올리며 작은 N-MOSFET을 통해 GPIO 하나가 끌어내린다. 스위치 뒤에 3.3V 레귤레이터와 MCU가 있고 USB 5V는 레귤레이터로 들어온다. 분압은 스위치보다 앞, 배터리 쪽에서 딴다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/cutoff-circuit.png)
 
 분압은 **스위치보다 앞**에서 딴다. 뒤에서 따면 차단된 배터리가 0V로 읽혀서, USB로 깨어났을 때
 방전된 배터리와 충전된 배터리를 구분할 수 없다.
@@ -42,7 +42,7 @@ P-MOSFET은 게이트가 소스보다 낮을 때 통한다. 대략 1V 이상 낮
 | 떠 있음, 풀업이 배터리 +로 끌어올림 | 0V | **꺼짐** |
 | 0V로 잡힘 | −3.7V | **켜짐** |
 
-![MOSFET 단면을 두 경우로 나눠 본 그림. 게이트가 소스와 같은 전압이면 V_GS는 0V이고 게이트 아래로 아무것도 끌려오지 않아 소스와 드레인 사이 틈이 비어 있고 둘이 끊어져 있다. 게이트를 0V로 내리면 V_GS가 −3.7V가 되어 전하가 게이트 아래로 끌려와 틈을 잇고 소스에서 드레인으로 전류가 흐른다. 두 경우 모두 게이트 판과 통로 사이에 절연막이 있다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/mosfet-inside.png)
+![MOSFET 단면을 두 경우로 나눠 본 그림. 게이트가 소스와 같은 전압이면 V_GS는 0V이고 게이트 아래로 아무것도 끌려오지 않아 소스와 드레인 사이 틈이 비어 있고 둘이 끊어져 있다. 게이트를 0V로 내리면 V_GS가 −3.7V가 되어 전하가 게이트 아래로 끌려와 틈을 잇고 소스에서 드레인으로 전류가 흐른다. 두 경우 모두 게이트 판과 통로 사이에 절연막이 있다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/mosfet-inside.png)
 
 게이트는 스스로 전압을 갖지 못한다. 절연막 위에 얹힌 판이라 전류가 들어가지도, 어딘가에 머물지도
 않는다. 풀업이 없으면 떠 있게 되고, 떠 있는 게이트는 잡음에 따라 켜졌다 꺼졌다 한다. 풀업은
@@ -79,7 +79,7 @@ P-MOSFET은 게이트가 소스보다 낮을 때 통한다. 대략 1V 이상 낮
 
 ## 6. 꺼진 채로 있는 이유, 그리고 돌아오는 길
 
-![세 가지 상태. 정상: 닫힌 스위치를 지나 배터리가 보드에 닿고 GPIO가 스위치를 잡고 있다. 차단: 게이트를 놓아 스위치가 열렸고 배터리에서 나가는 모든 선이 죽어 있으며, 열린 채로 두는 데 전류가 들지 않아 스스로 되살아나지 못한다. 충전기 연결: 배터리가 끊긴 채로 USB 5V가 레귤레이터에 닿아 MCU가 그 전력으로 부팅하고 스위치를 다시 닫는다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/cutoff-states.png)
+![세 가지 상태. 정상: 닫힌 스위치를 지나 배터리가 보드에 닿고 GPIO가 스위치를 잡고 있다. 차단: 게이트를 놓아 스위치가 열렸고 배터리에서 나가는 모든 선이 죽어 있으며, 열린 채로 두는 데 전류가 들지 않아 스스로 되살아나지 못한다. 충전기 연결: 배터리가 끊긴 채로 USB 5V가 레귤레이터에 닿아 MCU가 그 전력으로 부팅하고 스위치를 다시 닫는다.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/cutoff-states.png)
 
 게이트와 소스가 둘 다 배터리에 붙어 있어서 **배터리가 어떻게 변하든 V_GS는 0V**다. 부하가 빠져 배터리가
 3.5V로 회복해도 두 단자가 같이 올라가므로 아무것도 바뀌지 않는다. MCU는 전원이 없어 게이트를

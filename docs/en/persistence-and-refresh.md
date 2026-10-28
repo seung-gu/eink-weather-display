@@ -1,4 +1,4 @@
-[English](persistence-and-refresh.md) | [한국어](../ko/docs/persistence-and-refresh.md)
+[English](persistence-and-refresh.md) | [한국어](../ko/persistence-and-refresh.md)
 
 # Persistence & refresh
 
@@ -23,7 +23,7 @@ A partial update is *differential*: it drives only the pixels that differ from t
 so the current screen must already sit in the panel controller's own RAM — on the display module,
 not the ESP32's memory. Every wake leaves that RAM undefined, which breaks both `init()` modes.
 
-![Three panels: a partial update draws from the panel controller's own RAM (0x24 current, 0x26 previous); every wake destroys that RAM through display.hibernate(), the manual RST pulse and init(…, false); so init(…, true) forces a full refresh and clears the weather area to white, while init(…, false) draws from undefined RAM and fills the whole panel with noise — always full refresh](epd-partial-fail.png)
+![Three panels: a partial update draws from the panel controller's own RAM (0x24 current, 0x26 previous); every wake destroys that RAM through display.hibernate(), the manual RST pulse and init(…, false); so init(…, true) forces a full refresh and clears the weather area to white, while init(…, false) draws from undefined RAM and fills the whole panel with noise — always full refresh](../images/epd-partial-fail.png)
 
 The installed GxEPD2 states both modes in its source:
 
@@ -47,7 +47,7 @@ RAM the wake left undefined.
 
 Observed on this panel — `setPartialWindow()` over the bottom ~22 px after `init(…, false)`:
 
-![The whole e-Paper panel filled with random pixel noise after a partial refresh of the bottom status strip](partial-refresh-noise.jpg)
+![The whole e-Paper panel filled with random pixel noise after a partial refresh of the bottom status strip](../images/partial-refresh-noise.jpg)
 
 ### The trade-off
 

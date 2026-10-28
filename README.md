@@ -1,4 +1,4 @@
-[English](README.md) | [한국어](ko/README.md)
+[English](README.md) | [한국어](docs/ko/README.md)
 
 # eink-weather-display
 
@@ -8,14 +8,14 @@ Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink
 > Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
 
 ## Runtime (5 steps)
-![Runtime: wake, read battery, Wi-Fi or setup portal, POST to the server, draw e-Paper, deep sleep, then reset on wake](docs/runtime.png)
+![Runtime: wake, read battery, Wi-Fi or setup portal, POST to the server, draw e-Paper, deep sleep, then reset on wake](docs/images/runtime.png)
 
 - Everything in `setup()`, `loop()` empty (a wake is a full reset)
 - Bistable e-ink → 0 current to hold the image, draws only on refresh
 - State that has to survive a sleep goes to NVS, not RTC memory (see the design notes)
 
 ## Data pipeline
-![Data pipeline: public weather API to MCP server to device; server also exposed over MCP to an AI](docs/pipeline.png)
+![Data pipeline: public weather API to MCP server to device; server also exposed over MCP to an AI](docs/images/pipeline.png)
 
 - Formatting is server-side → the device stays light (less RAM/power)
 - Device: one HTTPS POST per wake — it reports its own state and gets the weather back
@@ -108,15 +108,15 @@ src/
 ```
 
 ## Design notes
-- [Persistence & refresh](docs/persistence-and-refresh.md) — why the last weather is kept in NVS
+- [Persistence & refresh](docs/en/persistence-and-refresh.md) — why the last weather is kept in NVS
   (not RTC memory), and why a partial refresh of just the status line doesn't work here
-- [JTAG debugging](docs/jtag-debug.md) — step debugging over the built-in USB-JTAG: the OpenOCD
+- [JTAG debugging](docs/en/jtag-debug.md) — step debugging over the built-in USB-JTAG: the OpenOCD
   overrides it needs, and why download mode silently breaks it
-- [Storing state in NVS](docs/nvs-internals.md) — why NVS over RTC memory, what NVS is, the
+- [Storing state in NVS](docs/en/nvs-internals.md) — why NVS over RTC memory, what NVS is, the
   `Preferences` API, and what a `putString()` becomes on flash, read back from a device dump
-- [e-Paper power gating](docs/epd-power-gating.md) — switching the module's VCC from a GPIO so it
+- [e-Paper power gating](docs/en/epd-power-gating.md) — switching the module's VCC from a GPIO so it
   stops drawing in deep sleep: the wiring, the pin choice, and why it is parked rather than merged
-- [Low-voltage cutoff](docs/battery-cutoff.md) — a P-MOSFET that disconnects the battery outright
+- [Low-voltage cutoff](docs/en/battery-cutoff.md) — a P-MOSFET that disconnects the battery outright
   at 3.4 V and comes back when a charger is plugged in, with no button and no standby current
 
 ## Server (MCP)

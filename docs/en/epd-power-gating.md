@@ -1,4 +1,4 @@
-[English](epd-power-gating.md) | [한국어](../ko/docs/epd-power-gating.md)
+[English](epd-power-gating.md) | [한국어](../ko/epd-power-gating.md)
 
 # Powering the e-Paper module from a GPIO
 
