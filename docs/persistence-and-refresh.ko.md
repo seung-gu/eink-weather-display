@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 [English](persistence-and-refresh.md) | [한국어](persistence-and-refresh.ko.md)
 
 # 저장과 화면 갱신

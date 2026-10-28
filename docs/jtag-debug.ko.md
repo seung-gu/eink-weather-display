@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 [English](jtag-debug.md) | [한국어](jtag-debug.ko.md)
 
 # ESP32-C3 JTAG 디버깅

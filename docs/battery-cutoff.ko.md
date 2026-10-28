@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 [English](battery-cutoff.md) | [한국어](battery-cutoff.ko.md)
 
 # 저전압에서 배터리 차단하기

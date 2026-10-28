@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 [English](nvs-internals.md) | [한국어](nvs-internals.ko.md)
 
 # NVS에 상태 저장하기
