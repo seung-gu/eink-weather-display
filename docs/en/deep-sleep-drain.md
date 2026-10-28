@@ -10,6 +10,10 @@ firmware never held RST low through deep sleep. It floated until 7110254 and was
 that, and either way the module stayed powered. f880792 holds every line into the panel low,
 RST included.
 
+**Result:** with f880792 on the board from 2026-10-21 15:52, the battery went from 3970 to 3862 mV
+in 6.3 days: −0.76 mV/h. The two builds before it drained at −3.6 and −7.6 mV/h (section 6). It
+was flashed from the working tree before the commit, so the board reports it as `0e14a8d-dirty`.
+
 ---
 
 ## 1. On the V2.1 board, RST is also the power switch
@@ -86,7 +90,17 @@ Measured with the board asleep before f880792: DC, CLK, DIN and CS each read 0 V
 
 ---
 
-## 6. Slopes on 7110254
+## 6. Slopes
+
+Each span starts at least an hour after a charge. Local time, Europe/Berlin.
+
+| Firmware | Span | Battery | Slope |
+|---|---|---|---|
+| 7110254 | 10-19 11:15 – 10-20 14:27 | 3966 → 3866 mV | −3.6 mV/h |
+| 0e14a8d | 10-20 15:40 – 10-21 15:28 | 4172 → 3990 mV | −7.6 mV/h |
+| f880792 | 10-21 17:35 – 10-28 01:53 | 3970 → 3862 mV | −0.76 mV/h |
+
+Earlier on 7110254, while the module was being swapped:
 
 | Local time (UTC+2) | Module | Slope |
 |---|---|---|
@@ -94,8 +108,6 @@ Measured with the board asleep before f880792: DC, CLK, DIN and CS each read 0 V
 | 10-16 21:00 – 10-17 10:33 | X (fitted 20:20) | −1.2 mV/h |
 | 10-17 11:39 – 10-18 09:57 | Y (fitted 10:46–11:09) | −4 mV/h |
 | 10-18 11:26 – 21:27 | X again (fitted 10:01–10:56) | −10 mV/h |
-
-0e14a8d drained as fast.
 
 ---
 
