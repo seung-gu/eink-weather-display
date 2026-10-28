@@ -118,6 +118,8 @@ src/
   stops drawing in deep sleep: the wiring, the pin choice, and why it is parked rather than merged
 - [Low-voltage cutoff](docs/en/battery-cutoff.md) — a P-MOSFET that disconnects the battery outright
   at 3.4 V and comes back when a charger is plugged in, with no button and no standby current
+- [Battery leakage current troubleshooting](docs/en/deep-sleep-drain.md) — RST on the Waveshare V2.1 board also switches the
+  module's supply, so it has to be held low through deep sleep, and what was ruled out on the way
 
 ## Server (MCP)
 The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.

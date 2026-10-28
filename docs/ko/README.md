@@ -122,6 +122,8 @@ src/
   없애는 방법: 배선, 핀 선택, 그리고 병합하지 않고 보류한 이유
 - [저전압 차단](battery-cutoff.md) — 3.4V에서 P-MOSFET으로 배터리를 아예 떼어내고
   충전기를 꽂으면 돌아오는 회로. 버튼도 대기전류도 없다
+- [배터리 누설전류 Trouble shooting](deep-sleep-drain.md) — Waveshare V2.1 보드에서는 RST가 모듈 전원 스위치이기도 해서
+  딥슬립 중 LOW로 잡아 둬야 한다. 찾는 과정에서 배제한 것들
 
 ## 서버 (MCP)
 날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**

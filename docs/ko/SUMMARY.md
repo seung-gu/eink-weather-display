@@ -9,3 +9,4 @@
 * [NVS에 상태 저장하기](nvs-internals.md)
 * [e-Paper 모듈을 GPIO로 급전하기](epd-power-gating.md)
 * [저전압에서 배터리 차단하기](battery-cutoff.md)
+* [배터리 누설전류 Trouble shooting](deep-sleep-drain.md)
