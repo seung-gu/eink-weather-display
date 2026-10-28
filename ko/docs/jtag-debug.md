@@ -1,8 +1,4 @@
----
-hidden: true
----
-
-[English](jtag-debug.md) | [한국어](jtag-debug.ko.md)
+[English](../../docs/jtag-debug.md) | [한국어](jtag-debug.md)
 
 # ESP32-C3 JTAG 디버깅
 
@@ -86,7 +82,7 @@ Error: attempted 'gdb' connection rejected
 **브레이크포인트가 안 걸리는 원인은 두 가지이고, 둘 다 아무 메시지가 없음.** 앱이 안 돌고 있거나,
 리셋이 디버거를 우회했거나.
 
-![조용히 실패하는 두 경우. ① 앱이 실제로 돌고 있는가? 정상 부팅은 boot:0x8 (SPI_FAST_FLASH_BOOT)로 앱이 돌고 브레이크포인트가 걸림. 다운로드 모드는 boot:0x0 (USB_BOOT) + wait usb download로 앱이 시작조차 안 하고 CPU가 ROM에 머물러 아무것도 걸릴 수 없음. ② 리셋이 디버거를 거쳤는가? 디버거 리셋(Restart, monitor reset halt, PIO Debug without uploading)은 GDB가 하드웨어 브레이크포인트를 다시 심어 정상 동작. 리셋 버튼은 GDB 모르게 칩을 리셋해 트리거 레지스터가 지워지고 다시 심는 주체가 없어 이후로 영영 안 멈춤.](jtag-fail-modes.png)
+![조용히 실패하는 두 경우. ① 앱이 실제로 돌고 있는가? 정상 부팅은 boot:0x8 (SPI_FAST_FLASH_BOOT)로 앱이 돌고 브레이크포인트가 걸림. 다운로드 모드는 boot:0x0 (USB_BOOT) + wait usb download로 앱이 시작조차 안 하고 CPU가 ROM에 머물러 아무것도 걸릴 수 없음. ② 리셋이 디버거를 거쳤는가? 디버거 리셋(Restart, monitor reset halt, PIO Debug without uploading)은 GDB가 하드웨어 브레이크포인트를 다시 심어 정상 동작. 리셋 버튼은 GDB 모르게 칩을 리셋해 트리거 레지스터가 지워지고 다시 심는 주체가 없어 이후로 영영 안 멈춤.](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/jtag-fail-modes.png)
 
 ### 다운로드 모드에서는 브레이크포인트가 걸리지 않음
 

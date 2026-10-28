@@ -1,4 +1,4 @@
-[English](battery-cutoff.md) | [한국어](battery-cutoff.ko.md)
+[English](battery-cutoff.md) | [한국어](../ko/docs/battery-cutoff.md)
 
 # Cutting the battery off at low voltage
 

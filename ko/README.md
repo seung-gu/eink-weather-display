@@ -1,8 +1,4 @@
----
-hidden: true
----
-
-[English](README.md) | [한국어](README.ko.md)
+[English](../README.md) | [한국어](README.md)
 
 # eink-weather-display
 
@@ -12,14 +8,14 @@ hidden: true
 > Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
 
 ## 동작 흐름 (5조각)
-![동작 흐름](docs/runtime.png)
+![동작 흐름](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/runtime.png)
 
 - 모든 작업 `setup()`, `loop()` 비움 (웨이크 = 리셋)
 - e-ink 쌍안정 → 화면 유지 전류 0, 갱신 순간만 소비
 - 잠들어도 남아야 하는 상태는 RTC 메모리가 아니라 NVS에 둔다 (설계 노트 참고)
 
 ## 데이터 파이프라인
-![데이터 파이프라인](docs/pipeline.png)
+![데이터 파이프라인](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/pipeline.png)
 
 - 정제 = 서버 담당 → 기기 경량 (RAM·전력 절약)
 - 기기: wake마다 HTTPS POST 하나 — 자기 상태를 보고하고 날씨를 응답으로 받는다
@@ -116,15 +112,15 @@ src/
 - 날씨 조건 문자열(`뇌우`·`눈`·`비`…) = 서버 응답 매칭용, 코드에 한국어 유지
 
 ## 설계 노트
-- [저장과 화면 갱신](docs/persistence-and-refresh.ko.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
+- [저장과 화면 갱신](docs/persistence-and-refresh.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
   상태줄만 부분 갱신이 안 되는 이유
-- [JTAG 디버깅](docs/jtag-debug.ko.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
+- [JTAG 디버깅](docs/jtag-debug.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
   다운로드 모드에서 디버깅이 안 되는 이유
-- [NVS에 상태 저장하기](docs/nvs-internals.ko.md) — RTC 대신 NVS인 이유, NVS가 무엇인지,
+- [NVS에 상태 저장하기](docs/nvs-internals.md) — RTC 대신 NVS인 이유, NVS가 무엇인지,
   `Preferences` API, 그리고 `putString()`이 플래시에서 어떤 모습이 되는지 (기기 덤프 기반)
-- [e-Paper 전원 게이팅](docs/epd-power-gating.ko.md) — 모듈 VCC를 GPIO로 끊어 딥슬립 중 소비를
+- [e-Paper 전원 게이팅](docs/epd-power-gating.md) — 모듈 VCC를 GPIO로 끊어 딥슬립 중 소비를
   없애는 방법: 배선, 핀 선택, 그리고 병합하지 않고 보류한 이유
-- [저전압 차단](docs/battery-cutoff.ko.md) — 3.4V에서 P-MOSFET으로 배터리를 아예 떼어내고
+- [저전압 차단](docs/battery-cutoff.md) — 3.4V에서 P-MOSFET으로 배터리를 아예 떼어내고
   충전기를 꽂으면 돌아오는 회로. 버튼도 대기전류도 없다
 
 ## 서버 (MCP)

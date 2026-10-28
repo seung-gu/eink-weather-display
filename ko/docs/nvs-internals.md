@@ -1,8 +1,4 @@
----
-hidden: true
----
-
-[English](nvs-internals.md) | [한국어](nvs-internals.ko.md)
+[English](../../docs/nvs-internals.md) | [한국어](nvs-internals.md)
 
 # NVS에 상태 저장하기
 
@@ -13,7 +9,7 @@ hidden: true
 아래 수치는 한 기기의 덤프에서 나온 값이고 "이 덤프에선"으로 표시함. 표시가 없는 것은 NVS 포맷이
 고정하는 값.
 
-관련: [저장과 화면 갱신](persistence-and-refresh.ko.md).
+관련: [저장과 화면 갱신](persistence-and-refresh.md).
 
 ---
 
@@ -21,7 +17,7 @@ hidden: true
 
 RTC SRAM은 딥슬립은 버티지만 리셋 버튼·재플래시·전원 차단에서는 지워짐 — 개발 중엔 자주 일어남
 NVS는 다 버티는 대신 플래시 erase를 씀(§6). 전체 비교표와 전력 수치는
-[저장과 화면 갱신](persistence-and-refresh.ko.md) 참고.
+[저장과 화면 갱신](persistence-and-refresh.md) 참고.
 
 ---
 
@@ -53,7 +49,7 @@ prefs.end();
 
 ## 4. NVS가 플래시에 쓰는 것
 
-![NVS 구조 (한 기기 덤프 기준): 4MB 플래시 → nvs 파티션의 페이지 5개 → ACTIVE 페이지 → 값이 담긴 32바이트 엔트리](nvs-layout.png)
+![NVS 구조 (한 기기 덤프 기준): 4MB 플래시 → nvs 파티션의 페이지 5개 → ACTIVE 페이지 → 값이 담긴 32바이트 엔트리](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/nvs-layout.png)
 
 네 개 층이 차례로 안에 중첩돼 있음. **엔트리**는 페이지 안 126개 자리 하나를 뜻하고,
 그림에는 `slot`으로 표시돼 있음:
@@ -86,7 +82,7 @@ bytes 24–31  Data        8바이트 이하 값은 여기 통째로, 크면 길
 
 키 `"last"`에 58바이트 문자열을 저장하면 이렇게 놓임:
 
-![엔트리 목록에서 slot 1의 32바이트 내부로 확대: Ns·Type, CRC32, 16B Key, 8B Data, 그리고 값이 넘쳐간 slot 2·3](nvs-entry.png)
+![엔트리 목록에서 slot 1의 32바이트 내부로 확대: Ns·Type, CRC32, 16B Key, 8B Data, 그리고 값이 넘쳐간 slot 2·3](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/nvs-entry.png)
 
 `Key`(16B)가 `Data`(8B)보다 커 보이지만 값에 실제로 쓰인 공간은 64B. **키는 길이가 유한해서 인라인,
 값은 무한해서 넘치는 구조.**
@@ -140,7 +136,7 @@ NVS는 페이지 하나만 ACTIVE로 두고 쓰기는 거기로만 감. 애플�
 상태와 seq는 **각 페이지 헤더의 첫 8바이트**에 들어 있음. 별도 색인이 없고 페이지마다 자기 번호를
 들고 있으며, 아래 `xxd` 루프가 찍는 게 바로 이 값임:
 
-![3단 확대: 페이지 5개 → page 3 내부(헤더 32B · 비트맵 32B · 엔트리) → 그 헤더의 첫 8바이트(0~3번 상태, 4~7번 seq)](nvs-page.png)
+![3단 확대: 페이지 5개 → page 3 내부(헤더 32B · 비트맵 32B · 엔트리) → 그 헤더의 첫 8바이트(0~3번 상태, 4~7번 seq)](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/nvs-page.png)
 
 위 표의 내용 열은 페이지를 문자열 검색해서 확인한 것. BLE 키는 이 펌웨어가 BLE를 쓰지 않는데도
 들어 있음.

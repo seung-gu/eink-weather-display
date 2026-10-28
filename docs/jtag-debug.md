@@ -1,4 +1,4 @@
-[English](jtag-debug.md) | [한국어](jtag-debug.ko.md)
+[English](jtag-debug.md) | [한국어](../ko/docs/jtag-debug.md)
 
 # JTAG debugging on the ESP32-C3
 

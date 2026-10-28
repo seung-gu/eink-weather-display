@@ -1,0 +1,19 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: E-ink Weather Display
+  structure:
+    - type: space
+      key: eink-en
+      title: English
+      path: en
+      default: true
+      content:
+        directory: ./
+        language: en
+    - type: space
+      key: eink-ko
+      title: 한국어
+      path: ko
+      content:
+        directory: ./ko
+        language: ko

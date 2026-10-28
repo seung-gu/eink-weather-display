@@ -1,4 +1,4 @@
-[English](nvs-internals.md) | [한국어](nvs-internals.ko.md)
+[English](nvs-internals.md) | [한국어](../ko/docs/nvs-internals.md)
 
 # Storing state in NVS
 

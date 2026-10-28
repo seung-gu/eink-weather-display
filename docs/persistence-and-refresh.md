@@ -1,4 +1,4 @@
-[English](persistence-and-refresh.md) | [한국어](persistence-and-refresh.ko.md)
+[English](persistence-and-refresh.md) | [한국어](../ko/docs/persistence-and-refresh.md)
 
 # Persistence & refresh
 

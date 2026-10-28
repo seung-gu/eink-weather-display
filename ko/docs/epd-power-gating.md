@@ -1,8 +1,4 @@
----
-hidden: true
----
-
-[English](epd-power-gating.md) | [한국어](epd-power-gating.ko.md)
+[English](../../docs/epd-power-gating.md) | [한국어](epd-power-gating.md)
 
 # e-Paper 모듈을 GPIO로 급전하기
 
