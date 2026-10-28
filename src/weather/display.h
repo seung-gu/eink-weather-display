@@ -5,8 +5,8 @@
 // Init the e-Paper (remap SPI + manual reset + start fonts)
 void displayBegin();
 
-// Drives every line into the panel to a fixed level and holds it there through deep sleep.
-// displayBegin() releases them.
+// Drives every line into the panel low, which also switches the module off, and holds them there
+// through deep sleep. displayBegin() releases them.
 void displayHoldPins();
 
 // Full-screen message: a centred heading over newline-separated body lines, drawn left

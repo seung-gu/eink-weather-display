@@ -13,7 +13,9 @@ static GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
 static U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
 // Every line into the panel. Each floats through deep sleep unless held by itself: GPIO0-5 are
-// never held, and gpio_deep_sleep_hold_en() cuts GPIO6-21 off.
+// never held, and gpio_deep_sleep_hold_en() cuts GPIO6-21 off. On the Waveshare V2.1 board RST
+// also switches the module's supply, through 1 kOhm into a transistor's base: held high, that is
+// about 2.6 mA for as long as it is high.
 static const gpio_num_t panelInputs[] = {
     (gpio_num_t)EPD_RST, (gpio_num_t)EPD_CS, (gpio_num_t)EPD_DC,
     (gpio_num_t)EPD_SCK, (gpio_num_t)EPD_MOSI};
@@ -40,12 +42,13 @@ void displayBegin() {
 
 void displayHoldPins() {
   SPI.end();                                  // CLK and DIN back from the SPI peripheral to plain pins
-  pinMode(EPD_SCK, OUTPUT);  digitalWrite(EPD_SCK, LOW);
-  pinMode(EPD_MOSI, OUTPUT); digitalWrite(EPD_MOSI, LOW);
-  digitalWrite(EPD_CS, HIGH);                 // deselected
-  digitalWrite(EPD_DC, LOW);
-  digitalWrite(EPD_RST, HIGH);                // low resets the panel out of its deep sleep
-  for (gpio_num_t p : panelInputs) gpio_hold_en(p);
+  // All low. RST low switches the module off, and a line left high would feed the unpowered
+  // module through the level shifter's clamp diodes.
+  for (gpio_num_t p : panelInputs) {
+    pinMode(p, OUTPUT);
+    digitalWrite(p, LOW);
+    gpio_hold_en(p);
+  }
 }
 
 static void drawCentered(const String& s, int y) {
