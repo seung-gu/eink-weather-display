@@ -29,7 +29,7 @@ RST를 HIGH로 잡아 두면 Q32 베이스로 약 (3.3 − 0.7) V / 1 kΩ ≈ 2.
   주석이 있다.
 - Waveshare 위키에 리셋을 오래 LOW로 두면 드라이버 보드 전원이 껐다 켜질 수 있다고 나와 있다.
 
-[e-Paper 모듈을 GPIO로 급전하기](epd-power-gating.md)는 GPIO로 모듈 VCC를 끊는 배선이다. V2.1
+[GPIO로 e-Paper 모듈 전원 켜고 끄기](epd-power-gating.md)는 GPIO로 모듈 VCC를 끊는 배선이다. V2.1
 보드에서는 RST가 이미 그 일을 한다.
 
 ---

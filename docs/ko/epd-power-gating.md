@@ -1,6 +1,6 @@
 [English](../en/epd-power-gating.md) | [한국어](epd-power-gating.md)
 
-# e-Paper 모듈을 GPIO로 급전하기
+# GPIO로 e-Paper 모듈 전원 켜고 끄기
 
 `display.hibernate()`는 SSD1681 컨트롤러만 재운다. 모듈의 나머지는 그대로다 — Waveshare 캐리어
 보드에는 레벨 시프터와 자체 전원 회로가 있고, 이것들은 딥슬립 내내 3V3에서 전류를 끌어간다.
