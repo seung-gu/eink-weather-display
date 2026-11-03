@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 #include <GxEPD2_BW.h>
 #include <U8g2_for_Adafruit_GFX.h>
+#include "qrcode.h"                 // ESP-IDF's QR encoder, shipped with the core
 #include "weather_icons.h"
 #include "config.h"
 
@@ -55,6 +56,35 @@ static void drawCentered(const String& s, int y) {
   int w = u8g2Fonts.getUTF8Width(s.c_str());
   u8g2Fonts.setCursor((display.width() - w) / 2, y);
   u8g2Fonts.print(s);
+}
+
+static void drawCenteredAt(const String& s, int cx, int y) {
+  int w = u8g2Fonts.getUTF8Width(s.c_str());
+  u8g2Fonts.setCursor(cx - w / 2, y);
+  u8g2Fonts.print(s);
+}
+
+// Where the QR goes. The encoder hands its result to a plain function pointer, so the position
+// travels in these rather than as arguments.
+static int qrLeft, qrTop, qrBox;
+
+// Each module as a square, as large as fits in qrBox: a short URL is a 25-module QR, 4 px each.
+static void drawQrModules(esp_qrcode_handle_t qr) {
+  int n = esp_qrcode_get_size(qr);
+  int px = qrBox / n;
+  for (int y = 0; y < n; y++)
+    for (int x = 0; x < n; x++)
+      if (esp_qrcode_get_module(qr, x, y))
+        display.fillRect(qrLeft + x * px, qrTop + y * px, px, px, GxEPD_BLACK);
+}
+
+static void drawQr(const String& text, int left, int top, int box) {
+  qrLeft = left; qrTop = top; qrBox = box;
+  esp_qrcode_config_t cfg = {};
+  cfg.display_func       = drawQrModules;
+  cfg.max_qrcode_version = 3;                 // 29 modules: still 3 px each in a 100 px box
+  cfg.qrcode_ecc_level   = ESP_QRCODE_ECC_LOW;  // a crisp screen up close needs little recovery
+  esp_qrcode_generate(&cfg, text.c_str());
 }
 
 // Condition string -> 48x48 bitmap icon (cx,cy = center).
@@ -214,6 +244,40 @@ void displayMessage(const String& title, const String& body) {
   display.hibernate();
 }
 
+// QR on the left, the code on the right, the steps underneath. The QR leads because scanning it
+// fills the code in on the dashboard; the code is there for anyone who cannot scan. The phone is
+// already on the internet by now: this screen only comes up once the board itself is online.
+void displayRegister(const String& code) {
+  display.setRotation(1);
+  u8g2Fonts.setFontMode(1);
+  u8g2Fonts.setForegroundColor(GxEPD_BLACK);
+  u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
+  display.setFullWindow();
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
+    drawQr(String(REGISTER_URL) + code, 8, 8, 100);
+
+    const int cx = 156;                       // centre of the column right of the QR
+    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+    drawCenteredAt("Scan to", cx, 22);
+    drawCenteredAt("register", cx, 34);
+    u8g2Fonts.setFont(u8g2_font_helvB14_tf);
+    drawCenteredAt(code, cx, 66);
+    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+    drawCenteredAt("or enter it at", cx, 88);
+    drawCenteredAt(SERVER_HOST, cx, 100);
+
+    display.drawLine(12, 116, 188, 116, GxEPD_BLACK);
+    u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+    u8g2Fonts.setCursor(12, 140); u8g2Fonts.print("1. Scan or enter");
+    u8g2Fonts.setCursor(12, 159); u8g2Fonts.print("2. Log in, register");
+    u8g2Fonts.setCursor(12, 178); u8g2Fonts.print("3. Press RESET");
+  } while (display.nextPage());
+  display.hibernate();
+}
+
 // Response -> screen. Call only when it changed.
 void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
                     const Room& room) {
@@ -225,12 +289,13 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   String city  = d["city"]  | "";
   String cond  = d["cond"]  | "";
   String clock = d["stamp"] | "";
-  String temp  = d["temp_c"].isNull()     ? String() : String(d["temp_c"].as<int>())   + "°C";
-  String wind  = d["wind_kmh"].isNull()   ? String() : String(d["wind_kmh"].as<int>()) + "km/h";
-  String humid = d["humidity"].isNull()   ? String() : String(d["humidity"].as<int>()) + "%";
-  String pop   = d["pop"].isNull()        ? String() : String(d["pop"].as<int>())      + "%";
-  String hilo  = d["temp_max_c"].isNull() ? String()
-               : String(d["temp_max_c"].as<int>()) + "°/" + String(d["temp_min_c"].as<int>()) + "°";
+  // Outdoor values carry out_ so they cannot be mistaken for this room's.
+  String temp  = d["out_temp_c"].isNull()     ? String() : String(d["out_temp_c"].as<int>())   + "°C";
+  String wind  = d["wind_kmh"].isNull()       ? String() : String(d["wind_kmh"].as<int>())     + "km/h";
+  String humid = d["out_humidity"].isNull()   ? String() : String(d["out_humidity"].as<int>()) + "%";
+  String pop   = d["pop"].isNull()            ? String() : String(d["pop"].as<int>())          + "%";
+  String hilo  = d["out_temp_max_c"].isNull() ? String()
+               : String(d["out_temp_max_c"].as<int>()) + "°/" + String(d["out_temp_min_c"].as<int>()) + "°";
 
   display.setRotation(1);
   u8g2Fonts.setFontMode(1);

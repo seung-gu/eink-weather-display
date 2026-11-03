@@ -13,6 +13,11 @@ void displayHoldPins();
 // aligned. Used before Wi-Fi exists, so it takes no weather data.
 void displayMessage(const String& title, const String& body);
 
+// Registration screen, for a board that is online but not in anyone's account yet. A QR code that
+// opens the dashboard with this code filled in, the code itself in large type for typing by hand,
+// and what to do next. Full refresh.
+void displayRegister(const String& code);
+
 // Render a weather response string (up to 8 lines). Full refresh.
 // updated = did this wake bring a new response. The stored one carries the time it was fetched,
 // so when nothing came back the clock is replaced by "offline". rssi >= 0 means "no signal".

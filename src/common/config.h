@@ -10,9 +10,19 @@
 
 // ==== MCP server ====
 #define LED_URL       "https://emcp-led.fly.dev/led"
-#define WEATHER_URL   "https://emcp-led.fly.dev/weather"
-// Weather response: city / temp_c / cond / wind_kmh / humidity / temp_max_c / temp_min_c /
-// pop / stamp. Numbers arrive as numbers; the units are a display decision and go on here.
+#define SERVER_HOST   "emcp.fly.dev"
+#define WEATHER_URL   "https://" SERVER_HOST "/weather"
+// The registration QR opens this with the claim code on the end, which lands on the dashboard
+// with the code filled in. Lower case keeps it inside the 32 bytes a version-2 QR holds.
+#define REGISTER_URL  "https://" SERVER_HOST "/r/"
+// Weather response: city / cond / wind_kmh / pop / stamp, and out_temp_c / out_humidity /
+// out_temp_max_c / out_temp_min_c. Numbers arrive as numbers; the units are a display decision
+// and go on here. The server also sends the old names (temp_c, ...) for boards not yet reflashed.
+
+// ==== Registration ====
+// Only once Wi-Fi works: a board the server does not know asks once, shows a code for its owner
+// to scan or type, and sleeps with no wake timer. The owner registers on the dashboard and
+// presses RESET, and that wake asks again. Nothing keeps checking in between.
 
 // ==== Wake schedule ====
 #define SLEEP_MINUTES 30
@@ -35,7 +45,7 @@
 // themselves at WIFI_FAIL_LIMIT, but HTTP failures never touch that counter — a live router
 // with a dead uplink clears it on every wake and retries every RETRY_MINUTES with nothing to
 // stop it. NVS refuses a string past 4000 bytes without saying so, so stop well short.
-#define LOG_MAX_BYTES 1024
+#define LOG_MAX_BYTES 2048
 
 // ==== Onboard LED (GPIO8, active-LOW) ====
 #define LED_PIN 8

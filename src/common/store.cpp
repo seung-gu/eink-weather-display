@@ -81,6 +81,38 @@ void saveAwakeMs(uint32_t ms) {
   prefs.end();
 }
 
+String boardToken() {
+  prefs.begin(NS, true);            // read-only
+  String token = prefs.getString("token", "");
+  prefs.end();
+  return token;
+}
+
+void saveBoardToken(const String& token) {
+  prefs.begin(NS, false);
+  prefs.putString("token", token);
+  prefs.end();
+}
+
+String claimCode() {
+  prefs.begin(NS, true);            // read-only
+  String code = prefs.getString("code", "");
+  prefs.end();
+  return code;
+}
+
+void saveClaimCode(const String& code) {
+  prefs.begin(NS, false);
+  prefs.putString("code", code);
+  prefs.end();
+}
+
+void clearClaimCode() {
+  prefs.begin(NS, false);
+  prefs.remove("code");
+  prefs.end();
+}
+
 uint16_t nvsFreeEntries() {
   nvs_stats_t st;
   if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;

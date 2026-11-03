@@ -31,6 +31,17 @@ void    clearLog();
 uint32_t lastAwakeMs();
 void     saveAwakeMs(uint32_t ms);
 
+// Which board this is, to the server. The token is the board's secret: it goes on every report and
+// the server keeps only its hash. The claim code is what a person scans or types to put the board
+// in their account, and exists only until the server says registered, so "a token and no code"
+// is a registered board and anything else still has to register. Only a full NVS erase over USB
+// loses the token; setting up Wi-Fi again never touches it.
+String  boardToken();
+void    saveBoardToken(const String& token);
+String  claimCode();
+void    saveClaimCode(const String& code);
+void    clearClaimCode();
+
 // Entries in the NVS partition, 32 bytes each. Worth watching because putString stops working
 // silently when it runs out, and the failure log writes here on every failed wake. The total
 // goes along so the free count means something without knowing the partition table.

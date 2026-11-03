@@ -28,6 +28,51 @@ static void addWakeFacts(JsonDocument& d, const Wake& w) {
   d["battery_mv"]    = w.batteryMv;
   d["wifi_attempts"] = w.attempts;
   d["reset_reason"]  = w.resetReason;
+  // A cell holds less charge when it is cold, so without this the battery curve mixes the
+  // weather in with the discharge and neither can be read off it. On failed wakes too: those
+  // are the readings the server would otherwise never see.
+  d["chip_c"]        = roundf(w.chipC * 10) / 10;
+  // Left out entirely when the sensor is missing, rather than sent as zero — a board without one
+  // should read as "no sensor", not as a freezing room.
+  if (w.room.ok) {
+    d["room_c"]  = roundf(w.room.c * 10) / 10;
+    d["room_rh"] = roundf(w.room.rh * 10) / 10;
+  }
+}
+
+// ---- Registration ----
+// Claim codes use 32 characters with no 0, 1, I or O, which look alike on a small screen. 32 also
+// divides 2^32, so taking esp_random() modulo it favours none of them. The server checks the same set.
+static const char CODE_CHARS[] = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+// esp_random() is only a true random source while the radio is on, which is why both of these are
+// made after Wi-Fi has connected and never before.
+static String newToken() {
+  String token;
+  for (int i = 0; i < 8; i++) {
+    char word[9];
+    snprintf(word, sizeof word, "%08lx", (unsigned long)esp_random());
+    token += word;
+  }
+  return token;                     // 64 lower-case hex characters, the form the server expects
+}
+
+static String newClaimCode() {
+  String code;
+  for (int i = 0; i < 6; i++) code += CODE_CHARS[esp_random() % 32];
+  return code;
+}
+
+// "Token and no code" is a registered board. Anything else still has to register.
+static bool needsRegistration() {
+  return !boardToken().length() || claimCode().length();
+}
+
+// Starts over: a token the server has never seen and a code for its owner. Used for a board that
+// never had a token, and for one the server stopped knowing because its owner released it.
+static void startRegistration() {
+  saveBoardToken(newToken());
+  saveClaimCode(newClaimCode());
 }
 
 // Files a wake the server never heard about, to ride along on the next report that gets through.
@@ -117,19 +162,12 @@ static String wakeReport(const Wake& w) {
   // many boards are pointed at it, and anything that compares a row with the one before it —
   // the battery curve, the wake time — is comparing two different devices.
   req["mac"]           = readMacAddress();
+  // Which board this is, as far as the server is concerned. The MAC above is only for display.
+  req["token"]         = boardToken();
   addWakeFacts(req, w);
   req["wifi_ms"]       = w.wifi.ms;
   req["rssi"]          = w.wifi.rssi;
-  req["fw"]            = FW_VERSION;
-  // A cell holds less charge when it is cold, so without this the battery curve mixes the
-  // weather in with the discharge and neither can be read off it.
-  req["chip_c"]        = roundf(w.chipC * 10) / 10;
-  // Left out entirely when the sensor is missing, rather than sent as zero — a board without one
-  // should read as "no sensor", not as a freezing room.
-  if (w.room.ok) {
-    req["room_c"]  = roundf(w.room.c * 10) / 10;
-    req["room_rh"] = roundf(w.room.rh * 10) / 10;
-  }
+  req["fw_version"]    = FW_VERSION;
   // Sent on every wake, not only on failure: a build that reports these can be told apart from
   // one that cannot, which the firmware stamp fails at — it is the commit plus a dirty flag, so
   // two different working trees on one commit report the same string.
@@ -149,6 +187,62 @@ static String wakeReport(const Wake& w) {
   String body;
   serializeJson(req, body);
   return body;
+}
+
+// "Has anyone entered my code yet?" No readings: until the board is registered it sends nothing
+// the server would keep, and the server answers with weather only once it is.
+static String checkInBody(const String& code) {
+  JsonDocument req;
+  req["mac"]        = readMacAddress();
+  req["token"]      = boardToken();
+  req["claim_code"] = code;
+  String body;
+  serializeJson(req, body);
+  return body;
+}
+
+// Sleep with no wake timer, for a board that is waiting on a person. Only RESET wakes it.
+static void sleepUntilReset() {
+  saveAwakeMs(millis());
+  Serial.flush();
+  deepSleep();
+}
+
+// A wake of a board that is online but not registered. Never returns. Asks the server once; if
+// nobody has entered the code yet, shows it and sleeps until RESET. The owner registers on the
+// dashboard and presses RESET, and that wake asks again, so nothing has to keep checking. The
+// code stays the same until it is used: if the server has dropped it after its hour, this ask
+// puts it back, and entering it again works.
+static void registrationWake(const Wake& w, uint32_t radioOnAt) {
+  if (!boardToken().length()) startRegistration();
+  String code = claimCode();
+
+  bool registered = false;
+  HttpResult http = httpPost(WEATHER_URL, checkInBody(code));
+  if (http.code == 200) {
+    JsonDocument d;
+    registered = !deserializeJson(d, http.body) && (d["registered"] | false);
+    if (registered) {
+      clearClaimCode();
+      saveWeather(http.body);
+      Serial.println("[registered]");
+    }
+  } else if (http.code == 409) {
+    // Another board is showing the same code. Rare enough that a fresh one is the whole fix.
+    code = newClaimCode();
+    saveClaimCode(code);
+  }
+  // Anything else (not yet, 429, 503, no answer) changes nothing: the next RESET asks again.
+  disconnectWifi();
+  Serial.printf("radio on for %u ms\n", millis() - radioOnAt);
+
+  displayBegin();
+  if (registered) displayWeather(lastWeather(), true, w.wifi.rssi, w.batteryMv, w.room);
+  else            displayRegister(code);
+  clearWifiAttempts();              // online, so the portal counter starts over (see setup())
+
+  if (registered) sleepUntilNextWake(SLEEP_MINUTES);
+  else            sleepUntilReset();
 }
 
 void setup() {
@@ -178,10 +272,19 @@ void setup() {
   uint32_t radioOnAt = millis();
   w.wifi = connectWiFi();
 
+  // Registration comes only after Wi-Fi, and knows nothing about it: the Wi-Fi steps above never
+  // mention a code, and a board that cannot reach the network does not try to register. Each
+  // step stands alone, so a board that has one and not the other needs no screen of its own.
+  if (w.wifi.ok && needsRegistration()) {
+    registrationWake(w, radioOnAt);
+    return;                         // only reached in debug builds, which do not sleep
+  }
+
   // How far the wake gets decides what to store and how soon to come back. Reaching the network
   // is all the portal counter tracks — a server being down is no reason to ask someone to set up
   // Wi-Fi again.
   bool    updated  = false;
+  bool    released = false;
   uint8_t nextWake = RETRY_MINUTES;
   if (w.wifi.ok) {
     HttpResult http = httpPost(WEATHER_URL, wakeReport(w));
@@ -191,6 +294,12 @@ void setup() {
       updated  = true;
       nextWake = SLEEP_MINUTES;
       Serial.println("[weather updated]\n" + http.body);
+    } else if (http.code == 401) {
+      // The server does not know this token: its owner released the board. This is the only
+      // answer that drops a token. A 429 or 503 means the server could not check, and keeps it.
+      startRegistration();
+      released = true;
+      Serial.println("not registered — showing a new code");
     } else {
       JsonDocument e;
       e["wifi_ms"]   = w.wifi.ms;
@@ -211,8 +320,17 @@ void setup() {
 
   // NVS is the single source of truth, so the screen draws what is stored whether or not this
   // wake added to it. Redraw every time, so the status line reflects THIS wake.
-  displayBegin();
-  displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv, w.room);
+  //
+  // Except on a board still waiting to be registered that could not reach Wi-Fi: its screen holds
+  // the QR its owner needs, and the weather screen would have nothing to show in its place. The
+  // panel keeps an image without power, so leaving it alone leaves the QR up.
+  if (released) {
+    displayBegin();
+    displayRegister(claimCode());
+  } else if (w.wifi.ok || !needsRegistration()) {
+    displayBegin();
+    displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv, w.room);
+  }
 
   // Cleared here rather than the moment the connect succeeds, which is 0.5 s into a 4.4 s wake.
   // Five resets in a row is how someone asks for the setup page, and hitting a half-second
@@ -220,6 +338,7 @@ void setup() {
   // still means the same thing, only written later: a boot that got interrupted before the
   // screen was drawn should count, the same as one that never reached the network.
   if (w.wifi.ok) clearWifiAttempts();
+  if (released) sleepUntilReset();  // the new code waits for its owner, like any unregistered board
   sleepUntilNextWake(nextWake);
 }
 
