@@ -19,13 +19,25 @@ def git(*args):
 
 
 try:
-    version = git("rev-parse", "--short", "HEAD")
-    if git("status", "--porcelain"):
-        version += "-dirty"
+    commit = git("rev-parse", "--short", "HEAD")
+    dirty = bool(git("status", "--porcelain"))
+    if dirty:
+        commit += "-dirty"
 except Exception:
-    version = "unknown"          # no git, or not a checkout — say so rather than guess
+    commit, dirty = "unknown", True   # no git, or not a checkout — say so rather than guess
 
-print(f"fw version: {version} ({env['PIOENV']})")
+# The name people read on the dashboard: the release tag (v1, v2, ...) when the build is exactly a
+# tagged commit, so a released board says which release it runs. Anything else is a build no
+# release matches, and keeps the commit. FW_COMMIT is the commit either way; updates compare by it.
+version = commit
+if not dirty:
+    try:
+        version = git("describe", "--tags", "--exact-match", "--match", "v*", "HEAD")
+    except Exception:
+        pass                          # not tagged
+
+print(f"fw version: {version} ({commit}, {env['PIOENV']})")
 env.Append(CPPDEFINES=[("FW_VERSION", env.StringifyMacro(version)),
+                       ("FW_COMMIT", env.StringifyMacro(commit)),
                        # the env name says which board the build is for; updates pick the file by it
                        ("FW_BOARD", env.StringifyMacro(env["PIOENV"]))])

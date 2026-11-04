@@ -168,11 +168,12 @@ static String wakeReport(const Wake& w) {
   addWakeFacts(req, w);
   req["wifi_ms"]       = w.wifi.ms;
   req["rssi"]          = w.wifi.rssi;
-  req["fw_version"]    = FW_VERSION;
+  req["fw_version"]    = FW_VERSION;    // the release tag, or the commit for any other build
+  req["fw_commit"]     = FW_COMMIT;     // what the server decides updates by
   req["fw_board"]      = FW_BOARD;      // which release file fits this board, for updates
   // An update that has not landed yet, and how many tries it has had. Gone once the board runs it.
   String otaTried = otaVersion();
-  if (otaTried.length() && !otaTried.startsWith(FW_VERSION)) {
+  if (otaTried.length() && !otaTried.startsWith(FW_COMMIT)) {
     req["ota_tried"] = otaTried;
     req["ota_tries"] = otaTries();
   }

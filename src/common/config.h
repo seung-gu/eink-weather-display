@@ -7,6 +7,11 @@
 #ifndef FW_VERSION
 #define FW_VERSION "unknown"
 #endif
+// The commit FW_VERSION was built from, with -dirty when the tree had changes. FW_VERSION is the
+// release tag on a release build; this is what updates compare, since the server knows commits.
+#ifndef FW_COMMIT
+#define FW_COMMIT "unknown"
+#endif
 // Which build it is, as the platformio.ini env name (weather-xiao, ...). The server picks the update
 // file by it. Also set by scripts/fw_version.py.
 #ifndef FW_BOARD
