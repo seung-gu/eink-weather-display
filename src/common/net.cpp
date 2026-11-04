@@ -3,6 +3,7 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include "config.h"
+#include "roots.h"
 
 // A healthy connect takes 100-300 ms, so three seconds is already ten times the margin. Waiting
 // longer only keeps the radio on: a network that has not answered by then is usually gone, and
@@ -61,9 +62,13 @@ void disconnectWifi() {
   WiFi.disconnect(true);
 }
 
+void trustServer(WiFiClientSecure& client) {
+  client.setCACert(ROOT_CAS);
+}
+
 HttpResult httpGet(const char* url) {
   WiFiClientSecure client;
-  client.setInsecure();
+  trustServer(client);
   HTTPClient http;
   if (!http.begin(client, url)) return { HTTP_BEGIN_FAILED, "" };
 
@@ -76,7 +81,7 @@ HttpResult httpGet(const char* url) {
 
 static HttpResult post(const char* url, const String& payload) {
   WiFiClientSecure client;
-  client.setInsecure();
+  trustServer(client);
   HTTPClient http;
   if (!http.begin(client, url)) return { HTTP_BEGIN_FAILED, "" };
 

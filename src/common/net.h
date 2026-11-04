@@ -28,6 +28,11 @@ struct HttpResult {
   String body;   // response body, empty unless code is 200
 };
 
+// Every HTTPS request checks the server's certificate against the roots in roots.h. The board
+// has no clock, so only the chain is checked, not the dates.
+class WiFiClientSecure;
+void trustServer(WiFiClientSecure& client);
+
 // Neither retries: a POST has a side effect on the server, and the caller comes back after
 // RETRY_MINUTES anyway.
 HttpResult httpGet(const char* url);
