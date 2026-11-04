@@ -94,7 +94,7 @@ pio device monitor -b 115200
 
 ## Updates over Wi-Fi
 ```bash
-git tag v2 && git push origin v2
+git tag v1.01 && git push origin v1.01
 ```
 - A `v*` tag builds a GitHub release (`.github/workflows/release.yml`). Within 10 minutes the
   server offers it to every board running an older commit, and each one installs it on its next wake

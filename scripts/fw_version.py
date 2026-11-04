@@ -26,7 +26,7 @@ try:
 except Exception:
     commit, dirty = "unknown", True   # no git, or not a checkout — say so rather than guess
 
-# The name people read on the dashboard: the release tag (v1, v2, ...) when the build is exactly a
+# The name people read on the dashboard: the release tag (v1, v1.01, ...) when the build is exactly a
 # tagged commit, so a released board says which release it runs. Anything else is a build no
 # release matches, and keeps the commit. FW_COMMIT is the commit either way; updates compare by it.
 version = commit

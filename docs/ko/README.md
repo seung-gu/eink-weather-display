@@ -93,7 +93,7 @@ pio device monitor -b 115200
 
 ## Wi-Fi로 업데이트
 ```bash
-git tag v2 && git push origin v2
+git tag v1.01 && git push origin v1.01
 ```
 - `v*` 태그를 push하면 GitHub 릴리스가 만들어진다 (`.github/workflows/release.yml`). 서버가 10분 안에
   이걸 보고 더 옛 커밋을 돌리는 보드에 알려 주고, 보드는 다음에 깨어날 때 설치한다

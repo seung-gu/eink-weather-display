@@ -1,4 +1,4 @@
-# Release: push a tag that starts with v (git tag v1 && git push origin v1). This builds the weather
+# Release: push a tag that starts with v. This builds the weather
 # firmware for the XIAO and publishes it as a GitHub release. The emcp server checks the latest
 # release every 10 minutes and offers it to every board that runs an older commit, on that board's
 # next wake. Boards running a commit the release does not contain (a build flashed from a laptop)
