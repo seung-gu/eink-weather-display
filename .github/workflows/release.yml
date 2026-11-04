@@ -34,12 +34,12 @@ jobs:
           gh release create "$GITHUB_REF_NAME" commits.txt weather-xiao.bin --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
-      # The server also checks every 10 minutes; this makes it fetch now and says whether it did.
-      # A few tries, in case GitHub's "latest release" takes a moment to point at this one.
+      # The server does not keep checking GitHub; it fetches a release when this step asks. Up to ten
+      # tries, in case GitHub's "latest release" takes a moment to point at this one.
       - name: Tell emcp to fetch the release
         run: |
           want=$(git rev-parse HEAD)
-          for try in 1 2 3 4 5; do
+          for try in $(seq 1 10); do
             got=$(curl -fsS -X POST https://emcp.fly.dev/firmware/refresh | jq -r .commit) || got=
             if [ "$got" = "$want" ]; then echo "emcp holds $want"; exit 0; fi
             echo "emcp holds ${got:-nothing}, want $want"; sleep 15
