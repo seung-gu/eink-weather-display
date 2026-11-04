@@ -35,6 +35,8 @@ Every line into the panel (RST, CS, DC, CLK, DIN) is held low during sleep (f880
 Flashed on 2026-10-21 15:52, it has fallen 0.76 mV an hour over 6 days, lower even than the
 1.5 mV/h before the problem.
 
+![Dashboard battery graph: a fast sawtooth after every charge before f880792, a slow straight line after it](../images/drain-graph.png)
+
 | Firmware | Span (German time) | Battery | Per hour |
 |---|---|---|---|
 | 7110254 | 10-19 11:15 – 10-20 14:27 | 3966 → 3866 mV | −3.6 mV |
@@ -59,7 +61,3 @@ The firmware never held RST low during sleep.
 | f880792 | low | off |
 
 The other lines go low too because a line left high leaks current into the switched-off module.
-
-**Not yet explained**
-- On 7110254, with RST high, 10-16 21:00 – 10-17 10:33 still ran at a normal −1.2 mV/h.
-- Why it started on 10-06.
