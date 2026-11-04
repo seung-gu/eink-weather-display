@@ -10,8 +10,9 @@
 // release that cannot reach the server or cannot draw the screen — the two things a wake is for.
 // The old firmware then sees the same offer again; after OTA_TRIES it waits for the next release.
 
-// Called with a 200 weather body while Wi-Fi is still up. Returns when there is nothing to install
-// or the download failed; after a successful install it restarts and does not return.
+// Called with this wake's 200 weather body, after the screen is drawn. Connects Wi-Fi again only
+// when there is something to install. Returns when there is nothing to install or the download
+// failed; after a successful install it restarts and does not return.
 void otaUpdate(const String& weatherBody);
 
 // Keeps the running firmware for good. Called at the end of a wake that reached the server.

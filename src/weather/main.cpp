@@ -294,6 +294,7 @@ void setup() {
   // Wi-Fi again.
   bool    updated  = false;
   bool    released = false;
+  String  answer;                 // this wake's 200 body; may name a newer firmware (see the end)
   uint8_t nextWake = RETRY_MINUTES;
   if (w.wifi.ok) {
     HttpResult http = httpPost(WEATHER_URL, wakeReport(w));
@@ -303,7 +304,7 @@ void setup() {
       updated  = true;
       nextWake = SLEEP_MINUTES;
       Serial.println("[weather updated]\n" + http.body);
-      otaUpdate(http.body);       // restarts into the new firmware if the server offered one
+      answer   = http.body;
     } else if (http.code == 401) {
       // The server does not know this token: its owner released the board. This is the only
       // answer that drops a token. A 429 or 503 means the server could not check, and keeps it.
@@ -350,6 +351,13 @@ void setup() {
   if (w.wifi.ok) clearWifiAttempts();
   // A new firmware is kept once it has done a whole wake: reached the server and drawn the screen.
   if (updated) otaConfirm();
+  // A newer firmware the server offered comes last, after the screen already shows this wake's
+  // weather: the download keeps the board busy for most of a minute, and nobody should be looking
+  // at an unchanged screen meanwhile. Restarts into it on success; otherwise the wake ends as usual.
+  if (answer.length()) {
+    otaUpdate(answer);
+    disconnectWifi();
+  }
   if (released) sleepUntilReset();  // the new code waits for its owner, like any unregistered board
   sleepUntilNextWake(nextWake);
 }

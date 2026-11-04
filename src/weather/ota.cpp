@@ -41,6 +41,8 @@ void otaUpdate(const String& weatherBody) {
   // counts, and so does a rollback: the old firmware comes back to this same offer.
   uint8_t tries = otaVersion() == version ? otaTries() : 0;
   if (tries >= OTA_TRIES) return;
+  // The wake dropped Wi-Fi before drawing the screen. A connect that fails costs no try.
+  if (!connectWiFi().ok) return;
   saveOtaTry(version, tries + 1);
 
   // Built here from SERVER_HOST rather than taken from the answer, so it can only ever point at
