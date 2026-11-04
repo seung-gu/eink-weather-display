@@ -41,20 +41,15 @@ void displayBegin() {
   u8g2Fonts.begin(display);
 }
 
-void displayOff() {
+void displayHoldPins() {
+  SPI.end();                                  // CLK and DIN back from the SPI peripheral to plain pins
   // All low. RST low switches the module off, and a line left high would feed the unpowered
-  // module through the level shifter's clamp diodes. On a timer wake the pads are still held low
-  // from deep sleep, so this changes nothing.
+  // module through the level shifter's clamp diodes.
   for (gpio_num_t p : panelInputs) {
     pinMode(p, OUTPUT);
     digitalWrite(p, LOW);
+    gpio_hold_en(p);
   }
-}
-
-void displayHoldPins() {
-  SPI.end();                                  // CLK and DIN back from the SPI peripheral to plain pins
-  displayOff();
-  for (gpio_num_t p : panelInputs) gpio_hold_en(p);
 }
 
 static void drawCentered(const String& s, int y) {
