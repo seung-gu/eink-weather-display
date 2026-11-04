@@ -246,6 +246,7 @@ static void registrationWake(const Wake& w, uint32_t radioOnAt) {
 }
 
 void setup() {
+  displayOff();                               // before anything that takes time (see display.h)
   Serial.begin(115200);
   Serial.println("fw " FW_VERSION);           // a -dirty suffix means this build matches no commit
   Wake w;

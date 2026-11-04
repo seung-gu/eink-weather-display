@@ -9,6 +9,12 @@ void displayBegin();
 // through deep sleep. displayBegin() releases them.
 void displayHoldPins();
 
+// The same lines low, without holding them: the module off until displayBegin(). Called first
+// thing on every boot, because RESET or power-on releases the holds and RST would otherwise float
+// and leave the module on, its other lines floating too, through Wi-Fi and the server. One board
+// then failed to draw on every RESET wake, while drawing on its timer wakes.
+void displayOff();
+
 // Full-screen message: a centred heading over newline-separated body lines, drawn left
 // aligned. Used before Wi-Fi exists, so it takes no weather data.
 void displayMessage(const String& title, const String& body);
