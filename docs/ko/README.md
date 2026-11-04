@@ -2,144 +2,84 @@
 
 # eink-weather-display
 
-**ESP32-C3 + 1.54" e-Paper 저전력 날씨 표시기.**
-서버(MCP)에서 정제된 날씨를 HTTP로 수신 → e-ink 렌더링 → 딥슬립. 배터리로 수개월.
+![ESP32-C3](https://img.shields.io/badge/ESP32--C3-XIAO-E7352C?logo=espressif&logoColor=white)
+![Arduino core](https://img.shields.io/badge/Arduino_core-2.0.17-00878F?logo=arduino&logoColor=white)
+![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32_7.0.1-F5822A?logo=platformio&logoColor=white)
+![C++14](https://img.shields.io/badge/C%2B%2B-14-00599C?logo=cplusplus&logoColor=white)
+<br>
+![e-Paper](https://img.shields.io/badge/e--Paper-Waveshare_1.54%22-333333)
+![SHT40](https://img.shields.io/badge/SHT40-I2C-4B5563)
+![GxEPD2](https://img.shields.io/badge/GxEPD2-1.6.9-4B5563)
+![ArduinoJson](https://img.shields.io/badge/ArduinoJson-7.4.3-4B5563)
+![WiFiManager](https://img.shields.io/badge/WiFiManager-2.0.17-4B5563)
+<br>
+[![emcp](https://img.shields.io/badge/server-emcp-14B8A6?logo=modelcontextprotocol&logoColor=white)](https://github.com/seung-gu/emcp)
+![Fly.io](https://img.shields.io/badge/Fly.io-emcp.fly.dev-7B3BE2?logo=flydotio&logoColor=white)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-release-2088FF?logo=githubactions&logoColor=white)](https://github.com/seung-gu/eink-weather-display/blob/main/.github/workflows/release.yml)
 
-> Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
+<p>
+  <img src="https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/photo-front.jpg" width="49%" alt="냉장고 위 보드 근접샷">
+  <img src="https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/photo-sensor.jpg" width="49%" alt="케이스 구멍 쪽 SHT40 센서">
+</p>
 
-## 동작 흐름 (5조각)
-![동작 흐름](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/runtime.png)
+ESP32-C3와 1.54" e-Paper로 만든 저전력 날씨 표시기. 30분마다 깨어나 날씨와 실내 온습도를 화면에
+그리고 다시 딥슬립. 배터리로 수개월 동작.
 
-- 모든 작업 `setup()`, `loop()` 비움 (웨이크 = 리셋)
-- e-ink 쌍안정 → 화면 유지 전류 0, 갱신 순간만 소비
-- 잠들어도 남아야 하는 상태는 RTC 메모리가 아니라 NVS에 둔다 (설계 노트 참고)
+## 주요 기능
+| 기능 | 내용 |
+|---|---|
+| 날씨 표시 | 지정한 위치의 기온, 최고·최저, 날씨, 바람, 습도, 강수확률. 실내 온습도, 배터리, Wi-Fi 신호도 함께 표시 |
+| 저전력 | 갱신할 때만 깨어나고 나머지는 딥슬립. e-Paper는 전원 없이도 화면 유지 |
+| 기록 | 깨어날 때마다 배터리, Wi-Fi, 실내 온습도, 그때 받은 날씨를 서버에 저장. 대시보드에서 그래프로 확인 |
+| AI 연동 (MCP) | Claude, ChatGPT 앱에서 보드 등록, 날씨 위치 변경, 이름 변경, 최근 7일 기록 조회와 분석 |
+| 자동 업데이트 | 새 릴리스를 올리면 보드가 다음 wake에 Wi-Fi로 설치. 실패하면 이전 펌웨어로 자동 복귀 |
+| 간단한 설정 | 코드 수정 없이 휴대폰으로 Wi-Fi 설정, 화면의 QR로 내 계정에 등록 |
 
-## 데이터 파이프라인
-![데이터 파이프라인](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/pipeline.png)
+## 동작 방식
+![깨어남, 측정, 서버 통신, 화면 갱신, FW 업데이트(새 버전이 있을 때만), 딥슬립의 순환](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/cycle-ko.png)
 
-- 정제 = 서버 담당 → 기기 경량 (RAM·전력 절약)
-- 기기: wake마다 HTTPS POST 하나 — 자기 상태를 보고하고 날씨를 응답으로 받는다
+- 보고와 날씨 수신을 HTTPS 요청 한 번으로 처리
+- 날씨 정제는 서버 담당. 보드는 받은 값을 그리기만 해서 RAM과 전력 절약
+
+## emcp 서버
+![보드, Claude·ChatGPT, 브라우저, GitHub Actions가 emcp 서버를 호출하고 서버는 open-meteo, Neon, GitHub를 호출](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/emcp.png)
+
+![대시보드: 20일간 배터리, Wi-Fi 신호, 깨어 있던 시간, 실내 온도·습도 그래프](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/dashboard.png)
+
+서버는 별도 프로젝트 [seung-gu/emcp](https://github.com/seung-gu/emcp). Fly.io에서 동작하며 날씨 조회,
+기록 저장, 대시보드, MCP, 펌웨어 배포 담당.
+
+## 펌웨어 자동 업데이트
+![GitHub Actions가 만든 릴리스를 emcp 서버가 받아 두고, 보드가 다음 wake에 설치. 성공하면 확정, 실패하면 이전 펌웨어로 복귀](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/ota-ko.png)
+
+배포 방법과 세부 규칙은 [펌웨어 구조와 업데이트](firmware.md) 참고.
 
 ## 하드웨어
 | 부품 | 사용 |
 |---|---|
-| MCU | ESP32-C3 (XIAO ESP32-C3 / Super Mini) |
-| 디스플레이 | Waveshare 1.54" e-Paper (SSD1681, 200×200, 흑백) |
-| 프레임워크 | Arduino (PlatformIO) |
-| 전원 | LiPo — 딥슬립으로 수개월 |
+| MCU | Seeed XIAO ESP32-C3 |
+| 디스플레이 | Waveshare 1.54" e-Paper V2.1 (200×200, 흑백) |
+| 실내 센서 | SHT40 (I2C, 없어도 동작) |
+| 전원 | LiPo 배터리 |
 
-## 배선 (`src/config.h`)
-두 보드 **GPIO 번호 동일**(코드 같음) — 물리 핀 라벨만 다름.
+핀 연결과 회로는 [하드웨어와 배선](hardware.md) 참고.
 
-| e-Paper | GPIO | Super Mini 핀 | XIAO 라벨 |
-|---|---|---|---|
-| VCC | — | 3V3 | 3V3 |
-| GND | — | GND | GND |
-| DIN (MOSI) | 7 | GPIO7 | D5 |
-| CLK (SCK) | 6 | GPIO6 | D4 |
-| CS | 10 | GPIO10 | D10 |
-| DC | 5 | GPIO5 | D3 |
-| RST | 4 | GPIO4 | D2 |
-| BUSY | 20 | GPIO20 | D7 |
+## 시작하기
+1. 빌드·업로드: `pio run -e weather-xiao -t upload`
+2. Wi-Fi 설정: 휴대폰으로 `XIAO-ESP32-C3`에 접속, 브라우저에서 `192.168.4.1`을 열고 네트워크 선택
+3. 등록: 화면의 QR을 휴대폰으로 스캔해 대시보드에서 등록 (또는 Claude·ChatGPT에 코드 입력), 보드의 RESET 누르기
 
-배터리 전압 측정 — 화면에 표시되고 서버로도 전송된다:
+Wi-Fi 재설정과 업로드 문제는 [설정과 등록](setup.md) 참고.
 
-| | GPIO | Super Mini 핀 | XIAO 라벨 |
-|---|---|---|---|
-| 분압 탭 | 3 | GPIO3 | D1 |
-
-`BAT+ ──[1M]──┬──[1M]── GND`, 가운데 탭을 D1로, 탭에서 `100nF`을 GND로. Wi-Fi가 켜지면 ADC2를
-못 쓰므로 탭은 ADC1(GPIO0~4)에 있어야 하고, GPIO2는 스트래핑 핀이라 분압을 물리면 부팅 시 LOW로
-읽힌다 — 그래서 BUSY를 GPIO3에서 비켜냈다.
-
-실내 온도·습도 — SHT40 브레이크아웃을 I2C로. 없어도 동작한다:
-
-| SHT40 | GPIO | Super Mini 핀 | XIAO 라벨 |
-|---|---|---|---|
-| VIN | — | 3V3 | 3V3 |
-| GND | — | GND | GND |
-| SDA | 8 | GPIO8 | D8 |
-| SCL | 2 | GPIO2 | D0 |
-
-남는 핀 중 GPIO21이 먼저 눈에 들어오지만 그건 UART0 TX라 리셋마다 ROM 부트로더가 그 핀을
-구동한다. GPIO9도 비어 있고 더 나쁘다 — 부트모드 선택 핀이라, SDA가 LOW로 멈춘 상태에서 리셋이
-걸리면 앱 대신 다운로드 모드로 부팅해 다시 깨어나지 않는다. Super Mini는 GPIO8에 온보드 LED가
-달려 있어 전송 중 깜빡이고 그 저항이 풀업으로 하나 더 붙는다.
-
-- Super Mini는 핀에 GPIO 번호 직접 표기, XIAO는 `D0–D10`(보드 위치 이름, GPIO와 매핑 다름)
-- ⚠️ C3 기본 SPI핀(SCK=4·MISO=5) ↔ RST(4)/DC(5) 충돌 → `display.cpp`에서 SPI 재지정 후 핀 재확정
-- RST와 BUSY 모두 연결한 채로 둔다. GxEPD2는 둘 다 `-1`을 받아 소프트웨어 리셋과 고정 대기로
-  대체할 수 있지만, 시도해보니 화면이 제대로 나오지 않았다. 원인은 확인하지 않았다
-
-## 설정 (Wi-Fi)
-빌드 전에 고칠 게 없다 — 보드가 직접 Wi-Fi를 물어본다. 저장된 네트워크가 없으면 AP를 띄우고
-e-Paper에 안내를 표시한다:
-
-1. 휴대폰에서 **XIAO-weather** 네트워크에 접속
-2. 브라우저로 **192.168.4.1** 을 열고 쓰는 네트워크를 고른다
-
-자격증명은 Wi-Fi 드라이버 전용 NVS 네임스페이스에 저장되므로 펌웨어를 다시 올려도 남는다.
-
-나중에 바꾸려면: 접속에 다섯 번 연속 실패하면 보드가 알아서 이 화면을 다시 띄우고,
-**RESET을 다섯 번 연타**하면(접속이 끝나기 전에 눌러야 한다) 즉시 같은 상태가 된다. 5분 동안
-아무도 설정하지 않으면 저장된 값을 그대로 둔 채 다시 잠든다.
-
-## 빌드 & 업로드
-```bash
-pio run -t upload
-pio device monitor -b 115200
-```
-- 딥슬립 펌웨어 업로드 후 재업로드 = BOOT 누른 채 RESET (다운로드 모드)
-
-## Wi-Fi로 업데이트
-```bash
-git tag v1.01 && git push origin v1.01
-```
-- `v*` 태그를 push하면 GitHub 릴리스가 만들어지고 서버가 바로 받아 간다 (`.github/workflows/release.yml`).
-  Actions가 초록 체크면 서버가 받아 둔 것이고, 더 옛 커밋을 돌리는 보드는 다음에 깨어날 때 설치한다
-- 노트북에서 릴리스에 없는 커밋(또는 `-dirty` 빌드)으로 직접 올린 보드는 건드리지 않는다
-- 새 펌웨어는 한 번 서버에 닿고 화면을 다시 그려야 확정된다. 못 하면 부트로더가 이전 펌웨어로 돌아간다.
-  릴리스 하나에 두 번까지, 배터리가 3.7V 아래면 미룬다
-- 이 기능 전에 올린 보드(`src/weather/ota.cpp` 없음, 기본 파티션)는 USB로 한 번 올려야 한다
-
-## 구조
-```
-src/
-├─ common/          모든 빌드가 공유
-│  ├─ config.h         설정 (URL · 핀 · 주기)
-│  ├─ net.h/.cpp       WiFi 연결 + HTTPS GET/POST
-│  ├─ roots.h          서버 인증서를 확인할 루트 인증서
-│  ├─ battery.h/.cpp   분압을 통한 배터리 전압
-│  └─ provision.h/.cpp Wi-Fi 설정 포털
-├─ weather/         e-Paper 표시기 빌드
-│  ├─ display.h/.cpp   e-Paper 초기화 + 렌더링 (전역 객체 static 캡슐화)
-│  ├─ weather_icons.h  날씨 아이콘 비트맵
-│  ├─ ota.h/.cpp       서버가 알려 준 릴리스 설치, 실패하면 되돌리기
-│  └─ main.cpp         흐름 (setup/loop)
-└─ led/             LED 전용 빌드
-```
-
-## 참고 (스터디)
-- 딥슬립 = 리셋 → `setup()` 재시작, `loop()` 미사용
-- SPI 충돌 회피: `SPI.begin(6, -1, 7, 10)` 후 핀 OUTPUT 재확정 + 수동 리셋
-- 날씨 조건 문자열(`뇌우`·`눈`·`비`…) = 서버 응답 매칭용, 코드에 한국어 유지
-
-## 설계 노트
-- [저장과 화면 갱신](persistence-and-refresh.md) — 마지막 날씨를 NVS에 두는 이유(RTC 미사용),
-  상태줄만 부분 갱신이 안 되는 이유
-- [JTAG 디버깅](jtag-debug.md) — 내장 USB-JTAG 스텝 디버깅: 필요한 OpenOCD 설정,
-  다운로드 모드에서 디버깅이 안 되는 이유
-- [NVS에 상태 저장하기](nvs-internals.md) — RTC 대신 NVS인 이유, NVS가 무엇인지,
-  `Preferences` API, 그리고 `putString()`이 플래시에서 어떤 모습이 되는지 (기기 덤프 기반)
-- [e-Paper 전원 게이팅](epd-power-gating.md) — 모듈 VCC를 GPIO로 끊어 딥슬립 중 소비를
-  없애는 방법: 배선, 핀 선택, 그리고 병합하지 않고 보류한 이유
-- [저전압 차단](battery-cutoff.md) — 3.4V에서 P-MOSFET으로 배터리를 아예 떼어내고
-  충전기를 꽂으면 돌아오는 회로. 버튼도 대기전류도 없다
-- [배터리 누설전류 Trouble shooting](deep-sleep-drain.md) — Waveshare V2.1 보드에서는 RST가 모듈 전원 스위치이기도 해서
-  딥슬립 중 LOW로 잡아 둬야 한다. 찾는 과정에서 배제한 것들
-
-## 서버 (MCP)
-날씨·LED 백엔드 = 별도 프로젝트: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**
-
-- 기기: 평문 HTTPS 엔드포인트만
-- 동일 서버 MCP 노출 → AI(ChatGPT 등) 조회·제어
+## 문서
+| 문서 | 내용 |
+|---|---|
+| [하드웨어와 배선](hardware.md) | 핀 연결, 배터리 분압, 핀을 고른 이유 |
+| [설정과 등록](setup.md) | Wi-Fi 재설정, 보드 등록 과정, 다운로드 모드 업로드 |
+| [펌웨어 구조와 업데이트](firmware.md) | 코드 구조, 한 번 깨어날 때의 상세 흐름, 업데이트 규칙 |
+| [저장과 화면 갱신](persistence-and-refresh.md) | 마지막 날씨를 NVS에 두는 이유, 부분 갱신이 안 되는 이유 |
+| [NVS에 상태 저장하기](nvs-internals.md) | NVS 구조와 `Preferences` API |
+| [JTAG 디버깅](jtag-debug.md) | 내장 USB-JTAG 스텝 디버깅 |
+| [GPIO로 e-Paper 모듈 전원 켜고 끄기](epd-power-gating.md) | 모듈 VCC를 GPIO로 끊는 회로 (보류) |
+| [저전압 차단](battery-cutoff.md) | 3.4V에서 배터리를 분리하는 P-MOSFET 회로 |
+| [배터리 누설전류 Trouble shooting](deep-sleep-drain.md) | V2.1 보드의 RST를 딥슬립 중 LOW로 둬야 하는 이유 |

@@ -2,141 +2,86 @@
 
 # eink-weather-display
 
-A low-power weather display built with an **ESP32-C3 + 1.54" e-Paper**.
-Fetches pre-formatted weather from a server (MCP) over HTTP, renders it on e-ink, then deep-sleeps — running for months on a battery.
+![ESP32-C3](https://img.shields.io/badge/ESP32--C3-XIAO-E7352C?logo=espressif&logoColor=white)
+![Arduino core](https://img.shields.io/badge/Arduino_core-2.0.17-00878F?logo=arduino&logoColor=white)
+![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32_7.0.1-F5822A?logo=platformio&logoColor=white)
+![C++14](https://img.shields.io/badge/C%2B%2B-14-00599C?logo=cplusplus&logoColor=white)
+<br>
+![e-Paper](https://img.shields.io/badge/e--Paper-Waveshare_1.54%22-333333)
+![SHT40](https://img.shields.io/badge/SHT40-I2C-4B5563)
+![GxEPD2](https://img.shields.io/badge/GxEPD2-1.6.9-4B5563)
+![ArduinoJson](https://img.shields.io/badge/ArduinoJson-7.4.3-4B5563)
+![WiFiManager](https://img.shields.io/badge/WiFiManager-2.0.17-4B5563)
+<br>
+[![emcp](https://img.shields.io/badge/server-emcp-14B8A6?logo=modelcontextprotocol&logoColor=white)](https://github.com/seung-gu/emcp)
+![Fly.io](https://img.shields.io/badge/Fly.io-emcp.fly.dev-7B3BE2?logo=flydotio&logoColor=white)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-release-2088FF?logo=githubactions&logoColor=white)](https://github.com/seung-gu/eink-weather-display/blob/main/.github/workflows/release.yml)
 
-> Topics: `esp32-c3` · `e-ink` · `mcp` · `battery`
+<p>
+  <img src="docs/images/photo-front.jpg" width="49%" alt="The board up close on the fridge">
+  <img src="docs/images/photo-sensor.jpg" width="49%" alt="The SHT40 sensor at the opening in the case">
+</p>
 
-## Runtime (5 steps)
-![Runtime: wake, read battery, Wi-Fi or setup portal, POST to the server, draw e-Paper, deep sleep, then reset on wake](docs/images/runtime.png)
+A low-power weather display: an ESP32-C3 driving a 1.54" e-Paper. Every 30 minutes it wakes, draws
+the weather and the room's temperature and humidity, and goes back to deep sleep. It runs for months
+on a battery.
 
-- Everything in `setup()`, `loop()` empty (a wake is a full reset)
-- Bistable e-ink → 0 current to hold the image, draws only on refresh
-- State that has to survive a sleep goes to NVS, not RTC memory (see the design notes)
+## Features
+| Feature | What it does |
+|---|---|
+| Weather | Temperature, high and low, conditions, wind, humidity and chance of rain for the board's location, plus room temperature and humidity, battery and Wi-Fi signal |
+| Low power | Awake only to refresh, deep sleep the rest of the time. The e-Paper holds its image without power |
+| History | Every wake stores the battery, Wi-Fi, room readings and the weather it got on the server, shown as graphs on a dashboard |
+| AI (MCP) | From the Claude or ChatGPT app: register a board, change its weather location, rename it, read and analyse the last 7 days of reports |
+| Updates | A new release reaches every board over Wi-Fi on its next wake, and a board goes back to its previous firmware if the new one fails |
+| Setup | No code to edit: Wi-Fi is set from a phone, and the QR on the screen registers the board to your account |
 
-## Data pipeline
-![Data pipeline: public weather API to MCP server to device; server also exposed over MCP to an AI](docs/images/pipeline.png)
+## How it works
+![Wake, measure, talk to the server, draw, update the firmware if there is a newer one, deep sleep](docs/images/cycle.png)
 
-- Formatting is server-side → the device stays light (less RAM/power)
-- Device: one HTTPS POST per wake — it reports its own state and gets the weather back
+- One HTTPS request per wake carries the report out and the weather back
+- The server formats the weather, so the board only draws what it gets and stays light on RAM and power
+
+## The emcp server
+![The board, Claude or ChatGPT, a browser and GitHub Actions call the emcp server; the server calls open-meteo, Neon and GitHub](docs/images/emcp.png)
+
+![The dashboard: 20 days of battery, Wi-Fi signal, awake time, room temperature and humidity](docs/images/dashboard-en.png)
+
+The backend is a separate project, [seung-gu/emcp](https://github.com/seung-gu/emcp), running on
+Fly.io. It looks up the weather, stores the reports, and serves the dashboard, the MCP tools and the
+firmware.
+
+## Firmware updates
+![GitHub Actions builds a release, the emcp server holds it, and the board installs it on its next wake; kept if it works, rolled back if not](docs/images/ota.png)
+
+How to publish one, and the rules a board follows: [Firmware layout and updates](docs/en/firmware.md).
 
 ## Hardware
 | Part | Used |
 |---|---|
-| MCU | ESP32-C3 (Seeed XIAO ESP32-C3 or ESP32-C3 Super Mini) |
-| Display | Waveshare 1.54" e-Paper (SSD1681, 200×200, black/white) |
-| Framework | Arduino (PlatformIO) |
-| Power | LiPo battery — months on deep sleep |
+| MCU | Seeed XIAO ESP32-C3 |
+| Display | Waveshare 1.54" e-Paper V2.1 (200×200, black/white) |
+| Room sensor | SHT40 (I2C, optional) |
+| Power | LiPo battery |
 
-## Wiring (`src/config.h`)
-Both boards use the **same GPIO numbers** (identical code) — only the physical pin labels differ.
+Pins and circuits: [Hardware and wiring](docs/en/hardware.md).
 
-| e-Paper | GPIO | Super Mini pin | XIAO label |
-|---|---|---|---|
-| VCC | — | 3V3 | 3V3 |
-| GND | — | GND | GND |
-| DIN (MOSI) | 7 | GPIO7 | D5 |
-| CLK (SCK) | 6 | GPIO6 | D4 |
-| CS | 10 | GPIO10 | D10 |
-| DC | 5 | GPIO5 | D3 |
-| RST | 4 | GPIO4 | D2 |
-| BUSY | 20 | GPIO20 | D7 |
+## Getting started
+1. Build and upload: `pio run -e weather-xiao -t upload`
+2. Wi-Fi: join `XIAO-ESP32-C3` from a phone, open `192.168.4.1` and pick your network
+3. Register: scan the QR on the screen and register the board on the dashboard (or give the code to Claude or ChatGPT), then press RESET on the board
 
-Battery sense — shown on the display and reported to the server:
+Changing networks and upload trouble: [Setup and registration](docs/en/setup.md).
 
-| | GPIO | Super Mini pin | XIAO label |
-|---|---|---|---|
-| Divider tap | 3 | GPIO3 | D1 |
-
-`BAT+ ──[1M]──┬──[1M]── GND`, tap to D1, plus `100nF` from tap to GND. ADC2 stops working once
-Wi-Fi is on, so the tap has to sit on ADC1 (GPIO0–4); GPIO2 is a strapping pin that reads low
-through the divider at boot, which is why BUSY moved off GPIO3 to make room.
-
-Room temperature and humidity — an SHT40 breakout on I2C. The board works without one:
-
-| SHT40 | GPIO | Super Mini pin | XIAO label |
-|---|---|---|---|
-| VIN | — | 3V3 | 3V3 |
-| GND | — | GND | GND |
-| SDA | 8 | GPIO8 | D8 |
-| SCL | 2 | GPIO2 | D0 |
-
-GPIO21 would be the obvious free pin but it is UART0 TX, which the ROM bootloader drives at every
-reset. GPIO9 is free too, and worse: it picks the boot mode, so a bus left stuck with SDA low
-would boot to download mode and never wake again. On a Super Mini, GPIO8 also carries the onboard
-LED — it flickers during transfers and its resistor adds a second pull-up.
-
-- Super Mini labels pins by GPIO number; XIAO uses `D0–D10` (board positions mapped to different GPIOs)
-- ⚠️ The C3's default SPI pins (SCK=4 / MISO=5) collide with RST(4)/DC(5) → `display.cpp` remaps SPI and re-asserts the pins
-- RST and BUSY both stay wired. GxEPD2 accepts `-1` for either, falling back to a software reset
-  and to fixed delays; tried here, and the display did not render correctly. Cause not investigated
-
-## Setup (Wi-Fi)
-Nothing to edit before building — the board asks for Wi-Fi itself. On a board with no stored
-network it puts up an access point and shows the instructions on the e-Paper:
-
-1. Join the Wi-Fi network **XIAO-weather** from a phone
-2. Open **192.168.4.1** in a browser and pick your network
-
-Credentials go into the Wi-Fi driver's own NVS namespace, so they survive firmware uploads.
-
-To change networks later: the board offers the page again after five failed connections, and
-pressing **RESET five times in a row** — faster than a connect takes — reaches the same point
-immediately. Five minutes with nobody configuring anything and it goes back to sleep, keeping
-whatever was stored.
-
-## Build & Upload
-```bash
-pio run -t upload
-pio device monitor -b 115200
-```
-- After flashing the deep-sleep firmware, re-uploads need download mode: hold **BOOT**, tap **RESET**
-
-## Updates over Wi-Fi
-```bash
-git tag v1.01 && git push origin v1.01
-```
-- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A
-  green check on the run means the server holds it; every board running an older commit installs it
-  on its next wake
-- A board flashed from a laptop with a commit the release does not have (or a `-dirty` build) is left alone
-- The new firmware has to reach the server and redraw the screen once; if it does not, the bootloader
-  goes back to the previous one. Two tries per release, and none while the battery is under 3.7 V
-- Boards flashed before this (no `src/weather/ota.cpp`, default partition table) need one USB upload
-
-## Layout
-```
-src/
-├─ common/          shared by every build target
-│  ├─ config.h         all settings (URLs · pins · intervals)
-│  ├─ net.h/.cpp       Wi-Fi connect + HTTPS GET/POST
-│  ├─ roots.h          the CA roots the server's certificate is checked against
-│  ├─ battery.h/.cpp   battery voltage through the divider
-│  └─ provision.h/.cpp the Wi-Fi setup portal
-├─ weather/         the e-Paper display build
-│  ├─ display.h/.cpp   e-Paper init + rendering (globals kept static = encapsulated)
-│  ├─ weather_icons.h  weather icon bitmaps
-│  ├─ ota.h/.cpp       installs a release the server offers, with rollback
-│  └─ main.cpp         flow only (setup/loop)
-└─ led/             the LED-only build
-```
-
-## Design notes
-- [Persistence & refresh](docs/en/persistence-and-refresh.md) — why the last weather is kept in NVS
-  (not RTC memory), and why a partial refresh of just the status line doesn't work here
-- [JTAG debugging](docs/en/jtag-debug.md) — step debugging over the built-in USB-JTAG: the OpenOCD
-  overrides it needs, and why download mode silently breaks it
-- [Storing state in NVS](docs/en/nvs-internals.md) — why NVS over RTC memory, what NVS is, the
-  `Preferences` API, and what a `putString()` becomes on flash, read back from a device dump
-- [e-Paper power gating](docs/en/epd-power-gating.md) — switching the module's VCC from a GPIO so it
-  stops drawing in deep sleep: the wiring, the pin choice, and why it is parked rather than merged
-- [Low-voltage cutoff](docs/en/battery-cutoff.md) — a P-MOSFET that disconnects the battery outright
-  at 3.4 V and comes back when a charger is plugged in, with no button and no standby current
-- [Battery leakage current troubleshooting](docs/en/deep-sleep-drain.md) — RST on the Waveshare V2.1 board also switches the
-  module's supply, so it has to be held low through deep sleep, and what was ruled out on the way
-
-## Server (MCP)
-The weather/LED backend is a companion project: **[seung-gu/emcp](https://github.com/seung-gu/emcp)**.
-
-- The device only hits a plain-text HTTPS endpoint
-- The same server is exposed over MCP, so an AI client (e.g. ChatGPT) can query and control it
+## Docs
+| Doc | About |
+|---|---|
+| [Hardware and wiring](docs/en/hardware.md) | Pin connections, the battery divider, why each pin |
+| [Setup and registration](docs/en/setup.md) | Changing Wi-Fi, how registration works, uploading in download mode |
+| [Firmware layout and updates](docs/en/firmware.md) | Code layout, one wake in detail, update rules |
+| [Persistence & refresh](docs/en/persistence-and-refresh.md) | Why the last weather lives in NVS, why a partial refresh doesn't work |
+| [Storing state in NVS](docs/en/nvs-internals.md) | How NVS is laid out, and the `Preferences` API |
+| [JTAG debugging](docs/en/jtag-debug.md) | Step debugging over the built-in USB-JTAG |
+| [e-Paper power gating](docs/en/epd-power-gating.md) | Switching the module's VCC from a GPIO (parked) |
+| [Low-voltage cutoff](docs/en/battery-cutoff.md) | A P-MOSFET that disconnects the battery at 3.4 V |
+| [Battery leakage current troubleshooting](docs/en/deep-sleep-drain.md) | Why RST on the V2.1 board has to stay low in deep sleep |

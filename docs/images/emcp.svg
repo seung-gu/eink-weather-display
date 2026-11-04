@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 464" role="img" aria-labelledby="emcp-title emcp-desc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="emcp-title">The board and the emcp server</title>
+  <desc id="emcp-desc">The weather board, Claude or ChatGPT, a browser and GitHub Actions all call the emcp server; the server calls open-meteo for weather, Neon for storage and GitHub for releases.</desc>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+  <rect x="1.5" y="1.5" width="897" height="461" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+
+  <!-- arrows first, so the boxes sit on top -->
+  <g stroke-width="2" fill="none">
+    <line x1="219" y1="184" x2="337" y2="184" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="219" y1="220" x2="337" y2="220" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="385" y1="87" x2="385" y2="157" stroke="#d97706" marker-end="url(#ahA)"/>
+    <line x1="575" y1="87" x2="575" y2="157" stroke="#d97706" marker-end="url(#ahA)"/>
+    <line x1="603" y1="176" x2="697" y2="176" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="603" y1="228" x2="697" y2="228" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="430" y1="341" x2="430" y2="247" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="510" y1="247" x2="510" y2="341" stroke="#6b7280" marker-end="url(#ah)"/>
+  </g>
+
+  <!-- arrow labels -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">
+    <text x="278" y="174" text-anchor="middle" fill="#4b5563">POST /weather</text>
+    <text x="278" y="240" text-anchor="middle" fill="#4b5563">GET /firmware</text>
+    <text x="395" y="126" fill="#b45309">/mcp</text>
+    <text x="585" y="126" fill="#b45309">/dashboard</text>
+    <text x="420" y="298" text-anchor="end" fill="#4b5563">POST /firmware/refresh</text>
+  </g>
+  <text x="520" y="298" font-size="12" fill="#4b5563">fetch release</text>
+
+  <!-- people's clients -->
+  <rect x="300" y="28" width="170" height="56" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="385" y="52" text-anchor="middle" font-size="15" font-weight="600" fill="#92400e">Claude / ChatGPT</text>
+  <text x="385" y="71" text-anchor="middle" font-size="12.5" fill="#4b5563">MCP client</text>
+
+  <rect x="490" y="28" width="170" height="56" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="575" y="52" text-anchor="middle" font-size="15" font-weight="600" fill="#92400e">Browser</text>
+  <text x="575" y="71" text-anchor="middle" font-size="12.5" fill="#4b5563">dashboard · QR</text>
+
+  <!-- board -->
+  <rect x="32" y="160" width="184" height="84" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="124" y="196" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">Weather board</text>
+  <text x="124" y="216" text-anchor="middle" font-size="12.5" fill="#4b5563">XIAO ESP32-C3 · e-Paper</text>
+
+  <!-- server -->
+  <rect x="340" y="160" width="260" height="84" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2"/>
+  <text x="470" y="196" text-anchor="middle" font-size="16" font-weight="600" fill="#134e4a">emcp server</text>
+  <text x="470" y="216" text-anchor="middle" font-size="12.5" fill="#4b5563">emcp.fly.dev on Fly.io</text>
+
+  <!-- external services -->
+  <rect x="700" y="132" width="168" height="56" rx="10" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="784" y="156" text-anchor="middle" font-size="15" font-weight="600" fill="#374151">open-meteo</text>
+  <text x="784" y="175" text-anchor="middle" font-size="12.5" fill="#4b5563">forecast · places</text>
+
+  <rect x="700" y="216" width="168" height="56" rx="10" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="784" y="240" text-anchor="middle" font-size="15" font-weight="600" fill="#374151">Neon Postgres</text>
+  <text x="784" y="259" text-anchor="middle" font-size="12.5" fill="#4b5563">boards · reports</text>
+
+  <rect x="360" y="344" width="220" height="64" rx="10" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="470" y="371" text-anchor="middle" font-size="15" font-weight="600" fill="#374151">GitHub</text>
+  <text x="470" y="391" text-anchor="middle" font-size="12.5" fill="#4b5563">Actions · Releases</text>
+
+  <!-- legend -->
+  <line x1="32" y1="424" x2="868" y2="424" stroke="#e5e7eb"/>
+  <g font-size="12" fill="#4b5563">
+    <rect x="32" y="436" width="12" height="12" rx="2" fill="#eef2ff" stroke="#6366f1"/>
+    <text x="50" y="446">board</text>
+    <rect x="104" y="436" width="12" height="12" rx="2" fill="#ccfbf1" stroke="#14b8a6"/>
+    <text x="122" y="446">server</text>
+    <rect x="180" y="436" width="12" height="12" rx="2" fill="#fef3c7" stroke="#d97706"/>
+    <text x="198" y="446">used by people</text>
+    <rect x="300" y="436" width="12" height="12" rx="2" fill="#f3f4f6" stroke="#9ca3af"/>
+    <text x="318" y="446">outside service</text>
+    <text x="868" y="446" text-anchor="end">arrows point from the caller to what it calls</text>
+  </g>
+</svg>

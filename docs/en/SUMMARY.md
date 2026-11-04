@@ -2,6 +2,12 @@
 
 * [E-ink Weather Display](../../README.md)
 
+## Guides
+
+* [Hardware and wiring](hardware.md)
+* [Setup and registration](setup.md)
+* [Firmware layout and updates](firmware.md)
+
 ## Design notes
 
 * [Persistence & refresh](persistence-and-refresh.md)

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 896 168" role="img" aria-labelledby="ota-ko-title ota-ko-desc" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif">
+  <title id="ota-ko-title">펌웨어 자동 업데이트</title>
+  <desc id="ota-ko-desc">GitHub Actions가 v 태그로 릴리스를 만들면 emcp 서버가 받아 두고, 보드가 다음 wake에 받아 설치한다. 한 번의 wake를 마치면 확정, 실패하면 이전 펌웨어로 돌아간다.</desc>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+  <rect x="1.5" y="1.5" width="893" height="165" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+
+  <g stroke-width="2" fill="none">
+    <line x1="200" y1="84" x2="245" y2="84" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="424" y1="84" x2="469" y2="84" stroke="#6b7280" marker-end="url(#ah)"/>
+    <path d="M648,72 H664 Q672,72 672,64 V58 Q672,50 680,50 H693" stroke="#6b7280" marker-end="url(#ah)"/>
+    <path d="M648,96 H664 Q672,96 672,104 V110 Q672,118 680,118 H693" stroke="#d97706" stroke-dasharray="5 4" marker-end="url(#ahA)"/>
+  </g>
+
+  <rect x="24" y="48" width="176" height="72" rx="10" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="112" y="79" text-anchor="middle" font-size="15" font-weight="600" fill="#374151">GitHub Actions</text>
+  <text x="112" y="99" text-anchor="middle" font-size="12.5" fill="#4b5563">v* 태그 → 빌드 · 릴리스</text>
+
+  <rect x="248" y="48" width="176" height="72" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2"/>
+  <text x="336" y="79" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">emcp 서버</text>
+  <text x="336" y="99" text-anchor="middle" font-size="12.5" fill="#4b5563">새 릴리스 받아 둠</text>
+
+  <rect x="472" y="48" width="176" height="72" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="560" y="79" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">보드</text>
+  <text x="560" y="99" text-anchor="middle" font-size="12.5" fill="#4b5563">다음 wake에 받아 설치</text>
+
+  <rect x="696" y="24" width="176" height="52" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="784" y="46" text-anchor="middle" font-size="14" font-weight="600" fill="#1e1b4b">새 펌웨어 확정</text>
+  <text x="784" y="64" text-anchor="middle" font-size="12" fill="#4b5563">서버 접속 · 화면 갱신 성공</text>
+
+  <rect x="696" y="92" width="176" height="52" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="784" y="114" text-anchor="middle" font-size="14" font-weight="600" fill="#92400e">이전 펌웨어로 복귀</text>
+  <text x="784" y="132" text-anchor="middle" font-size="12" fill="#4b5563">실패하면 자동으로</text>
+</svg>

@@ -2,6 +2,12 @@
 
 * [E-ink Weather Display](README.md)
 
+## 가이드 <a href="#guides" id="guides"></a>
+
+* [하드웨어와 배선](hardware.md)
+* [설정과 등록](setup.md)
+* [펌웨어 구조와 업데이트](firmware.md)
+
 ## 설계 노트 <a href="#design-notes" id="design-notes"></a>
 
 * [저장과 화면 갱신](persistence-and-refresh.md)
