@@ -7,6 +7,11 @@
 #ifndef FW_VERSION
 #define FW_VERSION "unknown"
 #endif
+// Which build it is, as the platformio.ini env name (weather-xiao, ...). The server picks the update
+// file by it. Also set by scripts/fw_version.py.
+#ifndef FW_BOARD
+#define FW_BOARD "unknown"
+#endif
 
 // ==== MCP server ====
 #define LED_URL       "https://emcp-led.fly.dev/led"

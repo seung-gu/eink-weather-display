@@ -9,6 +9,7 @@
 #include "provision.h"
 #include "store.h"
 #include "display.h"
+#include "ota.h"
 
 // What this wake knows about itself. Filled as the values become available — battery and chip
 // before the radio, since both change once it is on — and read by everything downstream, so the
@@ -168,6 +169,13 @@ static String wakeReport(const Wake& w) {
   req["wifi_ms"]       = w.wifi.ms;
   req["rssi"]          = w.wifi.rssi;
   req["fw_version"]    = FW_VERSION;
+  req["fw_board"]      = FW_BOARD;      // which release file fits this board, for updates
+  // An update that has not landed yet, and how many tries it has had. Gone once the board runs it.
+  String otaTried = otaVersion();
+  if (otaTried.length() && !otaTried.startsWith(FW_VERSION)) {
+    req["ota_tried"] = otaTried;
+    req["ota_tries"] = otaTries();
+  }
   // Sent on every wake, not only on failure: a build that reports these can be told apart from
   // one that cannot, which the firmware stamp fails at — it is the commit plus a dirty flag, so
   // two different working trees on one commit report the same string.
@@ -294,6 +302,7 @@ void setup() {
       updated  = true;
       nextWake = SLEEP_MINUTES;
       Serial.println("[weather updated]\n" + http.body);
+      otaUpdate(http.body);       // restarts into the new firmware if the server offered one
     } else if (http.code == 401) {
       // The server does not know this token: its owner released the board. This is the only
       // answer that drops a token. A 429 or 503 means the server could not check, and keeps it.
@@ -338,6 +347,8 @@ void setup() {
   // still means the same thing, only written later: a boot that got interrupted before the
   // screen was drawn should count, the same as one that never reached the network.
   if (w.wifi.ok) clearWifiAttempts();
+  // A new firmware is kept once it has done a whole wake: reached the server and drawn the screen.
+  if (updated) otaConfirm();
   if (released) sleepUntilReset();  // the new code waits for its owner, like any unregistered board
   sleepUntilNextWake(nextWake);
 }

@@ -25,5 +25,7 @@ try:
 except Exception:
     version = "unknown"          # no git, or not a checkout — say so rather than guess
 
-print(f"fw version: {version}")
-env.Append(CPPDEFINES=[("FW_VERSION", env.StringifyMacro(version))])
+print(f"fw version: {version} ({env['PIOENV']})")
+env.Append(CPPDEFINES=[("FW_VERSION", env.StringifyMacro(version)),
+                       # the env name says which board the build is for; updates pick the file by it
+                       ("FW_BOARD", env.StringifyMacro(env["PIOENV"]))])

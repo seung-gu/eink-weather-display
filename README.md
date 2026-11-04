@@ -92,17 +92,30 @@ pio device monitor -b 115200
 ```
 - After flashing the deep-sleep firmware, re-uploads need download mode: hold **BOOT**, tap **RESET**
 
+## Updates over Wi-Fi
+```bash
+git tag v2 && git push origin v2
+```
+- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`). Within 10 minutes the
+  server offers it to every board running an older commit, and each one installs it on its next wake
+- A board flashed from a laptop with a commit the release does not have (or a `-dirty` build) is left alone
+- The new firmware has to reach the server and redraw the screen once; if it does not, the bootloader
+  goes back to the previous one. Two tries per release, and none while the battery is under 3.7 V
+- Boards flashed before this (no `src/weather/ota.cpp`, default partition table) need one USB upload
+
 ## Layout
 ```
 src/
 ├─ common/          shared by every build target
 │  ├─ config.h         all settings (URLs · pins · intervals)
 │  ├─ net.h/.cpp       Wi-Fi connect + HTTPS GET/POST
+│  ├─ roots.h          the CA roots the server's certificate is checked against
 │  ├─ battery.h/.cpp   battery voltage through the divider
 │  └─ provision.h/.cpp the Wi-Fi setup portal
 ├─ weather/         the e-Paper display build
 │  ├─ display.h/.cpp   e-Paper init + rendering (globals kept static = encapsulated)
 │  ├─ weather_icons.h  weather icon bitmaps
+│  ├─ ota.h/.cpp       installs a release the server offers, with rollback
 │  └─ main.cpp         flow only (setup/loop)
 └─ led/             the LED-only build
 ```

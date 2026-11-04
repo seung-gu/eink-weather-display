@@ -42,6 +42,13 @@ String  claimCode();
 void    saveClaimCode(const String& code);
 void    clearClaimCode();
 
+// The firmware update tried last and how many times, so a version that keeps failing is given up
+// on instead of costing a download every wake (see ota.h). Not cleared once it lands: the server
+// stops offering a version the board runs, so the next offer is a newer one and starts over at 0.
+String  otaVersion();
+uint8_t otaTries();
+void    saveOtaTry(const String& version, uint8_t tries);
+
 // Entries in the NVS partition, 32 bytes each. Worth watching because putString stops working
 // silently when it runs out, and the failure log writes here on every failed wake. The total
 // goes along so the free count means something without knowing the partition table.

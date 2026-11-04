@@ -1,0 +1,33 @@
+# Release: push a tag that starts with v (git tag v1 && git push origin v1). This builds the weather
+# firmware for each board and publishes it as a GitHub release. The emcp server checks the latest
+# release every 10 minutes and offers it to every board that runs an older commit, on that board's
+# next wake. Boards running a commit the release does not contain (a build flashed from a laptop)
+# are left alone.
+#
+# Files: <env>.bin per board, named after the platformio.ini env the board reports as fw_board, and
+# commits.txt, every commit in the release newest first, which the server checks a board's version
+# against.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0            # commits.txt needs the whole history
+      - uses: astral-sh/setup-uv@v10.3.3
+      - run: uvx --from platformio pio run -e weather-xiao -e weather-supermini
+      - run: |
+          git rev-list HEAD > commits.txt
+          for env in weather-xiao weather-supermini; do cp .pio/build/$env/firmware.bin $env.bin; done
+          gh release create "$GITHUB_REF_NAME" commits.txt weather-xiao.bin weather-supermini.bin --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -91,17 +91,30 @@ pio device monitor -b 115200
 ```
 - 딥슬립 펌웨어 업로드 후 재업로드 = BOOT 누른 채 RESET (다운로드 모드)
 
+## Wi-Fi로 업데이트
+```bash
+git tag v2 && git push origin v2
+```
+- `v*` 태그를 push하면 GitHub 릴리스가 만들어진다 (`.github/workflows/release.yml`). 서버가 10분 안에
+  이걸 보고 더 옛 커밋을 돌리는 보드에 알려 주고, 보드는 다음에 깨어날 때 설치한다
+- 노트북에서 릴리스에 없는 커밋(또는 `-dirty` 빌드)으로 직접 올린 보드는 건드리지 않는다
+- 새 펌웨어는 한 번 서버에 닿고 화면을 다시 그려야 확정된다. 못 하면 부트로더가 이전 펌웨어로 돌아간다.
+  릴리스 하나에 두 번까지, 배터리가 3.7V 아래면 미룬다
+- 이 기능 전에 올린 보드(`src/weather/ota.cpp` 없음, 기본 파티션)는 USB로 한 번 올려야 한다
+
 ## 구조
 ```
 src/
 ├─ common/          모든 빌드가 공유
 │  ├─ config.h         설정 (URL · 핀 · 주기)
 │  ├─ net.h/.cpp       WiFi 연결 + HTTPS GET/POST
+│  ├─ roots.h          서버 인증서를 확인할 루트 인증서
 │  ├─ battery.h/.cpp   분압을 통한 배터리 전압
 │  └─ provision.h/.cpp Wi-Fi 설정 포털
 ├─ weather/         e-Paper 표시기 빌드
 │  ├─ display.h/.cpp   e-Paper 초기화 + 렌더링 (전역 객체 static 캡슐화)
 │  ├─ weather_icons.h  날씨 아이콘 비트맵
+│  ├─ ota.h/.cpp       서버가 알려 준 릴리스 설치, 실패하면 되돌리기
 │  └─ main.cpp         흐름 (setup/loop)
 └─ led/             LED 전용 빌드
 ```

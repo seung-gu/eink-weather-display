@@ -113,6 +113,27 @@ void clearClaimCode() {
   prefs.end();
 }
 
+String otaVersion() {
+  prefs.begin(NS, true);            // read-only
+  String version = prefs.getString("otaver", "");
+  prefs.end();
+  return version;
+}
+
+uint8_t otaTries() {
+  prefs.begin(NS, true);            // read-only
+  uint8_t n = prefs.getUChar("otatries", 0);
+  prefs.end();
+  return n;
+}
+
+void saveOtaTry(const String& version, uint8_t tries) {
+  prefs.begin(NS, false);
+  prefs.putString("otaver", version);
+  prefs.putUChar("otatries", tries);
+  prefs.end();
+}
+
 uint16_t nvsFreeEntries() {
   nvs_stats_t st;
   if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;
