@@ -95,8 +95,8 @@ pio device monitor -b 115200
 ```bash
 git tag v1.01 && git push origin v1.01
 ```
-- `v*` 태그를 push하면 GitHub 릴리스가 만들어진다 (`.github/workflows/release.yml`). 서버가 10분 안에
-  이걸 보고 더 옛 커밋을 돌리는 보드에 알려 주고, 보드는 다음에 깨어날 때 설치한다
+- `v*` 태그를 push하면 GitHub 릴리스가 만들어지고 서버가 바로 받아 간다 (`.github/workflows/release.yml`).
+  Actions가 초록 체크면 서버가 받아 둔 것이고, 더 옛 커밋을 돌리는 보드는 다음에 깨어날 때 설치한다
 - 노트북에서 릴리스에 없는 커밋(또는 `-dirty` 빌드)으로 직접 올린 보드는 건드리지 않는다
 - 새 펌웨어는 한 번 서버에 닿고 화면을 다시 그려야 확정된다. 못 하면 부트로더가 이전 펌웨어로 돌아간다.
   릴리스 하나에 두 번까지, 배터리가 3.7V 아래면 미룬다

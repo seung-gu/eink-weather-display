@@ -1,8 +1,8 @@
-# Release: push a tag that starts with v. This builds the weather
-# firmware for the XIAO and publishes it as a GitHub release. The emcp server checks the latest
-# release every 10 minutes and offers it to every board that runs an older commit, on that board's
-# next wake. Boards running a commit the release does not contain (a build flashed from a laptop)
-# are left alone.
+# Release: push a tag that starts with v. This builds the weather firmware for the XIAO, publishes
+# it as a GitHub release, and tells the emcp server to fetch it. The run succeeds only once the
+# server holds this release, so a green check here means boards get it from their next wake on.
+# The server offers it to every board running an older commit; a board running a commit the release
+# does not contain (a build flashed from a laptop) is left alone.
 #
 # Only the XIAO is built: no board in use runs the Super Mini env. To release one, add it here and
 # to BOARDS in the server's firmware.py together.
@@ -34,3 +34,14 @@ jobs:
           gh release create "$GITHUB_REF_NAME" commits.txt weather-xiao.bin --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
+      # The server also checks every 10 minutes; this makes it fetch now and says whether it did.
+      # A few tries, in case GitHub's "latest release" takes a moment to point at this one.
+      - name: Tell emcp to fetch the release
+        run: |
+          want=$(git rev-parse HEAD)
+          for try in 1 2 3 4 5; do
+            got=$(curl -fsS -X POST https://emcp.fly.dev/firmware/refresh | jq -r .commit) || got=
+            if [ "$got" = "$want" ]; then echo "emcp holds $want"; exit 0; fi
+            echo "emcp holds ${got:-nothing}, want $want"; sleep 15
+          done
+          exit 1
