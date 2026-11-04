@@ -10,6 +10,7 @@
 
 ## Design notes
 
+* [Registering a board over QR](registration.md)
 * [Persistence & refresh](persistence-and-refresh.md)
 * [JTAG debugging on the ESP32-C3](jtag-debug.md)
 * [Storing state in NVS](nvs-internals.md)

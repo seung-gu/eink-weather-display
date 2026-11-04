@@ -79,6 +79,7 @@ Changing networks and upload trouble: [Setup and registration](docs/en/setup.md)
 | [Hardware and wiring](docs/en/hardware.md) | Pin connections, the battery divider, why each pin |
 | [Setup and registration](docs/en/setup.md) | Changing Wi-Fi, how registration works, uploading in download mode |
 | [Firmware layout and updates](docs/en/firmware.md) | Code layout, one wake in detail, update rules |
+| [Registering a board over QR](docs/en/registration.md) | Token and claim code, what each server answer does, the QR screen |
 | [Persistence & refresh](docs/en/persistence-and-refresh.md) | Why the last weather lives in NVS, why a partial refresh doesn't work |
 | [Storing state in NVS](docs/en/nvs-internals.md) | How NVS is laid out, and the `Preferences` API |
 | [JTAG debugging](docs/en/jtag-debug.md) | Step debugging over the built-in USB-JTAG |

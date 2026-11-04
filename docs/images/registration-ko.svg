@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 468" role="img" aria-labelledby="registration-ko-title registration-ko-desc" font-family="-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', Roboto, sans-serif">
+  <title id="registration-ko-title">QR로 보드 등록</title>
+  <desc id="registration-ko-desc">보드가 토큰과 코드를 보내고 아직 등록 안 됨 응답을 받으면 QR을 띄우고 잠든다. 사람이 QR로 대시보드에서 등록하고 RESET을 누르면 보드가 다시 물어 날씨를 받는다.</desc>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="ahA" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#d97706"/>
+    </marker>
+  </defs>
+  <rect x="1.5" y="1.5" width="757" height="465" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+
+  <!-- lifelines -->
+  <g stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4 4">
+    <line x1="120" y1="72" x2="120" y2="448"/>
+    <line x1="380" y1="72" x2="380" y2="448"/>
+    <line x1="640" y1="72" x2="640" y2="448"/>
+  </g>
+
+  <!-- messages -->
+  <g stroke-width="2" fill="none">
+    <line x1="121" y1="112" x2="376" y2="112" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="379" y1="152" x2="124" y2="152" stroke="#6b7280" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+    <line x1="639" y1="252" x2="384" y2="252" stroke="#d97706" marker-end="url(#ahA)"/>
+    <line x1="639" y1="292" x2="124" y2="292" stroke="#d97706" marker-end="url(#ahA)"/>
+    <line x1="121" y1="332" x2="376" y2="332" stroke="#6b7280" marker-end="url(#ah)"/>
+    <line x1="379" y1="372" x2="124" y2="372" stroke="#6b7280" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+  </g>
+  <g font-size="12.5" fill="#4b5563" text-anchor="middle">
+    <text x="250" y="102"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">POST /weather</tspan> · 토큰 + 코드</text>
+    <text x="250" y="142" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">registered: false</text>
+    <text x="510" y="242" fill="#b45309">QR 스캔 → 로그인 후 등록</text>
+    <text x="510" y="282" fill="#b45309">RESET 누르기</text>
+    <text x="250" y="322"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">POST /weather</tspan> · 토큰 + 코드</text>
+    <text x="250" y="362">날씨 + <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">registered: true</tspan></text>
+  </g>
+
+  <!-- notes on the board's lifeline -->
+  <rect x="30" y="176" width="180" height="40" rx="8" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="120" y="193" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1b4b">QR 표시</text>
+  <text x="120" y="209" text-anchor="middle" font-size="11.5" fill="#4b5563">타이머 없이 딥슬립</text>
+  <rect x="30" y="396" width="180" height="40" rx="8" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="120" y="413" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e1b4b">코드 삭제 · 날씨 표시</text>
+  <text x="120" y="429" text-anchor="middle" font-size="11.5" fill="#4b5563">30분 타이머로 딥슬립</text>
+
+
+  <!-- headers -->
+  <rect x="40" y="24" width="160" height="48" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="120" y="54" text-anchor="middle" font-size="15" font-weight="600" fill="#1e1b4b">보드</text>
+  <rect x="300" y="24" width="160" height="48" rx="10" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2"/>
+  <text x="380" y="54" text-anchor="middle" font-size="15" font-weight="600" fill="#134e4a">emcp 서버</text>
+  <rect x="560" y="24" width="160" height="48" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="640" y="54" text-anchor="middle" font-size="15" font-weight="600" fill="#92400e">주인 (휴대폰)</text>
+</svg>

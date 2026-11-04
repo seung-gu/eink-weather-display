@@ -10,6 +10,7 @@
 
 ## 설계 노트 <a href="#design-notes" id="design-notes"></a>
 
+* [QR로 보드 등록](registration.md)
 * [저장과 화면 갱신](persistence-and-refresh.md)
 * [ESP32-C3 JTAG 디버깅](jtag-debug.md)
 * [NVS에 상태 저장하기](nvs-internals.md)

@@ -36,3 +36,5 @@ The server sends weather only to a board registered to an account.
   puts it back
 - When the owner releases a board, the server no longer knows its token, and the board shows a new
   code on its next wake
+
+How it works on the board: [Registering a board over QR](registration.md).
