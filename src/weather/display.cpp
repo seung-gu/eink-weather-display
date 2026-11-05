@@ -21,6 +21,17 @@ static const gpio_num_t panelInputs[] = {
     (gpio_num_t)EPD_RST, (gpio_num_t)EPD_CS, (gpio_num_t)EPD_DC,
     (gpio_num_t)EPD_SCK, (gpio_num_t)EPD_MOSI};
 
+// Every screen is drawn here, then sent to the panel whole. A canvas the firmware owns, because
+// GxEPD2 keeps its own buffer private.
+static const int W = GxEPD2_154_D67::WIDTH, H = GxEPD2_154_D67::HEIGHT;
+static GFXcanvas1 canvas(W, H);
+
+static void showFrame() {
+  display.epd2.writeImageForFullRefresh(canvas.getBuffer(), 0, 0, W, H);
+  display.epd2.refresh(false);
+  display.hibernate();
+}
+
 void displayBegin() {
   // Still held from the last deep sleep (see displayHoldPins()), and a held pad ignores writes.
   for (gpio_num_t p : panelInputs) gpio_hold_dis(p);
@@ -38,7 +49,7 @@ void displayBegin() {
   digitalWrite(EPD_RST, HIGH); delay(20);
   digitalWrite(EPD_RST, LOW);  delay(20);
   digitalWrite(EPD_RST, HIGH); delay(50);
-  u8g2Fonts.begin(display);
+  u8g2Fonts.begin(canvas);
 }
 
 void displayHoldPins() {
@@ -54,7 +65,7 @@ void displayHoldPins() {
 
 static void drawCentered(const String& s, int y) {
   int w = u8g2Fonts.getUTF8Width(s.c_str());
-  u8g2Fonts.setCursor((display.width() - w) / 2, y);
+  u8g2Fonts.setCursor((canvas.width() - w) / 2, y);
   u8g2Fonts.print(s);
 }
 
@@ -75,7 +86,7 @@ static void drawQrModules(esp_qrcode_handle_t qr) {
   for (int y = 0; y < n; y++)
     for (int x = 0; x < n; x++)
       if (esp_qrcode_get_module(qr, x, y))
-        display.fillRect(qrLeft + x * px, qrTop + y * px, px, px, GxEPD_BLACK);
+        canvas.fillRect(qrLeft + x * px, qrTop + y * px, px, px, GxEPD_BLACK);
 }
 
 static void drawQr(const String& text, int left, int top, int box) {
@@ -101,7 +112,7 @@ static void drawWeatherIcon(const String& c, int cx, int cy) {
   else if (c.indexOf("구름")   >= 0) icon = icon_partly;
   else if (c.indexOf("맑음")   >= 0) icon = icon_clear;
   else                               icon = icon_cloudy;
-  display.drawBitmap(cx - WI_W / 2, cy - WI_H / 2, icon, WI_W, WI_H, GxEPD_BLACK);
+  canvas.drawBitmap(cx - WI_W / 2, cy - WI_H / 2, icon, WI_W, WI_H, GxEPD_BLACK);
 }
 
 // High/low: "22°/12°" -> up-triangle 22°  down-triangle 12° (triangles drawn manually), baseline = cy
@@ -114,18 +125,18 @@ static void drawHighLow(const String& hl, int cy) {
   int wl = u8g2Fonts.getUTF8Width(lo.c_str());
   const int tri = 9, pad = 3, mid = 14;
   int total = tri + pad + wh + mid + tri + pad + wl;
-  int x = (display.width() - total) / 2;
-  display.fillTriangle(x, cy, x + tri, cy, x + tri / 2, cy - 10, GxEPD_BLACK);  // up triangle
+  int x = (canvas.width() - total) / 2;
+  canvas.fillTriangle(x, cy, x + tri, cy, x + tri / 2, cy - 10, GxEPD_BLACK);  // up triangle
   u8g2Fonts.setCursor(x + tri + pad, cy); u8g2Fonts.print(hi);
   x += tri + pad + wh + mid;
-  display.fillTriangle(x, cy - 10, x + tri, cy - 10, x + tri / 2, cy, GxEPD_BLACK);  // down triangle
+  canvas.fillTriangle(x, cy - 10, x + tri, cy - 10, x + tri / 2, cy, GxEPD_BLACK);  // down triangle
   u8g2Fonts.setCursor(x + tri + pad, cy); u8g2Fonts.print(lo);
 }
 
 // One bottom stat cell: icon + value
 static void drawStat(const unsigned char* icon, const String& val, int ix, int tx, int iy, int ty) {
   if (!val.length()) return;
-  display.drawBitmap(ix, iy, icon, WI_S, WI_S, GxEPD_BLACK);
+  canvas.drawBitmap(ix, iy, icon, WI_S, WI_S, GxEPD_BLACK);
   u8g2Fonts.setFont(u8g2_font_helvB10_tf);
   u8g2Fonts.setCursor(tx, ty);
   u8g2Fonts.print(val);
@@ -149,8 +160,8 @@ static void drawSignalGauge(int rssi, int x, int baseline) {
     int h  = 3 + i * 3;                 // ascending heights: 3,6,9,12
     int bx = x + i * 5;
     int by = baseline - h;
-    if (i < bars) display.fillRect(bx, by, 3, h, GxEPD_BLACK);   // filled
-    else          display.drawRect(bx, by, 3, h, GxEPD_BLACK);   // outline
+    if (i < bars) canvas.fillRect(bx, by, 3, h, GxEPD_BLACK);   // filled
+    else          canvas.drawRect(bx, by, 3, h, GxEPD_BLACK);   // outline
   }
 }
 
@@ -168,11 +179,11 @@ static int batteryBars(uint32_t mv) {
 // Battery outline with a terminal nub, filled from the left in quarters. 22x11 including the nub.
 static void drawBatteryIcon(uint32_t mv, int x, int top) {
   const int w = 20, h = 11;
-  display.drawRect(x, top, w, h, GxEPD_BLACK);
-  display.drawRect(x + w, top + 3, 3, 5, GxEPD_BLACK);           // terminal, hollow like the body
+  canvas.drawRect(x, top, w, h, GxEPD_BLACK);
+  canvas.drawRect(x + w, top + 3, 3, 5, GxEPD_BLACK);           // terminal, hollow like the body
                                                                  // so only the charge reads as fill
   int level = batteryBars(mv);
-  if (level) display.fillRect(x + 2, top + 2, (w - 4) * level / 4, h - 4, GxEPD_BLACK);
+  if (level) canvas.fillRect(x + 2, top + 2, (w - 4) * level / 4, h - 4, GxEPD_BLACK);
 }
 
 // Top row: when the weather was fetched on the left, the battery on the right, the city centred
@@ -189,7 +200,7 @@ static void drawStatusRow(const String& city, const String& clock, bool updated,
   // usual ones land exactly where they always did rather than one pixel off.
   u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
   int w = u8g2Fonts.getUTF8Width(city.c_str());
-  int x = (display.width() - w) / 2;
+  int x = (canvas.width() - w) / 2;
   if (x + w > 166) x = 166 - w;
   u8g2Fonts.setCursor(x, cityBaseline);
   u8g2Fonts.print(city);
@@ -199,8 +210,8 @@ static void drawStatusRow(const String& city, const String& clock, bool updated,
 // the small face, so a bitmap that size would tower over its own text.
 static void drawHouse(int x, int top) {
   const int w = 13, h = 12;
-  display.fillTriangle(x, top + 5, x + w / 2, top, x + w, top + 5, GxEPD_BLACK);
-  display.drawRect(x + 2, top + 5, w - 4, h - 5, GxEPD_BLACK);
+  canvas.fillTriangle(x, top + 5, x + w / 2, top, x + w, top + 5, GxEPD_BLACK);
+  canvas.drawRect(x + 2, top + 5, w - 4, h - 5, GxEPD_BLACK);
 }
 
 // Bottom row: this room on the left, the signal on the right. Set in the small face — this row
@@ -218,64 +229,56 @@ static void drawRoomRow(const Room& room, int rssi, int baseline) {
 
 // Plain full-screen message, for the states that have no weather to show yet.
 void displayMessage(const String& title, const String& body) {
-  display.setRotation(1);
+  canvas.setRotation(1);
   u8g2Fonts.setFontMode(1);
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
-  display.setFullWindow();
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
-    u8g2Fonts.setFont(u8g2_font_helvB12_tf);
-    drawCentered(title, 46);
-    display.drawLine(20, 58, 180, 58, GxEPD_BLACK);
-    u8g2Fonts.setFont(u8g2_font_helvB10_tf);
-    int y = 84;
-    for (int start = 0; start <= (int)body.length() && y < display.height() - 8; y += 19) {
-      int nl = body.indexOf('\n', start);
-      if (nl < 0) nl = body.length();
-      u8g2Fonts.setCursor(16, y);
-      u8g2Fonts.print(body.substring(start, nl));
-      if (nl == (int)body.length()) break;
-      start = nl + 1;
-    }
-  } while (display.nextPage());
-  display.hibernate();
+  canvas.fillScreen(GxEPD_WHITE);
+  canvas.drawRect(0, 0, canvas.width(), canvas.height(), GxEPD_BLACK);
+  u8g2Fonts.setFont(u8g2_font_helvB12_tf);
+  drawCentered(title, 46);
+  canvas.drawLine(20, 58, 180, 58, GxEPD_BLACK);
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  int y = 84;
+  for (int start = 0; start <= (int)body.length() && y < canvas.height() - 8; y += 19) {
+    int nl = body.indexOf('\n', start);
+    if (nl < 0) nl = body.length();
+    u8g2Fonts.setCursor(16, y);
+    u8g2Fonts.print(body.substring(start, nl));
+    if (nl == (int)body.length()) break;
+    start = nl + 1;
+  }
+  showFrame();
 }
 
 // QR on the left, the code on the right, the steps underneath. The QR leads because scanning it
 // fills the code in on the dashboard; the code is there for anyone who cannot scan. The phone is
 // already on the internet by now: this screen only comes up once the board itself is online.
 void displayRegister(const String& code) {
-  display.setRotation(1);
+  canvas.setRotation(1);
   u8g2Fonts.setFontMode(1);
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
-  display.setFullWindow();
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
-    drawQr(String(REGISTER_URL) + code, 8, 8, 100);
+  canvas.fillScreen(GxEPD_WHITE);
+  canvas.drawRect(0, 0, canvas.width(), canvas.height(), GxEPD_BLACK);
+  drawQr(String(REGISTER_URL) + code, 8, 8, 100);
 
-    const int cx = 156;                       // centre of the column right of the QR
-    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
-    drawCenteredAt("Scan to", cx, 22);
-    drawCenteredAt("register", cx, 34);
-    u8g2Fonts.setFont(u8g2_font_helvB14_tf);
-    drawCenteredAt(code, cx, 66);
-    u8g2Fonts.setFont(u8g2_font_helvB08_tf);
-    drawCenteredAt("or enter it at", cx, 88);
-    drawCenteredAt(SERVER_HOST, cx, 100);
+  const int cx = 156;                       // centre of the column right of the QR
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  drawCenteredAt("Scan to", cx, 22);
+  drawCenteredAt("register", cx, 34);
+  u8g2Fonts.setFont(u8g2_font_helvB14_tf);
+  drawCenteredAt(code, cx, 66);
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  drawCenteredAt("or enter it at", cx, 88);
+  drawCenteredAt(SERVER_HOST, cx, 100);
 
-    display.drawLine(12, 116, 188, 116, GxEPD_BLACK);
-    u8g2Fonts.setFont(u8g2_font_helvB10_tf);
-    u8g2Fonts.setCursor(12, 140); u8g2Fonts.print("1. Scan or enter");
-    u8g2Fonts.setCursor(12, 159); u8g2Fonts.print("2. Log in, register");
-    u8g2Fonts.setCursor(12, 178); u8g2Fonts.print("3. Press RESET");
-  } while (display.nextPage());
-  display.hibernate();
+  canvas.drawLine(12, 116, 188, 116, GxEPD_BLACK);
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  u8g2Fonts.setCursor(12, 140); u8g2Fonts.print("1. Scan or enter");
+  u8g2Fonts.setCursor(12, 159); u8g2Fonts.print("2. Log in, register");
+  u8g2Fonts.setCursor(12, 178); u8g2Fonts.print("3. Press RESET");
+  showFrame();
 }
 
 // Response -> screen. Call only when it changed.
@@ -297,31 +300,27 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   String hilo  = d["out_temp_max_c"].isNull() ? String()
                : String(d["out_temp_max_c"].as<int>()) + "°/" + String(d["out_temp_min_c"].as<int>()) + "°";
 
-  display.setRotation(1);
+  canvas.setRotation(1);
   u8g2Fonts.setFontMode(1);
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
-  display.setFullWindow();
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    display.drawRect(0, 0, display.width(), display.height(), GxEPD_BLACK);
-    const int YO = 12;                                // nudge everything down a bit (tunable)
-    drawStatusRow(city, clock, updated, batteryMv, 18, 19 + YO);
-    if (cond.length()) drawWeatherIcon(cond, 100, 45 + YO);   // icon 48 (skip when no data)
-    u8g2Fonts.setFont(u8g2_font_helvB18_tf);
-    drawCentered(temp, 91 + YO);                      // current temp
-    u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
-    drawCentered(cond, 109 + YO);                     // condition
-    if (hilo.length()) drawHighLow(hilo, 127 + YO);   // high/low
-    // Two rows of the same shape, split by the line: outdoors above, indoors below. Wind,
-    // humidity and precipitation are what the server sent; the row under them is this room.
-    display.drawLine(12, 133 + YO, 188, 133 + YO, GxEPD_BLACK);
-    drawStat(icon_wind,     wind,  6,  30, 139 + YO, 154 + YO);
-    drawStat(icon_humidity, humid, 82, 106, 139 + YO, 154 + YO);
-    drawStat(icon_umbrella, pop,   142, 166, 139 + YO, 154 + YO);
-    drawRoomRow(room, rssi, 177 + YO);
-  } while (display.nextPage());
-  display.hibernate();
+  canvas.fillScreen(GxEPD_WHITE);
+  canvas.drawRect(0, 0, canvas.width(), canvas.height(), GxEPD_BLACK);
+  const int YO = 12;                                // nudge everything down a bit (tunable)
+  drawStatusRow(city, clock, updated, batteryMv, 18, 19 + YO);
+  if (cond.length()) drawWeatherIcon(cond, 100, 45 + YO);   // icon 48 (skip when no data)
+  u8g2Fonts.setFont(u8g2_font_helvB18_tf);
+  drawCentered(temp, 91 + YO);                      // current temp
+  u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
+  drawCentered(cond, 109 + YO);                     // condition
+  if (hilo.length()) drawHighLow(hilo, 127 + YO);   // high/low
+  // Two rows of the same shape, split by the line: outdoors above, indoors below. Wind,
+  // humidity and precipitation are what the server sent; the row under them is this room.
+  canvas.drawLine(12, 133 + YO, 188, 133 + YO, GxEPD_BLACK);
+  drawStat(icon_wind,     wind,  6,  30, 139 + YO, 154 + YO);
+  drawStat(icon_humidity, humid, 82, 106, 139 + YO, 154 + YO);
+  drawStat(icon_umbrella, pop,   142, 166, 139 + YO, 154 + YO);
+  drawRoomRow(room, rssi, 177 + YO);
+  showFrame();
 }
 
