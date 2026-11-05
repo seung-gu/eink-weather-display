@@ -78,7 +78,7 @@ Wi-Fi 재설정과 업로드 문제는 [설정과 등록](setup.md) 참고.
 | [설정과 등록](setup.md) | Wi-Fi 재설정, 보드 등록 과정, 다운로드 모드 업로드 |
 | [펌웨어 구조와 업데이트](firmware.md) | 코드 구조, 한 번 깨어날 때의 상세 흐름, 업데이트 규칙 |
 | [QR로 보드 등록](registration.md) | 토큰과 등록 코드, 서버 응답별 동작, QR 화면 |
-| [저장과 화면 갱신](persistence-and-refresh.md) | 마지막 날씨를 NVS에 두는 이유, 부분 갱신이 안 되는 이유 |
+| [저장과 화면 갱신](persistence-and-refresh.md) | 마지막 날씨를 NVS에 두는 이유, 딥슬립을 넘어 부분 갱신하는 방법 |
 | [NVS에 상태 저장하기](nvs-internals.md) | NVS 구조와 `Preferences` API |
 | [JTAG 디버깅](jtag-debug.md) | 내장 USB-JTAG 스텝 디버깅 |
 | [GPIO로 e-Paper 모듈 전원 켜고 끄기](epd-power-gating.md) | 모듈 VCC를 GPIO로 끊는 회로 (보류) |

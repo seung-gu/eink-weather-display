@@ -80,7 +80,7 @@ Changing networks and upload trouble: [Setup and registration](docs/en/setup.md)
 | [Setup and registration](docs/en/setup.md) | Changing Wi-Fi, how registration works, uploading in download mode |
 | [Firmware layout and updates](docs/en/firmware.md) | Code layout, one wake in detail, update rules |
 | [Registering a board over QR](docs/en/registration.md) | Token and claim code, what each server answer does, the QR screen |
-| [Persistence & refresh](docs/en/persistence-and-refresh.md) | Why the last weather lives in NVS, why a partial refresh doesn't work |
+| [Persistence & refresh](docs/en/persistence-and-refresh.md) | Why the last weather lives in NVS, how a partial refresh survives deep sleep |
 | [Storing state in NVS](docs/en/nvs-internals.md) | How NVS is laid out, and the `Preferences` API |
 | [JTAG debugging](docs/en/jtag-debug.md) | Step debugging over the built-in USB-JTAG |
 | [e-Paper power gating](docs/en/epd-power-gating.md) | Switching the module's VCC from a GPIO (parked) |
