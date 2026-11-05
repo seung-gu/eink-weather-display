@@ -33,8 +33,9 @@ struct HttpResult {
 class WiFiClientSecure;
 void trustServer(WiFiClientSecure& client);
 
-// Neither retries: a POST has a side effect on the server, and the caller comes back after
-// RETRY_MINUTES anyway.
+// httpGet() does not retry: the caller comes back after RETRY_MINUTES anyway. httpPost() retries
+// once, and only when the connect never completed: a POST has a side effect on the server, and a
+// report that arrived must not be filed twice.
 HttpResult httpGet(const char* url);
 HttpResult httpPost(const char* url, const String& body);
 
