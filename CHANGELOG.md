@@ -8,6 +8,10 @@ What changed in each firmware release, newest first. Boards with auto update on 
 
 The releases up to v1.1.0 were first tagged v1, v1.01, v1.03 and v1.04, and boards that installed them still report those names. v1.02 changed only the release workflow, so it has no entry.
 
+## v1.1.1 · patch · 2026-11-05
+
+- The board reports its version under the new names (v1.1.1, not v1.04). Nothing else changed from v1.1.0.
+
 ## v1.1.0 · minor · 2026-11-05 (was v1.04)
 
 - The screen refreshes partially, over the last frame kept in RTC memory, instead of fully on every wake. A full refresh still runs after a reset and every 12 hours. Wakes take 1.9 to 2.5 s instead of about 4.6 s.
