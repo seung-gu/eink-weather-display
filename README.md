@@ -22,9 +22,7 @@
   <img src="docs/images/photo-sensor.jpg" width="49%" alt="The SHT40 sensor at the opening in the case">
 </p>
 
-A low-power weather display: an ESP32-C3 driving a 1.54" e-Paper. Every 30 minutes it wakes, draws
-the weather and the room's temperature and humidity, and goes back to deep sleep. It runs for months
-on a battery.
+A low-power weather display: an ESP32-C3 driving a 1.54" e-Paper. Every 30 minutes it wakes, draws the weather and the room's temperature and humidity, and goes back to deep sleep. It runs for months on a battery.
 
 ## Features
 | Feature | What it does |
@@ -47,9 +45,7 @@ on a battery.
 
 ![The dashboard: 20 days of battery, Wi-Fi signal, awake time, room temperature and humidity](docs/images/dashboard-en.png)
 
-The backend is a separate project, [seung-gu/emcp](https://github.com/seung-gu/emcp), running on
-Fly.io. It looks up the weather, stores the reports, and serves the dashboard, the MCP tools and the
-firmware.
+The backend is a separate project, [seung-gu/emcp](https://github.com/seung-gu/emcp), running on Fly.io. It looks up the weather, stores the reports, and serves the dashboard, the MCP tools and the firmware.
 
 ## Firmware updates
 ![GitHub Actions builds a release, the emcp server holds it, and the board installs it on its next wake; kept if it works, rolled back if not](docs/images/ota.png)

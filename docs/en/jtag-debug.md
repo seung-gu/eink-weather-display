@@ -2,11 +2,9 @@
 
 # JTAG debugging on the ESP32-C3
 
-Step debugging works over the C3's **built-in USB Serial/JTAG** — no external probe. It takes three
-OpenOCD overrides plus one build flag, none of which follow from the error messages they fix.
+Step debugging works over the C3's **built-in USB Serial/JTAG** — no external probe. It takes three OpenOCD overrides plus one build flag, none of which follow from the error messages they fix.
 
-Config lives in the `[dbg]` section of `platformio.ini`, inherited by every env via
-`[env] extends = dbg`.
+Config lives in the `[dbg]` section of `platformio.ini`, inherited by every env via `[env] extends = dbg`.
 
 ---
 
@@ -27,8 +25,7 @@ debug_server =                                 ; openocd path and gdb_port elide
     -c gdb_breakpoint_override hard            ; (3)
 ```
 
-`tbreak` is a **temporary** breakpoint, consumed on its first hit — which matters after a reset
-(§4).
+`tbreak` is a **temporary** breakpoint, consumed on its first hit — which matters after a reset (§4).
 
 ---
 
@@ -53,11 +50,8 @@ Error: Connect failed. Consider setting up a gdb-attach event ... or use 'gdb_me
 Error: attempted 'gdb' connection rejected
 ```
 
-- **(2) and (3) are one pair**: OpenOCD's own message names the fix, and disabling the memory map
-  is exactly what makes forced hardware breakpoints necessary. The C3 has **8 hardware triggers**,
-  so 8 breakpoints at a time.
-- Arduino on ESP32 **does** run on FreeRTOS (`setup()`/`loop()` live in a task), so (1) trades
-  task-aware debugging for a session that works.
+- **(2) and (3) are one pair**: OpenOCD's own message names the fix, and disabling the memory map is exactly what makes forced hardware breakpoints necessary. The C3 has **8 hardware triggers**, so 8 breakpoints at a time.
+- Arduino on ESP32 **does** run on FreeRTOS (`setup()`/`loop()` live in a task), so (1) trades task-aware debugging for a session that works.
 
 ---
 
@@ -74,36 +68,30 @@ Error: attempted 'gdb' connection rejected
 #endif
 ```
 
-`debug_build_flags` defines `DEBUG_NO_SLEEP` **only** for debug builds, so a normal
-`pio run -t upload` still deep-sleeps. No commenting code in and out.
+`debug_build_flags` defines `DEBUG_NO_SLEEP` **only** for debug builds, so a normal `pio run -t upload` still deep-sleeps. No commenting code in and out.
 
 ---
 
 ## 4. Why a session silently fails to stop
 
-**A breakpoint that never hits has two causes, and neither is reported.** Either the app is not
-running, or a reset went around the debugger.
+**A breakpoint that never hits has two causes, and neither is reported.** Either the app is not running, or a reset went around the debugger.
 
 ![Two silent failure modes. ① Is the app actually running? Normal boot, boot:0x8 (SPI_FAST_FLASH_BOOT), the app runs and breakpoints hit; download mode, boot:0x0 (USB_BOOT) plus wait usb download, the app never starts and the CPU sits in ROM, so nothing can ever hit. ② Did the reset go through the debugger? A debugger reset — Restart, monitor reset halt, or PIO Debug without uploading — makes GDB re-plant the hardware breakpoints and they hit; the reset button resets the chip behind GDB's back, the trigger registers are cleared, nothing re-plants them, and execution never stops again.](../images/jtag-fail-modes.png)
 
 ### Download mode blocks every breakpoint
 
-**Debugging requires the app to be running.** In USB download mode it never starts, so a halt lands
-in ROM with no symbols:
+**Debugging requires the app to be running.** In USB download mode it never starts, so a halt lands in ROM with no symbols:
 
 ```
 Program received signal SIGINT, Interrupt.
 0x400462dc in ?? ()
 ```
 
-**BOOT+RESET is for *flashing*, not for debugging.** The way out is to **unplug and replug USB**
-without holding BOOT — a software reset alone does not leave download mode.
+**BOOT+RESET is for *flashing*, not for debugging.** The way out is to **unplug and replug USB** without holding BOOT — a software reset alone does not leave download mode.
 
 ### The RESET button clears hardware breakpoints
 
-**A physical RESET press clears the CPU's hardware breakpoint trigger registers, and does so
-without the debugger's knowledge** — nothing re-plants them, so execution never stops again. Only a
-debugger-mediated reset re-plants them:
+**A physical RESET press clears the CPU's hardware breakpoint trigger registers, and does so without the debugger's knowledge** — nothing re-plants them, so execution never stops again. Only a debugger-mediated reset re-plants them:
 
 | Reset | Re-plants the triggers |
 |---|---|
@@ -112,23 +100,18 @@ debugger-mediated reset re-plants them:
 | **PIO Debug (without uploading)** | yes — and skips reflashing when the code has not changed |
 | **RESET** button on the board | **no** — cleared behind GDB's back |
 
-Editor breakpoints (the red dots) are GDB's own list and survive such a reset. `debug_init_break =
-tbreak setup` does not: a temporary breakpoint is consumed on its first hit.
+Editor breakpoints (the red dots) are GDB's own list and survive such a reset. `debug_init_break = tbreak setup` does not: a temporary breakpoint is consumed on its first hit.
 
 ---
 
 ## Workflow
 
-1. Board asleep (deep-sleep firmware)? Wake it for flashing: hold **BOOT**, tap **RESET** — or
-   replug USB.
-2. Press **F5** (Run and Debug). PlatformIO builds with debug flags, flashes over JTAG, and breaks
-   at `setup()`.
+1. Board asleep (deep-sleep firmware)? Wake it for flashing: hold **BOOT**, tap **RESET** — or replug USB.
+2. Press **F5** (Run and Debug). PlatformIO builds with debug flags, flashes over JTAG, and breaks at `setup()`.
 3. Step with **F10**; **F11** only where you mean it.
-4. Later runs need no BOOT+RESET — the debug build stays awake. To re-enter without reflashing
-   unchanged code, launch **PIO Debug (without uploading)**.
+4. Later runs need no BOOT+RESET — the debug build stays awake. To re-enter without reflashing unchanged code, launch **PIO Debug (without uploading)**.
 
-**Step *over* (`F10`) network calls.** Halting inside `connectWiFi()`/`http.GET()` lets TCP/TLS
-timers run while the CPU is stopped, so the connection dies and behaviour diverges.
+**Step *over* (`F10`) network calls.** Halting inside `connectWiFi()`/`http.GET()` lets TCP/TLS timers run while the CPU is stopped, so the connection dies and behaviour diverges.
 
 Toolbar buttons occasionally stop responding; the Debug Console still works:
 

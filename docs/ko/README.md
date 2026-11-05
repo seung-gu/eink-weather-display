@@ -22,8 +22,7 @@
   <img src="https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/photo-sensor.jpg" width="49%" alt="케이스 구멍 쪽 SHT40 센서">
 </p>
 
-ESP32-C3와 1.54" e-Paper로 만든 저전력 날씨 표시기. 30분마다 깨어나 날씨와 실내 온습도를 화면에
-그리고 다시 딥슬립. 배터리로 수개월 동작.
+ESP32-C3와 1.54" e-Paper로 만든 저전력 날씨 표시기. 30분마다 깨어나 날씨와 실내 온습도를 화면에 그리고 다시 딥슬립. 배터리로 수개월 동작.
 
 ## 주요 기능
 | 기능 | 내용 |
@@ -46,8 +45,7 @@ ESP32-C3와 1.54" e-Paper로 만든 저전력 날씨 표시기. 30분마다 깨�
 
 ![대시보드: 20일간 배터리, Wi-Fi 신호, 깨어 있던 시간, 실내 온도·습도 그래프](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/dashboard.png)
 
-서버는 별도 프로젝트 [seung-gu/emcp](https://github.com/seung-gu/emcp). Fly.io에서 동작하며 날씨 조회,
-기록 저장, 대시보드, MCP, 펌웨어 배포 담당.
+서버는 별도 프로젝트 [seung-gu/emcp](https://github.com/seung-gu/emcp). Fly.io에서 동작하며 날씨 조회, 기록 저장, 대시보드, MCP, 펌웨어 배포 담당.
 
 ## 펌웨어 자동 업데이트
 ![GitHub Actions가 만든 릴리스를 emcp 서버가 받아 두고, 보드가 다음 wake에 설치. 성공하면 확정, 실패하면 이전 펌웨어로 복귀](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/ota-ko.png)
