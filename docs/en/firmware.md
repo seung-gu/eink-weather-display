@@ -42,7 +42,7 @@ src/
 ```bash
 git tag v1.01 && git push origin v1.01
 ```
-- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A green check on the run means the server holds it. Every board running an older commit installs it on its next wake
+- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A green check on the run means the server holds it. Every board with auto update on that is not running it installs it on its next wake. Turn a board's auto update off on the dashboard before flashing a test build over USB, and back on to return it to the latest release
 - The board draws this wake's screen first, then downloads. A download that arrives cut short or damaged is never booted
 - A board flashed from a laptop with a commit the release does not have (or a `-dirty` build) is left alone
 - The new firmware has to reach the server and redraw the screen once. If it does not, the bootloader goes back to the previous one. Two tries per release, and none while the battery is under 3.7 V
