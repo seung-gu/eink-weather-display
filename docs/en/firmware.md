@@ -40,8 +40,9 @@ src/
 ![GitHub Actions builds a release, the emcp server holds it, and the board installs it on its next wake; kept if it works, rolled back if not](../images/ota.png)
 
 ```bash
-git tag v1.01 && git push origin v1.01
+git tag -a v1.1.1 -m "..." && git push origin v1.1.1
 ```
+- Versions are vMAJOR.MINOR.PATCH, and each release gets a [CHANGELOG.md](https://github.com/seung-gu/eink-weather-display/blob/main/CHANGELOG.md) entry before its tag. The release skill (`.claude/skills/release`) picks the number
 - A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A green check on the run means the server holds it. Every board with auto update on that is not running it installs it on its next wake. Turn a board's auto update off on the dashboard before flashing a test build over USB, and back on to return it to the latest release
 - The board draws this wake's screen first, then downloads. A download that arrives cut short or damaged is never booted
 - A board flashed from a laptop with a commit the release does not have (or a `-dirty` build) is left alone

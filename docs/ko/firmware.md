@@ -40,8 +40,9 @@ src/
 ![GitHub Actions가 만든 릴리스를 emcp 서버가 받아 두고, 보드가 다음 wake에 설치. 성공하면 확정, 실패하면 이전 펌웨어로 복귀](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/ota-ko.png)
 
 ```bash
-git tag v1.01 && git push origin v1.01
+git tag -a v1.1.1 -m "..." && git push origin v1.1.1
 ```
+- 버전은 vMAJOR.MINOR.PATCH. 태그 전에 [CHANGELOG.md](https://github.com/seung-gu/eink-weather-display/blob/main/CHANGELOG.md)에 항목 추가. 번호는 릴리스 스킬(`.claude/skills/release`)이 정함
 - `v*` 태그 push 시 GitHub 릴리스 생성, 서버가 바로 수신 (`.github/workflows/release.yml`). Actions 초록 체크는 서버가 받아 둔 상태라는 뜻. 자동 업데이트가 켜져 있고 그 릴리스가 아닌 보드는 다음 wake에 설치. 테스트 빌드를 USB로 올리기 전에 대시보드에서 그 보드의 자동 업데이트를 끄고, 다시 켜면 최신 릴리스로 돌아감
 - 보드는 이번 wake의 화면을 먼저 그린 뒤 다운로드. 중간에 끊기거나 손상된 다운로드로는 부팅하지 않음
 - 노트북에서 릴리스에 없는 커밋(또는 `-dirty` 빌드)으로 직접 올린 보드는 대상 아님
