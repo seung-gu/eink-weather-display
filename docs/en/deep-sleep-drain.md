@@ -8,8 +8,7 @@ Board: XIAO ESP32-C3 (mac E8F60A17AF28), e-Paper: Waveshare 1.54" V2.1
 
 ## 1. Symptom
 
-From 2026-10-06 the battery ran down far faster than usual. The voltage that normally fell about
-1.5 mV an hour fell about 9 mV an hour.
+From 2026-10-06 the battery ran down far faster than usual. The voltage that normally fell about 1.5 mV an hour fell about 9 mV an hour.
 
 ---
 
@@ -29,11 +28,9 @@ From 2026-10-06 the battery ran down far faster than usual. The voltage that nor
 
 ## 3. Fix
 
-Every line into the panel (RST, CS, DC, CLK, DIN) is held low during sleep (f880792). The code is
-`displayHoldPins()` in `display.cpp`, called from `deepSleep()` just before sleeping.
+Every line into the panel (RST, CS, DC, CLK, DIN) is held low during sleep (f880792). The code is `displayHoldPins()` in `display.cpp`, called from `deepSleep()` just before sleeping.
 
-Flashed on 2026-10-21 15:52, it has fallen 0.76 mV an hour over 6 days, lower even than the
-1.5 mV/h before the problem.
+Flashed on 2026-10-21 15:52, it has fallen 0.76 mV an hour over 6 days, lower even than the 1.5 mV/h before the problem.
 
 ![Dashboard battery graph: a fast sawtooth after every charge before f880792, a slow straight line after it](../images/drain-graph.png)
 
@@ -49,8 +46,7 @@ f880792 was flashed before it was committed, so the dashboard shows it as `0e14a
 
 ## 4. Root cause
 
-On the V2.1 board the module only switches off with RST low. High or floating, the module stays on
-through sleep and keeps drawing current.
+On the V2.1 board the module only switches off with RST low. High or floating, the module stays on through sleep and keeps drawing current.
 
 The firmware never held RST low during sleep.
 

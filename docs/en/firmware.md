@@ -42,16 +42,11 @@ src/
 ```bash
 git tag v1.01 && git push origin v1.01
 ```
-- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A
-  green check on the run means the server holds it. Every board running an older commit installs it
-  on its next wake
-- The board draws this wake's screen first, then downloads. A download that arrives cut short or
-  damaged is never booted
+- A `v*` tag builds a GitHub release (`.github/workflows/release.yml`) and has the server fetch it. A green check on the run means the server holds it. Every board running an older commit installs it on its next wake
+- The board draws this wake's screen first, then downloads. A download that arrives cut short or damaged is never booted
 - A board flashed from a laptop with a commit the release does not have (or a `-dirty` build) is left alone
-- The new firmware has to reach the server and redraw the screen once. If it does not, the bootloader
-  goes back to the previous one. Two tries per release, and none while the battery is under 3.7 V
+- The new firmware has to reach the server and redraw the screen once. If it does not, the bootloader goes back to the previous one. Two tries per release, and none while the battery is under 3.7 V
 - Boards flashed before this (no `src/weather/ota.cpp`, default partition table) need one USB upload
 
 ## Notes
-- The weather condition strings (`뇌우`, `눈`, `비`…) are matched against the server's reply, so they
-  stay in Korean in the code
+- The weather condition strings (`뇌우`, `눈`, `비`…) are matched against the server's reply, so they stay in Korean in the code
