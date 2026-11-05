@@ -21,14 +21,42 @@ static const gpio_num_t panelInputs[] = {
     (gpio_num_t)EPD_RST, (gpio_num_t)EPD_CS, (gpio_num_t)EPD_DC,
     (gpio_num_t)EPD_SCK, (gpio_num_t)EPD_MOSI};
 
-// Every screen is drawn here, then sent to the panel whole. A canvas the firmware owns, because
-// GxEPD2 keeps its own buffer private.
+// ---- Partial refresh ----
+// A partial refresh drives only the pixels that differ between the panel's two RAMs, so 0x26 must
+// hold exactly what the screen shows. Deep sleep switches the module off and that RAM with it, so
+// the frame each wake draws is kept here, in RTC memory, and written back to 0x26 on the next.
+// Drawing goes to a canvas because GxEPD2 keeps its own buffer private.
 static const int W = GxEPD2_154_D67::WIDTH, H = GxEPD2_154_D67::HEIGHT;
 static GFXcanvas1 canvas(W, H);
 
-static void showFrame() {
-  display.epd2.writeImageForFullRefresh(canvas.getBuffer(), 0, 0, W, H);
-  display.epd2.refresh(false);
+// Testing showed no ghosting, with the city moved and every value and the icon changing; the
+// full refresh every 12 hours is insurance. Counted in refreshes, so a run of RETRY_MINUTES
+// wakes brings it forward.
+#define FULL_EVERY (12 * 60 / SLEEP_MINUTES)
+
+// A reset or a power cut empties RTC memory, so the first refresh after one is full.
+RTC_DATA_ATTR static uint8_t lastFrame[W * H / 8];
+RTC_DATA_ATTR static bool    frameKept = false;   // lastFrame is what the panel shows
+RTC_DATA_ATTR static uint8_t partials  = 0;       // partial refreshes since the last full one
+
+// Sends the canvas to the panel. Only a weather screen is kept as the base for a partial refresh,
+// so the screen after a message or a QR is a full refresh.
+static void showFrame(bool keep) {
+  const uint8_t* next = canvas.getBuffer();
+  if (keep && frameKept && partials < FULL_EVERY - 1) {
+    Serial.println("partial refresh");
+    display.epd2.writeImageToPrevious(lastFrame, 0, 0, W, H);
+    display.epd2.writeImage(next, 0, 0, W, H);
+    display.epd2.refresh(0, 0, W, H);
+    partials++;
+  } else {
+    Serial.println("full refresh");
+    display.epd2.writeImageForFullRefresh(next, 0, 0, W, H);
+    display.epd2.refresh(false);
+    partials = 0;
+  }
+  memcpy(lastFrame, next, sizeof lastFrame);
+  frameKept = keep;
   display.hibernate();
 }
 
@@ -40,7 +68,9 @@ void displayBegin() {
   // RST and DC, and SCK=8 on the XIAO, which is the sensor's SDA. Having begun the bus already
   // makes that call return early, so neither set is ever touched.
   SPI.begin(EPD_SCK, -1, EPD_MOSI, EPD_CS);
-  display.init(115200);
+  // false skips GxEPD2's forced first full refresh, and its clearing of both RAMs before the
+  // first write, which showFrame() replaces by writing both itself.
+  display.init(115200, !frameKept);
   // Kept from when the default mapping did take RST and DC: re-assert them, then reset the
   // module by hand. This is the sequence the display is known to render with.
   pinMode(EPD_CS, OUTPUT);  digitalWrite(EPD_CS, HIGH);
@@ -248,7 +278,7 @@ void displayMessage(const String& title, const String& body) {
     if (nl == (int)body.length()) break;
     start = nl + 1;
   }
-  showFrame();
+  showFrame(false);
 }
 
 // QR on the left, the code on the right, the steps underneath. The QR leads because scanning it
@@ -278,7 +308,7 @@ void displayRegister(const String& code) {
   u8g2Fonts.setCursor(12, 140); u8g2Fonts.print("1. Scan or enter");
   u8g2Fonts.setCursor(12, 159); u8g2Fonts.print("2. Log in, register");
   u8g2Fonts.setCursor(12, 178); u8g2Fonts.print("3. Press RESET");
-  showFrame();
+  showFrame(false);
 }
 
 // Response -> screen. Call only when it changed.
@@ -321,6 +351,6 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   drawStat(icon_humidity, humid, 82, 106, 139 + YO, 154 + YO);
   drawStat(icon_umbrella, pop,   142, 166, 139 + YO, 154 + YO);
   drawRoomRow(room, rssi, 177 + YO);
-  showFrame();
+  showFrame(true);
 }
 
