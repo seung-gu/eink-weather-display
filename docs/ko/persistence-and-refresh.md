@@ -3,8 +3,8 @@
 # 저장과 화면 갱신
 
 딥슬립 웨이크 = 완전 리셋. `setup()`부터 다시 시작하고 일반 RAM은 사라지며, 패널 컨트롤러도 리셋된
-상태로 올라옴. 여기서 두 가지가 결정됨 — 마지막 성공 응답은 **RTC 메모리가 아니라 NVS(플래시)**에
-두고, 화면은 **부분 갱신이 아니라 항상 전체 갱신**으로 다시 그림.
+상태로 올라옴. 여기서 두 가지가 결정됨. 마지막 성공 응답은 **RTC 메모리가 아니라 NVS(플래시)**에
+두고, 화면은 wake마다 RTC 메모리에 보관한 직전 화면 위에 **부분 갱신**으로 다시 그림.
 
 두 결정의 전제가 되는 요구사항: Wi-Fi나 fetch가 실패해도 화면엔 마지막 날씨 + **이번 웨이크**의 상태
 (`offline`, 신호 게이지)가 떠 있어야 함.
@@ -16,13 +16,13 @@
 
 ---
 
-## 1. 상태줄도 전체 갱신으로 그림
+## 1. 부분 갱신에는 패널 RAM에 직전 화면이 다시 있어야 함
 
 부분 갱신은 **차분(differential)** 방식 — 직전 이미지와 다른 픽셀만 구동하므로, 현재 화면이 패널
 컨트롤러 자체 RAM에 이미 들어 있어야 함. 이 RAM은 **ESP32 메모리가 아니라** 디스플레이 모듈 위에
 있음. 매 웨이크가 그 RAM을 미정의 상태로 만들기 때문에 `init()`의 두 모드가 모두 깨짐.
 
-![3단 구성: 부분 갱신이 참조하는 것(패널 컨트롤러 자체 RAM, 0x24 현재 / 0x26 직전) → 매 웨이크가 그 RAM에 하는 일(display.hibernate(), 수동 RST 펄스, init(…, false)) → 그래서 두 init 모드가 각각 실패하는 방식(init(…, true)은 전체 갱신을 강제해 날씨 영역이 백색화, init(…, false)는 미정의 RAM으로 구동해 패널 전체가 노이즈) → 항상 전체 갱신](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/epd-partial-fail.png)
+![3단 구성: 부분 갱신이 참조하는 것(패널 컨트롤러 자체 RAM, 0x24 현재 / 0x26 직전) → 매 웨이크가 그 RAM에 하는 일(display.hibernate(), 수동 RST 펄스, init(…, false)) → 그래서 두 init 모드가 각각 실패하는 방식(init(…, true)은 전체 갱신을 강제해 날씨 영역이 백색화, init(…, false)는 미정의 RAM으로 구동해 패널 전체가 노이즈) → 보관한 직전 화면을 0x26에 다시 써 넣음](https://raw.githubusercontent.com/seung-gu/eink-weather-display/main/docs/images/epd-partial-fail.png)
 
 설치된 GxEPD2 소스가 두 모드를 그대로 기술함:
 
@@ -54,7 +54,29 @@ if (_initial_refresh) return refresh(false);   // initial update needs be full u
 | 부분 갱신 | 0.5초 | 컨트롤러 RAM에 현재 이미지 전체가 이미 들어 있을 것 |
 | **전체 갱신** | 2.6초 | 없음 |
 
-매 웨이크마다 컨트롤러가 리셋되는 기기는 그 전제를 만족시킬 수 없음 → **항상 전체 갱신**.
+매 웨이크마다 컨트롤러가 리셋되는 기기는 그 전제를 직접 채워야 함.
+
+### 직전 화면 다시 써 넣기
+
+wake마다 GxEPD2 버퍼 대신 ESP32 메모리의 canvas에 그림(GxEPD2 버퍼는 `private`). 그린 화면은 RTC
+메모리(5000바이트)에 복사해 두고, 다음 wake가 그 사본에서 시작함:
+
+| 단계 | 호출 |
+|---|---|
+| GxEPD2의 첫 갱신 전체 강제 없이 시작 | `display.init(115200, false)` |
+| 보관한 직전 화면(= 지금 화면에 보이는 것)을 0x26에 | `epd2.writeImageToPrevious()` |
+| 새 화면을 0x24에 | `epd2.writeImage()` |
+| 화면 전체를 부분 갱신 | `epd2.refresh(0, 0, 200, 200)` |
+
+시작할 직전 화면이 없을 때와 12시간마다는 여전히 전체 갱신:
+
+| 전체 갱신 | 이유 |
+|---|---|
+| RESET, 전원 차단, 업데이트 뒤 | RTC 메모리가 비워져 보관한 화면이 없음 |
+| 메시지나 QR 화면 뒤 | 날씨 화면만 기준으로 보관 |
+| 12시간마다 (30분 간격으로 24번째) | 보험. 테스트에서 도시를 바꿔 모든 값과 아이콘이 바뀌어도 잔상 없었음 |
+
+테스트에서 부분 갱신 wake는 1.9–2.5초, 전체 갱신 wake는 약 4.6초.
 
 ---
 
@@ -118,7 +140,7 @@ if (fetched.length()) prefs.putString("last", fetched);
 String w = prefs.getString("last", "");
 prefs.end();
 
-displayBegin();                                // 항상 다시 그림 (전체 갱신)
+displayBegin();                                // 항상 다시 그림 (부분 또는 전체, §1)
 displayWeather(w, wifi.ok ? wifi.ms : 0,       // 0 ms  -> "offline"
                   wifi.ok ? wifi.rssi : 0);    // 0 dBm -> 빈 게이지
 ```
