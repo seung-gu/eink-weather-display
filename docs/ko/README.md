@@ -82,3 +82,6 @@ Wi-Fi 재설정과 업로드 문제는 [설정과 등록](setup.md) 참고.
 | [GPIO로 e-Paper 모듈 전원 켜고 끄기](epd-power-gating.md) | 모듈 VCC를 GPIO로 끊는 회로 (보류) |
 | [저전압 차단](battery-cutoff.md) | 3.4V에서 배터리를 분리하는 P-MOSFET 회로 |
 | [배터리 누설전류 Trouble shooting](deep-sleep-drain.md) | V2.1 보드의 RST를 딥슬립 중 LOW로 둬야 하는 이유 |
+
+## 변경 기록
+[CHANGELOG.md](https://github.com/seung-gu/eink-weather-display/blob/main/CHANGELOG.md).

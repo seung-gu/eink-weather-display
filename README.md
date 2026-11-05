@@ -82,3 +82,6 @@ Changing networks and upload trouble: [Setup and registration](docs/en/setup.md)
 | [e-Paper power gating](docs/en/epd-power-gating.md) | Switching the module's VCC from a GPIO (parked) |
 | [Low-voltage cutoff](docs/en/battery-cutoff.md) | A P-MOSFET that disconnects the battery at 3.4 V |
 | [Battery leakage current troubleshooting](docs/en/deep-sleep-drain.md) | Why RST on the V2.1 board has to stay low in deep sleep |
+
+## Changelog
+[CHANGELOG.md](CHANGELOG.md).
