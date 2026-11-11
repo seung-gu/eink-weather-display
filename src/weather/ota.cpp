@@ -8,10 +8,11 @@
 #include "net.h"
 #include "store.h"
 
-// A download keeps the radio on for about a minute, some thirty normal wakes' worth of battery. Two tries
-// covers a dropped connection or one unlucky rollback; past that the version itself is the
-// likely problem, and the board waits for the next release.
-#define OTA_TRIES 2
+// A download keeps the radio on for about a minute, some thirty normal wakes' worth of battery. One
+// try per scheduled wake, three in all, covers a dropped connection, an unlucky rollback or a server
+// that briefly had the wrong file; past that the version itself is the likely problem, and the
+// board waits for the next release.
+#define OTA_TRIES 3
 
 // The Arduino core marks a new firmware as good the moment it starts, which would leave nothing
 // to roll back to. Returning true here hands that decision to otaConfirm().
@@ -36,6 +37,10 @@ void otaUpdate(const String& weatherBody) {
   if (version.length() != 40) return;
   // A firmware still on probation installing another would leave neither slot known to work.
   if (onProbation()) return;
+  // Only on a wake the sleep timer started. An install ends in a restart, and the wake right after
+  // it is not a new cycle: when the install did not take, trying again there would spend the next
+  // try a minute after the last one. The next scheduled wake gets it instead.
+  if (esp_reset_reason() != ESP_RST_DEEPSLEEP) return;
 
   // Counted before the download, so a try that hangs until someone resets the board still
   // counts, and so does a rollback: the old firmware comes back to this same offer.
