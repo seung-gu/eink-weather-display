@@ -99,6 +99,16 @@ static void deepSleep() {
   esp_deep_sleep_start();
 }
 
+// This wake's radio window, once the radio is down. Stays zero on a wake that never brought it up
+// for a report, such as the setup portal, which saveRadioMs() takes as "nothing to report".
+static uint32_t radioMs = 0;
+
+// The two figures a wake only knows about itself once it is over. The next wake reports them.
+static void saveWakeTimes() {
+  saveAwakeMs(millis());
+  saveRadioMs(radioMs);
+}
+
 // Puts the setup page on the air, and never returns: the board either restarts with a network
 // or sleeps with no wake timer until someone presses RESET. firstRun only decides what the
 // screen says — the board has never been set up, or the network it knows stopped answering.
@@ -133,7 +143,7 @@ static void enterSetupMode(bool firstRun, const Wake& w) {
   logWake("portal-timeout", w, timedOut);
 
   displayMessage("Setup timed out", "Press RESET to set up\nWi-Fi again.");
-  saveAwakeMs(millis());            // minutes of access point at ~100 mA — the costliest wake there is
+  saveWakeTimes();                  // minutes of access point at ~100 mA — the costliest wake there is
   Serial.flush();
   deepSleep();                                // no wake timer: asleep until someone resets it
 }
@@ -141,7 +151,7 @@ static void enterSetupMode(bool firstRun, const Wake& w) {
 static void sleepUntilNextWake(uint8_t minutes) {
   // Last thing before sleeping, so this covers the whole wake — the screen refresh included,
   // which is seconds of it. The next wake reports it; this one's report left long ago.
-  saveAwakeMs(millis());
+  saveWakeTimes();
 #ifndef DEBUG_NO_SLEEP
   // On timer expiry the chip resets and restarts from setup()
   Serial.printf("deep sleep for %u min...\n", minutes);
@@ -187,6 +197,9 @@ static String wakeReport(const Wake& w) {
   // The previous wake's, not this one's — see store.h. Left out on the first wake after a fresh
   // NVS, where there is no previous one: zero would read as a wake that took no time at all.
   if (uint32_t awake = lastAwakeMs()) req["prev_awake_ms"] = awake;
+  // The previous wake's as well, for the same reason. Wi-Fi's share of it is wifi_ms; the rest is
+  // the HTTPS round trip, and what the awake time has beyond it is mostly the screen refresh.
+  if (uint32_t radio = lastRadioMs()) req["prev_radio_ms"] = radio;
   req["nvs_free"]      = nvsFreeEntries();
   req["nvs_total"]     = nvsTotalEntries();
   // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
@@ -212,7 +225,7 @@ static String checkInBody(const String& code) {
 
 // Sleep with no wake timer, for a board that is waiting on a person. Only RESET wakes it.
 static void sleepUntilReset() {
-  saveAwakeMs(millis());
+  saveWakeTimes();
   Serial.flush();
   deepSleep();
 }
@@ -243,7 +256,8 @@ static void registrationWake(const Wake& w, uint32_t radioOnAt) {
   }
   // Anything else (not yet, 429, 503, no answer) changes nothing: the next RESET asks again.
   disconnectWifi();
-  Serial.printf("radio on for %u ms\n", millis() - radioOnAt);
+  radioMs = millis() - radioOnAt;
+  Serial.printf("radio on for %u ms\n", radioMs);
 
   displayBegin();
   if (registered) displayWeather(lastWeather(), true, w.wifi.rssi, w.batteryMv, w.room);
@@ -327,7 +341,8 @@ void setup() {
     Serial.println("Wi-Fi failed — redraw stored weather");
   }
   disconnectWifi();
-  Serial.printf("radio on for %u ms\n", millis() - radioOnAt);
+  radioMs = millis() - radioOnAt;
+  Serial.printf("radio on for %u ms\n", radioMs);
 
   // NVS is the single source of truth, so the screen draws what is stored whether or not this
   // wake added to it. Redraw every time, so the status line reflects THIS wake.

@@ -81,6 +81,20 @@ void saveAwakeMs(uint32_t ms) {
   prefs.end();
 }
 
+uint32_t lastRadioMs() {
+  prefs.begin(NS, true);            // read-only
+  uint32_t ms = prefs.getUInt("radio", 0);
+  prefs.end();
+  return ms;
+}
+
+void saveRadioMs(uint32_t ms) {
+  prefs.begin(NS, false);
+  if (ms) prefs.putUInt("radio", ms);
+  else    prefs.remove("radio");
+  prefs.end();
+}
+
 String boardToken() {
   prefs.begin(NS, true);            // read-only
   String token = prefs.getString("token", "");

@@ -31,6 +31,12 @@ void    clearLog();
 uint32_t lastAwakeMs();
 void     saveAwakeMs(uint32_t ms);
 
+// How long the previous wake had the radio on, from bringing Wi-Fi up to putting it down after the
+// report. Kept like the awake time and for the same reason: the radio goes down after the report
+// has gone. Zero clears it, for a wake that never measured one, so no report carries a stale one.
+uint32_t lastRadioMs();
+void     saveRadioMs(uint32_t ms);
+
 // Which board this is, to the server. The token is the board's secret: it goes on every report and
 // the server keeps only its hash. The claim code is what a person scans or types to put the board
 // in their account, and exists only until the server says registered, so "a token and no code"
