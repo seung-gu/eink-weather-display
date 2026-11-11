@@ -148,6 +148,13 @@ void saveOtaTry(const String& version, uint8_t tries) {
   prefs.end();
 }
 
+void clearOtaTry() {
+  prefs.begin(NS, false);
+  prefs.remove("otaver");
+  prefs.remove("otatries");
+  prefs.end();
+}
+
 uint16_t nvsFreeEntries() {
   nvs_stats_t st;
   if (nvs_get_stats(NULL, &st) != ESP_OK) return 0;

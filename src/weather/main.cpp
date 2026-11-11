@@ -186,6 +186,8 @@ static String wakeReport(const Wake& w) {
   if (otaTried.length() && !otaTried.startsWith(FW_COMMIT)) {
     req["ota_tried"] = otaTried;
     req["ota_tries"] = otaTries();
+    // Given up on it: the server turns auto update off, and the owner decides when to try again.
+    if (otaGaveUp()) req["ota_failed"] = true;
   }
   // Sent on every wake, not only on failure: a build that reports these can be told apart from
   // one that cannot, which the firmware stamp fails at — it is the commit plus a dirty flag, so

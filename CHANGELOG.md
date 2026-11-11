@@ -8,6 +8,10 @@ What changed in each firmware release, newest first. Boards with auto update on 
 
 The releases up to v1.1.0 were first tagged v1, v1.01, v1.03 and v1.04, and boards that installed them still report those names. v1.02 changed only the release workflow, so it has no entry.
 
+## v1.3.0 · minor · 2026-11-11
+
+- When an update fails on all three tries, the board tells the server, which turns its auto update off and shows why on the dashboard. Turning auto update back on makes the board try that version again from the start.
+
 ## v1.2.2 · patch · 2026-11-11
 
 - When an update does not take, the board tries again on its next scheduled wake instead of right away, up to three times per version instead of two back to back.

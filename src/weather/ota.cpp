@@ -30,11 +30,22 @@ void otaConfirm() {
   Serial.println("[ota] new firmware confirmed");
 }
 
+bool otaGaveUp() {
+  String version = otaVersion();
+  return version.length() && !version.startsWith(FW_COMMIT) && otaTries() >= OTA_TRIES;
+}
+
 void otaUpdate(const String& weatherBody) {
   JsonDocument d;
   if (deserializeJson(d, weatherBody)) return;
   String version = d["ota_version"] | "";
-  if (version.length() != 40) return;
+  // Nothing on offer: the board runs the release, or auto update is off, which is what the server
+  // does when a board gives up. Forgetting the tries here is what lets the owner's turning it back
+  // on start that version over.
+  if (version.length() != 40) {
+    if (otaVersion().length()) clearOtaTry();
+    return;
+  }
   // A firmware still on probation installing another would leave neither slot known to work.
   if (onProbation()) return;
   // Only on a wake the sleep timer started. An install ends in a restart, and the wake right after

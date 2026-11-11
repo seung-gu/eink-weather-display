@@ -8,7 +8,9 @@
 // The new firmware starts on probation. If it crashes, or resets for any reason before
 // otaConfirm(), the bootloader goes back to the previous one on the next boot. That covers a
 // release that cannot reach the server or cannot draw the screen — the two things a wake is for.
-// The old firmware then sees the same offer again; after OTA_TRIES it waits for the next release.
+// The old firmware sees the same offer again and tries on its next scheduled wake. After OTA_TRIES
+// it gives up, says so in its report, and the server turns auto update off until the owner turns
+// it back on.
 
 // Called with this wake's 200 weather body, after the screen is drawn. Connects Wi-Fi again only
 // when there is something to install. Returns when there is nothing to install or the download
@@ -17,3 +19,6 @@ void otaUpdate(const String& weatherBody);
 
 // Keeps the running firmware for good. Called at the end of a wake that reached the server.
 void otaConfirm();
+
+// True once the offered update has had all its tries without taking. The report carries it.
+bool otaGaveUp();
