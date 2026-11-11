@@ -35,7 +35,7 @@ bool otaGaveUp() {
   return version.length() && !version.startsWith(FW_COMMIT) && otaTries() >= OTA_TRIES;
 }
 
-void otaUpdate(const String& weatherBody) {
+void otaUpdate(const String& weatherBody, uint32_t radioMs) {
   JsonDocument d;
   if (deserializeJson(d, weatherBody)) return;
   String version = d["ota_version"] | "";
@@ -90,6 +90,7 @@ void otaUpdate(const String& weatherBody) {
   Serial.printf("[ota] installed %u ms into the wake, restarting\n", millis());
   clearWifiAttempts();              // this wake reached the network; the restart is no failed boot
   saveAwakeMs(millis());            // the next report carries how long the download kept it awake
+  saveRadioMs(radioMs);             // the report's window only: the download shows in the awake time
   Serial.flush();
   ESP.restart();
 }

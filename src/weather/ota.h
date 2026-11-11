@@ -14,8 +14,9 @@
 
 // Called with this wake's 200 weather body, after the screen is drawn. Connects Wi-Fi again only
 // when there is something to install. Returns when there is nothing to install or the download
-// failed; after a successful install it restarts and does not return.
-void otaUpdate(const String& weatherBody);
+// failed; after a successful install it restarts and does not return. radioMs is this wake's radio
+// window for the report, stored with the awake time before that restart, as a normal wake stores it.
+void otaUpdate(const String& weatherBody, uint32_t radioMs);
 
 // Keeps the running firmware for good. Called at the end of a wake that reached the server.
 void otaConfirm();

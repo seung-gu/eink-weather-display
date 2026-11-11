@@ -8,6 +8,10 @@ What changed in each firmware release, newest first. Boards with auto update on 
 
 The releases up to v1.1.0 were first tagged v1, v1.01, v1.03 and v1.04, and boards that installed them still report those names. v1.02 changed only the release workflow, so it has no entry.
 
+## v1.3.1 · patch · 2026-11-11
+
+- The report after a firmware download no longer repeats the radio time of the wake before it. It carries that wake's own, for the report alone; the download shows only in the awake time.
+
 ## v1.3.0 · minor · 2026-11-11
 
 - When an update fails on all three tries, the board tells the server, which turns its auto update off and shows why on the dashboard. Turning auto update back on makes the board try that version again from the start.

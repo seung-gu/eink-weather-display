@@ -372,7 +372,7 @@ void setup() {
   // weather: the download keeps the board busy for most of a minute, and nobody should be looking
   // at an unchanged screen meanwhile. Restarts into it on success; otherwise the wake ends as usual.
   if (answer.length()) {
-    otaUpdate(answer);
+    otaUpdate(answer, radioMs);
     disconnectWifi();
   }
   if (released) sleepUntilReset();  // the new code waits for its owner, like any unregistered board
