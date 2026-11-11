@@ -8,7 +8,7 @@
 #include "net.h"
 #include "store.h"
 
-// A download takes 10-20 s with the radio on, a few normal wakes' worth of battery. Two tries
+// A download keeps the radio on for about a minute, some thirty normal wakes' worth of battery. Two tries
 // covers a dropped connection or one unlucky rollback; past that the version itself is the
 // likely problem, and the board waits for the next release.
 #define OTA_TRIES 2

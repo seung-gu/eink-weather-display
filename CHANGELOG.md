@@ -8,6 +8,10 @@ What changed in each firmware release, newest first. Boards with auto update on 
 
 The releases up to v1.1.0 were first tagged v1, v1.01, v1.03 and v1.04, and boards that installed them still report those names. v1.02 changed only the release workflow, so it has no entry.
 
+## v1.2.1 · patch · 2026-11-11
+
+- The same firmware as v1.2.0, released again. The server sent the v1.1.1 file under the v1.2.0 name, so boards installed v1.1.1 twice and stopped trying v1.2.0. This release lets them install it.
+
 ## v1.2.0 · minor · 2026-11-11
 
 - Each report also says how long the radio was on in the previous wake, from bringing Wi-Fi up to putting it down. The dashboard shows it next to the Wi-Fi time, so a longer wake can be traced to the network or to the screen refresh.
