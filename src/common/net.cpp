@@ -107,14 +107,22 @@ HttpResult httpGet(const char* url) {
   return { code, body };
 }
 
-// Connects before handing the client to HTTPClient, which takes a client that is already connected
-// as it is. POST() would otherwise do the lookup, the handshake and the request in one call, and
-// timed apart they show which of them a slow report spent its time on. Every POST goes to
-// SERVER_HOST, so that is the host it connects to; a url on another host would need its own here.
+// Connects before POST(), which would otherwise do the lookup, the handshake and the request in one
+// call; timed apart they show which of them a slow report spent its time on. POST() finds the
+// connection open and uses it. begin() has to come first: handed a client that is already
+// connected, it compares the url's host with the one it last stored, which is none yet, takes the
+// connection for one to another server and closes it, and POST() then makes a second one without
+// the RSA-only offer. Every POST goes to SERVER_HOST, so that is the host it connects to; a url on
+// another host would need its own here.
 static HttpResult post(const char* url, const String& payload, const int* suites) {
   HttpResult r = { 0, "" };
   WiFiClientSecure client;
   trustServer(client);
+  HTTPClient http;
+  if (!http.begin(client, url)) {
+    r.code = HTTP_BEGIN_FAILED;
+    return r;
+  }
 
   uint32_t t = millis();
   IPAddress ip;
@@ -134,11 +142,6 @@ static HttpResult post(const char* url, const String& payload, const int* suites
   }
   client.setTimeout((HTTPCLIENT_DEFAULT_TCP_TIMEOUT + 500) / 1000);
 
-  HTTPClient http;
-  if (!http.begin(client, url)) {
-    r.code = HTTP_BEGIN_FAILED;
-    return r;
-  }
   http.addHeader("Content-Type", "application/json");
   r.code = http.POST(payload);
   t = millis();
