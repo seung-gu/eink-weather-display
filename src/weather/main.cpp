@@ -10,6 +10,7 @@
 #include "store.h"
 #include "display.h"
 #include "ota.h"
+#include "steps.h"
 
 // What this wake knows about itself. Filled as the values become available — battery and chip
 // before the radio, since both change once it is on — and read by everything downstream, so the
@@ -105,8 +106,10 @@ static uint32_t radioMs = 0;
 
 // The two figures a wake only knows about itself once it is over. The next wake reports them.
 static void saveWakeTimes() {
+  stepDone(STEP_FINISH);
   saveAwakeMs(millis());
   saveRadioMs(radioMs);
+  saveSteps(radioMs != 0);
 }
 
 // Puts the setup page on the air, and never returns: the board either restarts with a network
@@ -202,6 +205,8 @@ static String wakeReport(const Wake& w) {
   // The previous wake's as well, for the same reason. Wi-Fi's share of it is wifi_ms; the rest is
   // the HTTPS round trip, and what the awake time has beyond it is mostly the screen refresh.
   if (uint32_t radio = lastRadioMs()) req["prev_radio_ms"] = radio;
+  // And where the previous wake's time went, step by step (steps.h).
+  addPrevSteps(req);
   req["nvs_free"]      = nvsFreeEntries();
   req["nvs_total"]     = nvsTotalEntries();
   // serialized() drops the stored text in as JSON rather than quoting it into a string, so the
@@ -295,7 +300,10 @@ void setup() {
   // connectWiFi() brings the radio up and disconnectWifi() puts it down, so this brackets the whole
   // window that draws ~100 mA — the figure the battery pays, of which the connect is only part.
   uint32_t radioOnAt = millis();
+  stepDone(STEP_SENSE);
   w.wifi = connectWiFi();
+  stepDone(STEP_RADIO_ON);
+  stepSplit(STEP_RADIO_ON, STEP_JOIN, w.wifi.ms);   // connectWiFi() timed the join itself
 
   // Registration comes only after Wi-Fi, and knows nothing about it: the Wi-Fi steps above never
   // mention a code, and a board that cannot reach the network does not try to register. Each
@@ -314,6 +322,11 @@ void setup() {
   uint8_t nextWake = RETRY_MINUTES;
   if (w.wifi.ok) {
     HttpResult http = httpPost(WEATHER_URL, wakeReport(w));
+    // The whole request goes to waiting first, then each part httpPost() timed moves out of it.
+    stepDone(STEP_WAIT);
+    stepSplit(STEP_WAIT, STEP_DNS, http.dnsMs);
+    stepSplit(STEP_WAIT, STEP_CONNECT, http.connectMs);
+    stepSplit(STEP_WAIT, STEP_READ, http.readMs);
     if (http.code == 200) {
       saveWeather(http.body);
       clearLog();                 // only a 200 retires the log: anything else may not have landed
@@ -342,8 +355,10 @@ void setup() {
     logWake("wifi", w, e);
     Serial.println("Wi-Fi failed — redraw stored weather");
   }
+  stepDone(STEP_SAVE);
   disconnectWifi();
   radioMs = millis() - radioOnAt;
+  stepDone(STEP_RADIO_OFF);
   Serial.printf("radio on for %u ms\n", radioMs);
 
   // NVS is the single source of truth, so the screen draws what is stored whether or not this
@@ -352,12 +367,13 @@ void setup() {
   // Except on a board still waiting to be registered that could not reach Wi-Fi: its screen holds
   // the QR its owner needs, and the weather screen would have nothing to show in its place. The
   // panel keeps an image without power, so leaving it alone leaves the QR up.
-  if (released) {
+  if (released || w.wifi.ok || !needsRegistration()) {
     displayBegin();
-    displayRegister(claimCode());
-  } else if (w.wifi.ok || !needsRegistration()) {
-    displayBegin();
-    displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv, w.room);
+    stepDone(STEP_PANEL);
+    if (released) displayRegister(claimCode());
+    else          displayWeather(lastWeather(), updated, w.wifi.rssi, w.batteryMv, w.room);
+    stepDone(STEP_DRAW);
+    stepSplit(STEP_DRAW, STEP_REFRESH, displayFrameMs());   // the panel's part of the call
   }
 
   // Cleared here rather than the moment the connect succeeds, which is 0.5 s into a 4.4 s wake.
@@ -372,8 +388,10 @@ void setup() {
   // weather: the download keeps the board busy for most of a minute, and nobody should be looking
   // at an unchanged screen meanwhile. Restarts into it on success; otherwise the wake ends as usual.
   if (answer.length()) {
+    stepDone(STEP_FINISH);
     otaUpdate(answer, radioMs);
     disconnectWifi();
+    stepDone(STEP_OTA);
   }
   if (released) sleepUntilReset();  // the new code waits for its owner, like any unregistered board
   sleepUntilNextWake(nextWake);

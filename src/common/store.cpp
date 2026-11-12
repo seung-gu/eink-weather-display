@@ -95,6 +95,21 @@ void saveRadioMs(uint32_t ms) {
   prefs.end();
 }
 
+bool lastStepTimes(uint32_t* ms, size_t n) {
+  prefs.begin(NS, true);            // read-only
+  bool ok = prefs.getBytesLength("steps") == n * sizeof *ms &&
+            prefs.getBytes("steps", ms, n * sizeof *ms) == n * sizeof *ms;
+  prefs.end();
+  return ok;
+}
+
+void saveStepTimes(const uint32_t* ms, size_t n) {
+  prefs.begin(NS, false);
+  if (ms) prefs.putBytes("steps", ms, n * sizeof *ms);
+  else    prefs.remove("steps");
+  prefs.end();
+}
+
 String boardToken() {
   prefs.begin(NS, true);            // read-only
   String token = prefs.getString("token", "");

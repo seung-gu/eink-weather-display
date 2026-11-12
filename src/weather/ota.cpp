@@ -7,6 +7,7 @@
 #include "config.h"
 #include "net.h"
 #include "store.h"
+#include "steps.h"
 
 // A download keeps the radio on for about a minute, some thirty normal wakes' worth of battery. One
 // try per scheduled wake, three in all, covers a dropped connection, an unlucky rollback or a server
@@ -89,8 +90,10 @@ void otaUpdate(const String& weatherBody, uint32_t radioMs) {
 
   Serial.printf("[ota] installed %u ms into the wake, restarting\n", millis());
   clearWifiAttempts();              // this wake reached the network; the restart is no failed boot
+  stepDone(STEP_OTA);
   saveAwakeMs(millis());            // the next report carries how long the download kept it awake
   saveRadioMs(radioMs);             // the report's window only: the download shows in the awake time
+  saveSteps(true);
   Serial.flush();
   ESP.restart();
 }

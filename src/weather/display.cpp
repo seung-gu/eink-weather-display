@@ -39,9 +39,12 @@ RTC_DATA_ATTR static uint8_t lastFrame[W * H / 8];
 RTC_DATA_ATTR static bool    frameKept = false;   // lastFrame is what the panel shows
 RTC_DATA_ATTR static uint8_t partials  = 0;       // partial refreshes since the last full one
 
+static uint32_t frameMs = 0;   // how long the last showFrame() took, for the wake's steps
+
 // Sends the canvas to the panel. Only a weather screen is kept as the base for a partial refresh,
 // so the screen after a message or a QR is a full refresh.
 static void showFrame(bool keep) {
+  uint32_t start = millis();
   const uint8_t* next = canvas.getBuffer();
   if (keep && frameKept && partials < FULL_EVERY - 1) {
     Serial.println("partial refresh");
@@ -58,6 +61,11 @@ static void showFrame(bool keep) {
   memcpy(lastFrame, next, sizeof lastFrame);
   frameKept = keep;
   display.hibernate();
+  frameMs = millis() - start;
+}
+
+uint32_t displayFrameMs() {
+  return frameMs;
 }
 
 void displayBegin() {

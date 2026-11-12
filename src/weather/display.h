@@ -25,3 +25,7 @@ void displayRegister(const String& code);
 // so when nothing came back the clock is replaced by "offline". rssi >= 0 means "no signal".
 void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
                     const Room& room);
+
+// How long the last screen took to reach the panel: sending it, the refresh, and putting the panel
+// to sleep. What a display call took beyond this was drawing it.
+uint32_t displayFrameMs();

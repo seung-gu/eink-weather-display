@@ -37,6 +37,12 @@ void     saveAwakeMs(uint32_t ms);
 uint32_t lastRadioMs();
 void     saveRadioMs(uint32_t ms);
 
+// How long each step of the previous wake took (weather/steps.h), kept like the awake time. n is
+// how many steps this firmware has: an entry of another size was saved by a firmware with other
+// steps and reads as none, so lastStepTimes() returns false. nullptr removes the entry.
+bool lastStepTimes(uint32_t* ms, size_t n);
+void saveStepTimes(const uint32_t* ms, size_t n);
+
 // Which board this is, to the server. The token is the board's secret: it goes on every report and
 // the server keeps only its hash. The claim code is what a person scans or types to put the board
 // in their account, and exists only until the server says registered, so "a token and no code"

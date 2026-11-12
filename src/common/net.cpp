@@ -107,20 +107,46 @@ HttpResult httpGet(const char* url) {
   return { code, body };
 }
 
+// Connects before handing the client to HTTPClient, which takes a client that is already connected
+// as it is. POST() would otherwise do the lookup, the handshake and the request in one call, and
+// timed apart they show which of them a slow report spent its time on. Every POST goes to
+// SERVER_HOST, so that is the host it connects to; a url on another host would need its own here.
 static HttpResult post(const char* url, const String& payload, const int* suites) {
+  HttpResult r = { 0, "" };
   WiFiClientSecure client;
   trustServer(client);
-  HTTPClient http;
-  if (!http.begin(client, url)) return { HTTP_BEGIN_FAILED, "" };
 
-  http.addHeader("Content-Type", "application/json");
-  nextSuites = suites;              // POST() is where the connect happens
-  int code = http.POST(payload);
+  uint32_t t = millis();
+  IPAddress ip;
+  WiFi.hostByName(SERVER_HOST, ip);   // a failure shows up in the connect, which looks it up again
+  r.dnsMs = millis() - t;
+
+  t = millis();
+  nextSuites = suites;
+  // The same connect and timeouts HTTPClient's own connect() uses, so only the timing changes.
+  bool up = client.connect(SERVER_HOST, 443, HTTPCLIENT_DEFAULT_TCP_TIMEOUT);
   nextSuites = nullptr;
-  String body = (code == 200) ? http.getString() : String();
-  if (code != 200) Serial.printf("httpPost failed (code %d)\n", code);
+  r.connectMs = millis() - t;
+  if (!up) {
+    r.code = HTTPC_ERROR_CONNECTION_REFUSED;   // what POST() returns when its connect fails
+    Serial.printf("httpPost failed (code %d)\n", r.code);
+    return r;
+  }
+  client.setTimeout((HTTPCLIENT_DEFAULT_TCP_TIMEOUT + 500) / 1000);
+
+  HTTPClient http;
+  if (!http.begin(client, url)) {
+    r.code = HTTP_BEGIN_FAILED;
+    return r;
+  }
+  http.addHeader("Content-Type", "application/json");
+  r.code = http.POST(payload);
+  t = millis();
+  if (r.code == 200) r.body = http.getString();
+  else Serial.printf("httpPost failed (code %d)\n", r.code);
   http.end();
-  return { code, body };
+  r.readMs = millis() - t;
+  return r;
 }
 
 HttpResult httpPost(const char* url, const String& payload) {
@@ -130,7 +156,13 @@ HttpResult httpPost(const char* url, const String& payload) {
   // which is what rules out retrying the rest. A 500 or a READ_TIMEOUT arrived and was
   // processed; repeating those would duplicate the row on the server. The retry offers
   // mbedTLS's whole list, in case it was the RSA-only offer the server turned down.
-  if (r.code == HTTPC_ERROR_CONNECTION_REFUSED) r = post(url, payload, nullptr);
+  if (r.code == HTTPC_ERROR_CONNECTION_REFUSED) {
+    HttpResult again = post(url, payload, nullptr);
+    again.dnsMs     += r.dnsMs;       // the first try's time was spent all the same
+    again.connectMs += r.connectMs;
+    again.readMs    += r.readMs;
+    r = again;
+  }
   return r;
 }
 

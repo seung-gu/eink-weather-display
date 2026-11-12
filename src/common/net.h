@@ -26,6 +26,11 @@ bool wifiConnected();
 struct HttpResult {
   int code;      // HTTP status, or negative when the request never reached a server
   String body;   // response body, empty unless code is 200
+  // How long httpPost() spent on its parts, both tries together when it retried. httpGet() leaves
+  // them at zero. What the call took beyond them is sending the request and waiting for the answer.
+  uint32_t dnsMs = 0;       // looking the server's name up
+  uint32_t connectMs = 0;   // TCP and the TLS handshake
+  uint32_t readMs = 0;      // reading the body and closing
 };
 
 // Every HTTPS request checks the server's certificate against the roots in roots.h. The board
