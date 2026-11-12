@@ -8,6 +8,10 @@ What changed in each firmware release, newest first. Boards with auto update on 
 
 The releases up to v1.1.0 were first tagged v1, v1.01, v1.03 and v1.04, and boards that installed them still report those names. v1.02 changed only the release workflow, so it has no entry.
 
+## v1.4.0 · minor · 2026-11-12
+
+- Each report also says how long each step of the previous wake took, from the readings through joining Wi-Fi, the secure connection and the server's answer to the screen refresh and an update download. The dashboard lists them under the awake time, so a longer wake can be traced to the step that grew.
+
 ## v1.3.1 · patch · 2026-11-11
 
 - The report after a firmware download no longer repeats the radio time of the wake before it. It carries that wake's own, for the report alone; the download shows only in the awake time.
