@@ -26,8 +26,9 @@
 // with the code filled in. Lower case keeps it inside the 32 bytes a version-2 QR holds.
 #define REGISTER_URL  "https://" SERVER_HOST "/r/"
 // Weather response: city / cond / wind_kmh / pop / stamp, and out_temp_c / out_humidity /
-// out_temp_max_c / out_temp_min_c. Numbers arrive as numbers; the units are a display decision
-// and go on here. The server also sends the old names (temp_c, ...) for boards not yet reflashed.
+// out_temp_max_c / out_temp_min_c, and forecast: { time, out_temp_c, cond } for 6 and 12 hours on.
+// Numbers arrive as numbers; the units are a display decision and go on here. The server also
+// sends the old names (temp_c, ...) for boards not yet reflashed.
 
 // ==== Registration ====
 // Only once Wi-Fi works: a board the server does not know asks once, shows a code for its owner

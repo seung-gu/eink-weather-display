@@ -136,39 +136,104 @@ static void drawQr(const String& text, int left, int top, int box) {
   esp_qrcode_generate(&cfg, text.c_str());
 }
 
-// Condition string -> 48x48 bitmap icon (cx,cy = center).
-// Keys stay in Korean because they match the server's Korean weather text.
-static void drawWeatherIcon(const String& c, int cx, int cy) {
-  const unsigned char* icon;
-  if      (c.indexOf("뇌우")   >= 0) icon = icon_storm;
-  else if (c.indexOf("눈")     >= 0) icon = icon_snow;
-  else if (c.indexOf("소나기") >= 0) icon = icon_showers;
-  else if (c.indexOf("이슬비") >= 0) icon = icon_drizzle;
-  else if (c.indexOf("비")     >= 0) icon = icon_rain;
-  else if (c.indexOf("안개")   >= 0) icon = icon_fog;
-  else if (c.indexOf("흐림")   >= 0) icon = icon_cloudy;
-  else if (c.indexOf("구름")   >= 0) icon = icon_partly;
-  else if (c.indexOf("맑음")   >= 0) icon = icon_clear;
-  else                               icon = icon_cloudy;
-  canvas.drawBitmap(cx - WI_W / 2, cy - WI_H / 2, icon, WI_W, WI_H, GxEPD_BLACK);
+// The same picture at both sizes: the large one for now, the small one for the forecast row.
+struct WeatherIcon { const unsigned char* large; const unsigned char* small; };
+
+// Condition string -> icon. Keys stay in Korean because they match the server's Korean weather text.
+static WeatherIcon iconFor(const String& c) {
+  if (c.indexOf("뇌우")   >= 0) return { icon_storm,   icon_storm_s };
+  if (c.indexOf("눈")     >= 0) return { icon_snow,    icon_snow_s };
+  if (c.indexOf("소나기") >= 0) return { icon_showers, icon_showers_s };
+  if (c.indexOf("이슬비") >= 0) return { icon_drizzle, icon_drizzle_s };
+  if (c.indexOf("비")     >= 0) return { icon_rain,    icon_rain_s };
+  if (c.indexOf("안개")   >= 0) return { icon_fog,     icon_fog_s };
+  if (c.indexOf("흐림")   >= 0) return { icon_cloudy,  icon_cloudy_s };
+  if (c.indexOf("구름")   >= 0) return { icon_partly,  icon_partly_s };
+  if (c.indexOf("맑음")   >= 0) return { icon_clear,   icon_clear_s };
+  return { icon_cloudy, icon_cloudy_s };
 }
 
-// High/low: "22°/12°" -> up-triangle 22°  down-triangle 12° (triangles drawn manually), baseline = cy
-static void drawHighLow(const String& hl, int cy) {
-  int sl = hl.indexOf('/');
-  String hi = (sl < 0) ? hl : hl.substring(0, sl);
-  String lo = (sl < 0) ? "" : hl.substring(sl + 1);
-  u8g2Fonts.setFont(u8g2_font_helvB12_tf);
-  int wh = u8g2Fonts.getUTF8Width(hi.c_str());
-  int wl = u8g2Fonts.getUTF8Width(lo.c_str());
-  const int tri = 9, pad = 3, mid = 14;
-  int total = tri + pad + wh + mid + tri + pad + wl;
-  int x = (canvas.width() - total) / 2;
-  canvas.fillTriangle(x, cy, x + tri, cy, x + tri / 2, cy - 10, GxEPD_BLACK);  // up triangle
-  u8g2Fonts.setCursor(x + tri + pad, cy); u8g2Fonts.print(hi);
-  x += tri + pad + wh + mid;
-  canvas.fillTriangle(x, cy - 10, x + tri, cy - 10, x + tri / 2, cy, GxEPD_BLACK);  // down triangle
-  u8g2Fonts.setCursor(x + tri + pad, cy); u8g2Fonts.print(lo);
+// 48x48 icon, cx,cy = center.
+static void drawWeatherIcon(const String& c, int cx, int cy) {
+  canvas.drawBitmap(cx - WI_W / 2, cy - WI_H / 2, iconFor(c).large, WI_W, WI_H, GxEPD_BLACK);
+}
+
+// A filled triangle size px wide and tall, apex up or down, its bottom row on baseline. Drawn row
+// by row from the apex, so the two are exact mirror images: GFX's fillTriangle rounds the edges of
+// a flat-bottomed and a flat-topped one differently, and the up one came out visibly unlike the
+// down one.
+static void drawArrow(bool up, int x, int baseline, int size) {
+  for (int r = 0; r < size; r++) {            // r rows from the apex
+    int half = r * (size / 2) / (size - 1);
+    int y = up ? baseline - size + 1 + r : baseline - r;
+    canvas.drawFastHLine(x + size / 2 - half, y, 2 * half + 1, GxEPD_BLACK);
+  }
+}
+
+// The current temperature with today's range in brackets after it, as one line: "9°C (▲11° ▼3°)".
+// Too long to keep the temperature centred under the icon (-12°C (▲-8° ▼-15°) would run off the
+// right edge), so the line is centred and then nudged right, which brings the temperature back
+// towards the middle; a line too long for the nudge stops at the right margin. baseline = the
+// temperature's. Without a range the temperature stands alone, centred.
+static void drawTempRange(const String& temp, const String& hi, const String& lo, int baseline) {
+  if (!hi.length() || !lo.length()) {
+    u8g2Fonts.setFont(u8g2_font_helvB18_tf);
+    drawCentered(temp, baseline);
+    return;
+  }
+  const int gap = 6, tri = 7, pad = 2, space = 6, nudge = 10, margin = 4;
+  u8g2Fonts.setFont(u8g2_font_helvB18_tf);
+  int wt = u8g2Fonts.getUTF8Width(temp.c_str());
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  int wo = u8g2Fonts.getUTF8Width("("), wc = u8g2Fonts.getUTF8Width(")");
+  int wh = u8g2Fonts.getUTF8Width(hi.c_str()), wl = u8g2Fonts.getUTF8Width(lo.c_str());
+  int width = wt + gap + wo + 1 + tri + pad + wh + space + tri + pad + wl + 1 + wc;
+  int x = (canvas.width() - width) / 2 + nudge;
+  if (x + width > canvas.width() - margin) x = canvas.width() - margin - width;
+
+  u8g2Fonts.setFont(u8g2_font_helvB18_tf);
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(temp);
+  x += wt + gap;
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print("(");
+  x += wo + 1;
+  drawArrow(true, x, baseline - 1, tri);       // the font's last row is the one above its baseline
+  x += tri + pad;
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(hi);
+  x += wh + space;
+  drawArrow(false, x, baseline - 1, tri);
+  x += tri + pad;
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(lo);
+  x += wl + 1;                                  // keeps the degree sign off the bracket
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(")");
+}
+
+// One forecast cell, centred on cx: the hour, the icon, the temperature. top = the icon's top. The
+// hour arrives as a clock time, not "+6h", so a screen left standing while offline still reads right.
+static void drawForecast(JsonObjectConst f, int cx, int top) {
+  String hour = f["time"] | "";
+  String cond = f["cond"] | "";
+  String temp = f["out_temp_c"].isNull() ? String() : String(f["out_temp_c"].as<int>()) + "°";
+  if (!hour.length() || !cond.length()) return;
+  const int gap = 4, baseline = top + 15;   // the stats row's offset beside its 20 px icons
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  int wt = u8g2Fonts.getUTF8Width(temp.c_str());
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  int wh = u8g2Fonts.getUTF8Width(hour.c_str());
+  int x = cx - (wh + gap + WI_S + gap + wt) / 2;
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(hour);
+  x += wh + gap;
+  canvas.drawBitmap(x, top, iconFor(cond).small, WI_S, WI_S, GxEPD_BLACK);
+  x += WI_S + gap;
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  u8g2Fonts.setCursor(x, baseline);
+  u8g2Fonts.print(temp);
 }
 
 // One bottom stat cell: icon + value
@@ -335,8 +400,11 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   String wind  = d["wind_kmh"].isNull()       ? String() : String(d["wind_kmh"].as<int>())     + "km/h";
   String humid = d["out_humidity"].isNull()   ? String() : String(d["out_humidity"].as<int>()) + "%";
   String pop   = d["pop"].isNull()            ? String() : String(d["pop"].as<int>())          + "%";
-  String hilo  = d["out_temp_max_c"].isNull() ? String()
-               : String(d["out_temp_max_c"].as<int>()) + "°/" + String(d["out_temp_min_c"].as<int>()) + "°";
+  String hi    = d["out_temp_max_c"].isNull() ? String() : String(d["out_temp_max_c"].as<int>()) + "°";
+  String lo    = d["out_temp_min_c"].isNull() ? String() : String(d["out_temp_min_c"].as<int>()) + "°";
+  // 6 and 12 hours on. A server that sends none, or a stored response from before it did, leaves
+  // the row empty.
+  JsonArrayConst forecast = d["forecast"];
 
   canvas.setRotation(1);
   u8g2Fonts.setFontMode(1);
@@ -347,18 +415,18 @@ void displayWeather(const String& w, bool updated, int rssi, uint32_t batteryMv,
   const int YO = 12;                                // nudge everything down a bit (tunable)
   drawStatusRow(city, clock, updated, batteryMv, 18, 19 + YO);
   if (cond.length()) drawWeatherIcon(cond, 100, 45 + YO);   // icon 48 (skip when no data)
-  u8g2Fonts.setFont(u8g2_font_helvB18_tf);
-  drawCentered(temp, 91 + YO);                      // current temp
+  drawTempRange(temp, hi, lo, 91 + YO);             // current temp (today's high and low)
   u8g2Fonts.setFont(u8g2_font_unifont_t_korean2);
   drawCentered(cond, 109 + YO);                     // condition
-  if (hilo.length()) drawHighLow(hilo, 127 + YO);   // high/low
+  // Later today, left to right in time, one cell in each half of the screen.
+  for (size_t i = 0; i < forecast.size() && i < 2; i++) drawForecast(forecast[i], 50 + 100 * i, 114 + YO);
   // Two rows of the same shape, split by the line: outdoors above, indoors below. Wind,
   // humidity and precipitation are what the server sent; the row under them is this room.
-  canvas.drawLine(12, 133 + YO, 188, 133 + YO, GxEPD_BLACK);
-  drawStat(icon_wind,     wind,  6,  30, 139 + YO, 154 + YO);
-  drawStat(icon_humidity, humid, 82, 106, 139 + YO, 154 + YO);
-  drawStat(icon_umbrella, pop,   142, 166, 139 + YO, 154 + YO);
-  drawRoomRow(room, rssi, 177 + YO);
+  canvas.drawLine(12, 136 + YO, 188, 136 + YO, GxEPD_BLACK);
+  drawStat(icon_wind,     wind,  6,  30, 142 + YO, 157 + YO);
+  drawStat(icon_humidity, humid, 82, 106, 142 + YO, 157 + YO);
+  drawStat(icon_umbrella, pop,   142, 166, 142 + YO, 157 + YO);
+  drawRoomRow(room, rssi, 180 + YO);
   showFrame(true);
 }
 

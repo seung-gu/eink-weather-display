@@ -27,7 +27,7 @@ A low-power weather display: an ESP32-C3 driving a 1.54" e-Paper. Every 30 minut
 ## Features
 | Feature | What it does |
 |---|---|
-| Weather | Temperature, high and low, conditions, wind, humidity and chance of rain for the board's location, plus room temperature and humidity, battery and Wi-Fi signal |
+| Weather | Temperature, high and low, conditions, wind, humidity and chance of rain for the board's location, the weather 6 and 12 hours on, plus room temperature and humidity, battery and Wi-Fi signal |
 | Low power | Awake only to refresh, deep sleep the rest of the time. The e-Paper holds its image without power |
 | History | Every wake stores the battery, Wi-Fi, room readings and the weather it got on the server, shown as graphs on a dashboard |
 | AI (MCP) | From the Claude or ChatGPT app: register a board, change its weather location, rename it, read and analyse the last 7 days of reports |
