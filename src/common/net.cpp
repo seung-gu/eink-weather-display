@@ -80,17 +80,32 @@ static const int RSA_SUITES[] = {
   0
 };
 
-// What the next connect offers. nullptr leaves mbedTLS's own list.
+// The key exchanges the reports offer, lightest first. mbedTLS 2.28 lists its curves largest first,
+// P-521 and P-384 ahead of X25519, and the server now takes the first one it supports: P-384, whose
+// two multiplications the C3 does in software. The secure connection took 1320 ms instead of 860.
+// P-256 and P-384 stay behind X25519 for a server that drops it.
+static const mbedtls_ecp_group_id FAST_CURVES[] = {
+  MBEDTLS_ECP_DP_CURVE25519,
+  MBEDTLS_ECP_DP_SECP256R1,
+  MBEDTLS_ECP_DP_SECP384R1,
+  MBEDTLS_ECP_DP_NONE
+};
+
+// What the next connect offers: these suites, with FAST_CURVES. nullptr leaves mbedTLS's own lists.
 static const int* nextSuites = nullptr;
 
-// WiFiClientSecure in core 2.0.17 has no way to choose cipher suites: it builds its mbedTLS config
-// inside connect(). So the build sends every call to mbedtls_ssl_setup() here instead (-Wl,--wrap
-// in platformio.ini). ssl_client.cpp makes that call once the config is complete, just before the
-// handshake.
+// WiFiClientSecure in core 2.0.17 has no way to choose cipher suites or curves: it builds its
+// mbedTLS config inside connect(). So the build sends every call to mbedtls_ssl_setup() here
+// instead (-Wl,--wrap in platformio.ini). ssl_client.cpp makes that call once the config is
+// complete, just before the handshake.
 extern "C" int __real_mbedtls_ssl_setup(mbedtls_ssl_context* ssl, const mbedtls_ssl_config* conf);
 extern "C" int __wrap_mbedtls_ssl_setup(mbedtls_ssl_context* ssl, const mbedtls_ssl_config* conf) {
-  // The config is ssl_client.cpp's own and writable; only this function's signature calls it const.
-  if (nextSuites) mbedtls_ssl_conf_ciphersuites(const_cast<mbedtls_ssl_config*>(conf), nextSuites);
+  if (nextSuites) {
+    // The config is ssl_client.cpp's own and writable; only this function's signature calls it const.
+    mbedtls_ssl_config* c = const_cast<mbedtls_ssl_config*>(conf);
+    mbedtls_ssl_conf_ciphersuites(c, nextSuites);
+    mbedtls_ssl_conf_curves(c, FAST_CURVES);
+  }
   return __real_mbedtls_ssl_setup(ssl, conf);
 }
 
